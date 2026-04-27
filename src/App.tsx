@@ -8,7 +8,7 @@
     Search, Calendar, MapPin, Users, ChevronRight, ChevronLeft,
     Menu, X, Info, LogOut, LogIn, AlertCircle,
     Edit, ArrowLeft, ExternalLink, Sparkles, Palette, Mail, Clock, ChevronUp,
-    User, BookOpen, Wrench, Handshake, HeartPulse, ArrowDown
+    User, BookOpen, Wrench, Handshake, HeartPulse, Bookmark, ArrowDown
   } from 'lucide-react';
 
   import { contentfulClient } from './services/contentful';
@@ -23,6 +23,7 @@
   const MainEvents = lazy(() => import('./pages/MainEvents'));
   const FAQs = lazy(() => import('./pages/FAQs'));
   const Classes = lazy(() => import('./pages/Classes'));
+  const SavedClasses = lazy(() => import('./pages/SavedClasses'));
 
   import leapLogo from './assets/leap.webp';
   import styles from './App.module.css';
@@ -754,42 +755,54 @@
   const ScrollInvitation = ({ onClick }: { onClick: () => void }) => (
     <motion.button
       onClick={onClick}
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 1.4, duration: 0.6 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.9, duration: 0.55 }}
       aria-label="Scroll to explore"
       style={{
         position: 'absolute',
-        bottom: '1.4rem',
+        bottom: 'clamp(1.25rem, 4vh, 3.1rem)',
         left: '50%',
         transform: 'translateX(-50%)',
         background: 'transparent',
         border: 'none',
         cursor: 'pointer',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '0.4rem',
-        zIndex: 6,
-        padding: '0.4rem 0.8rem',
+        zIndex: 12,
+        padding: 'clamp(0.45rem, 1.3vh, 0.8rem) clamp(0.8rem, 1.6vw, 1.2rem)',
+        minWidth: 'fit-content',
       }}
     >
-      <span style={{
-        fontFamily: "'DM Sans', sans-serif",
-        color: 'rgba(250,225,133,0.66)',
-        fontSize: '0.58rem',
-        fontWeight: 700,
-        letterSpacing: '0.3em',
-        textTransform: 'uppercase',
-      }}>
-        Halika
-      </span>
       <motion.div
         animate={{ y: [0, 6, 0] }}
         transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-        style={{ color: 'rgba(250,225,133,0.72)' }}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 'clamp(0.35rem, 1vh, 0.6rem)',
+          color: 'rgba(250,225,133,0.72)',
+        }}
       >
-        <ArrowDown size={18} strokeWidth={1.5} />
+        <span style={{
+          fontFamily: "'DM Sans', sans-serif",
+          color: 'rgba(250,225,133,0.98)',
+          fontSize: 'clamp(0.62rem, 0.95vw, 0.86rem)',
+          fontWeight: 800,
+          letterSpacing: 'clamp(0.18em, 0.35vw, 0.32em)',
+          textTransform: 'uppercase',
+          textShadow: '0 1px 10px rgba(0,0,0,0.75)',
+        }}>
+          Halika
+        </span>
+        <ArrowDown
+          size={20}
+          strokeWidth={2}
+          style={{
+            width: 'clamp(22px, 3vw, 38px)',
+            height: 'clamp(22px, 3vw, 38px)',
+            filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.45))',
+          }}
+        />
       </motion.div>
     </motion.button>
   );
@@ -1977,7 +1990,7 @@
     }
     interface UserProfile {
       uid: string; email: string | null; displayName: string | null;
-      photoURL: string | null; role: 'student' | 'admin'; registeredClasses: string[];
+      photoURL: string | null; role: 'student' | 'admin'; registeredClasses: string[]; savedClasses: string[];
     }
 
     const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -1985,17 +1998,21 @@
     const [classes, setClasses] = useState<LeapClass[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAdminView, setIsAdminView] = useState(false);
-    const [currentView, setCurrentView] = useState<'home' | 'about' | 'major-events' | 'classes' | 'faq' | 'contact'>('home');
+    const [currentView, setCurrentView] = useState<'home' | 'about' | 'major-events' | 'classes' | 'faq' | 'contact' | 'saved-classes'>('home');
     const [scrolled, setScrolled] = useState(false);
     const [showBackToTop, setShowBackToTop] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState<'title-asc' | 'title-desc' | 'slots-desc' | 'slots-asc'>('title-asc');
     const [activeSubtheme, setActiveSubtheme] = useState<string | null>(null);
     const [selectedDay, setSelectedDay] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [viewingClass, setViewingClass] = useState<LeapClass | null>(null);
+    const [savedClassIds, setSavedClassIds] = useState<Set<string>>(new Set());
     const hasLoggedProfilePermissionIssue = useRef(false);
+    const profileDropdownRef = useRef<HTMLDivElement>(null);
     const [authError, setAuthError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -2005,7 +2022,7 @@
       }
     }, [authError]);
 
-    const navigateTo = (view: 'home' | 'about' | 'major-events' | 'classes' | 'faq' | 'contact') => {
+    const navigateTo = (view: 'home' | 'about' | 'major-events' | 'classes' | 'saved-classes' | 'faq' | 'contact') => {
       setCurrentView(view); setIsMenuOpen(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -2072,7 +2089,7 @@
                 if (userDoc.exists()) {
                   setUserProfile(userDoc.data() as UserProfile);
                 } else {
-                  const newProfile: UserProfile = { uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, photoURL: currentUser.photoURL, role: 'student', registeredClasses: [] };
+                  const newProfile: UserProfile = { uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, photoURL: currentUser.photoURL, role: 'student', registeredClasses: [], savedClasses: [] };
                   await setDoc(doc(db, 'users', currentUser.uid), newProfile);
                   setUserProfile(newProfile);
                 }
@@ -2080,7 +2097,7 @@
                 const isPermissionDenied = typeof error === 'object' && error !== null && 'code' in error && (error as { code?: string }).code === 'permission-denied';
                 if (isPermissionDenied) { if (!hasLoggedProfilePermissionIssue.current) { console.warn('Firestore profile access denied.'); hasLoggedProfilePermissionIssue.current = true; } }
                 else { console.error('Firestore profile bootstrap failed:', error); }
-                setUserProfile({ uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, photoURL: currentUser.photoURL, role: 'student', registeredClasses: [] });
+                setUserProfile({ uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, photoURL: currentUser.photoURL, role: 'student', registeredClasses: [], savedClasses: [] });
               }
             } else { setUserProfile(null); setIsAdminView(false); setCurrentView('home'); }
           } catch (error: unknown) { console.error('Auth state handling failed:', error); setUserProfile(null); }
@@ -2089,6 +2106,28 @@
       });
       return () => unsubscribe();
     }, []);
+
+    // Load saved classes when user profile changes
+    useEffect(() => {
+      if (userProfile?.savedClasses) {
+        setSavedClassIds(new Set(userProfile.savedClasses));
+      } else {
+        setSavedClassIds(new Set());
+      }
+    }, [userProfile]);
+
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+          setIsProfileOpen(false);
+        }
+      };
+
+      if (isProfileOpen) {
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+      }
+    }, [isProfileOpen]);
 
     useEffect(() => {
       if (!user) return;
@@ -2179,6 +2218,31 @@
       catch (error) { console.error("Sign Out Error:", error); }
     };
 
+    const toggleSaveClass = async (classId: string) => {
+      if (!user || !userProfile) {
+        console.warn('User or profile not loaded');
+        return;
+      }
+      const isSaved = savedClassIds.has(classId);
+      const newSavedIds = new Set(savedClassIds);
+      if (isSaved) {
+        newSavedIds.delete(classId);
+      } else {
+        newSavedIds.add(classId);
+      }
+      setSavedClassIds(newSavedIds);
+      
+      try {
+        const updatedProfile = { ...userProfile, savedClasses: Array.from(newSavedIds) };
+        await setDoc(doc(db, 'users', user.uid), updatedProfile, { merge: true });
+        setUserProfile(updatedProfile);
+        console.log('Class saved successfully:', classId);
+      } catch (error) {
+        console.error('Error saving class:', error);
+        setSavedClassIds(savedClassIds);
+      }
+    };
+
     const renderClassCard = (item: LeapClass, index: number) => (
       <motion.div
         key={item.id}
@@ -2188,27 +2252,56 @@
         transition={{ delay: index * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className={styles.classCardWrapper}
       >
+        {/* Image section */}
         <div className={styles.cardImageWrapper}>
           <img src={item.image} alt={item.title} className={styles.cardImage} referrerPolicy="no-referrer" />
           <div className={styles.cardImageGradient} />
+          {/* Slots label - prioritized */}
           <div className={styles.cardSlotsLabel}>{item.slots} SLOTS</div>
-          {item.subtheme && (
-            <span className={`${styles.cardBadge} ${styles.cardBadgeTheme}`} style={{
-              position: 'absolute', top: '0.6rem', left: '0.6rem', zIndex: 10,
-            }}>
-              {item.subtheme}
-            </span>
+
+          {/* Save button - bookmark icon */}
+          {user && (
+            <button
+              onClick={(e) => { e.stopPropagation(); toggleSaveClass(item.id); }}
+              title={savedClassIds.has(item.id) ? "Unbookmark class" : "Bookmark class"}
+              style={{
+                position: 'absolute',
+                bottom: 12,
+                left: 12,
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                background: 'rgba(0, 0, 0, 0.6)',
+                backdropFilter: 'blur(8px)',
+                border: '1.5px solid rgba(250, 225, 133, 0.35)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 100,
+                transition: 'all 0.2s',
+                pointerEvents: 'auto',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0, 0, 0, 0.8)';
+                (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.1)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0, 0, 0, 0.6)';
+                (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)';
+              }}
+            >
+              {savedClassIds.has(item.id) ? (
+                <Bookmark size={20} fill="#fae185" color="#fae185" />
+              ) : (
+                <Bookmark size={20} color="#fae185" />
+              )}
+            </button>
           )}
+
+          {/* Overlay content - desktop only */}
           <div className={styles.cardOverlayContent}>
-            <div className={styles.cardOverlayTopRow}>
-  {item.orgLogo ? (
-    <img src={item.orgLogo} alt={item.org} className={styles.cardOrgLogo} referrerPolicy="no-referrer" />
-  ) : (
-    <div className={styles.cardOrgLogoPlaceholder}>{item.org.charAt(0).toUpperCase()}</div>
-  )}
-</div>
-<p className={styles.cardOrganization}>{item.org}</p>
-            
+            <p className={styles.cardOrganization}>{item.org}</p>
             <h3 className={styles.cardTitle} style={{ fontFamily: "'Playfair Display', serif" }}
               onClick={() => { setViewingClass(item)}}>
               {item.title}
@@ -2225,6 +2318,35 @@
                 Learn More <ChevronRight size={13} />
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Details section - mobile only, shown below the image */}
+        <div className={styles.cardDetailsSection}>
+          <div className={styles.cardOverlayTopRow}>
+            {item.orgLogo ? (
+              <img src={item.orgLogo} alt={item.org} className={styles.cardOrgLogo} referrerPolicy="no-referrer" />
+            ) : (
+              <div className={styles.cardOrgLogoPlaceholder}>{item.org.charAt(0).toUpperCase()}</div>
+            )}
+          </div>
+          <p className={styles.cardOrganization}>{item.org}</p>
+          
+          <h3 className={styles.cardTitle} style={{ fontFamily: "'Playfair Display', serif" }}
+            onClick={() => { setViewingClass(item)}}>
+            {item.title}
+          </h3>
+          <div className={styles.cardMetadataOverlay}>
+            <div className={styles.metadataItem}><Calendar size={12} className={styles.metadataIcon} /><span>{item.date} · {item.time}</span></div>
+            <div className={styles.metadataItem}><MapPin size={12} className={styles.metadataIcon} /><span>{item.venue} ({item.modality})</span></div>
+          </div>
+          <div className={styles.cardActionsOverlay}>
+            <a href={item.googleFormUrl || "#"} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className={styles.registerBtnOverlay}>
+              Register <ExternalLink size={13} />
+            </a>
+            <button onClick={() => { setViewingClass(item)}} className={styles.learnMoreBtnOverlay}>
+              Learn More <ChevronRight size={13} />
+            </button>
           </div>
         </div>
       </motion.div>
@@ -3046,17 +3168,100 @@
               {userProfile?.role === 'admin' && <button onClick={() => setIsAdminView(true)} className="leap-admin-link">Admin</button>}
             </div>
             <div className="leap-nav-right hidden md:flex">
-              <button className="nav-icon-btn" onClick={() => navigateTo('classes')} title="Search classes"><Search size={17} /></button>
+              <button className="nav-icon-btn" onClick={() => setIsSearchModalOpen(true)} title="Search classes"><Search size={17} /></button>
               {user ? (
                 <>
-                  <button className="nav-icon-btn" title={user.displayName || 'Profile'}>
-                    {user.photoURL
-                      ? <img src={user.photoURL} alt="Profile" style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover' }} referrerPolicy="no-referrer" />
-                      : <User size={17} />}
-                  </button>
-                  <button onClick={handleSignOut} className="btn-leap-primary" style={{ padding: '0.55rem 1.1rem', fontSize: '0.76rem', borderRadius: 8, gap: '0.45rem' }}>
-                    <LogOut size={14} /> Sign Out
-                  </button>
+                  <div ref={profileDropdownRef} style={{ position: 'relative' }}>
+                    <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="nav-icon-btn" title={user.displayName || 'Profile'}>
+                      {user.photoURL
+                        ? <img src={user.photoURL} alt="Profile" style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover' }} referrerPolicy="no-referrer" />
+                        : <User size={17} />}
+                    </button>
+                    {isProfileOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                          position: 'absolute',
+                          top: '100%',
+                          right: 0,
+                          marginTop: '0.5rem',
+                          background: '#fdf7e8',
+                          borderRadius: '0.75rem',
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                          border: '1px solid rgba(222, 154, 73, 0.2)',
+                          zIndex: 1000,
+                          minWidth: '200px',
+                        }}
+                      >
+                        <button
+                          onClick={() => {
+                            navigateTo('saved-classes');
+                            setIsProfileOpen(false);
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '0.75rem 1.25rem',
+                            border: 'none',
+                            background: 'transparent',
+                            color: '#803e2f',
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: '0.9rem',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            transition: 'all 0.2s',
+                          }}
+                          onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(222, 154, 73, 0.1)';
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                          }}
+                        >
+                          <Bookmark size={16} />
+                          Saved Classes
+                        </button>
+                        <div style={{ borderTop: '1px solid rgba(222, 154, 73, 0.2)' }} />
+                        <button
+                          onClick={() => {
+                            handleSignOut();
+                            setIsProfileOpen(false);
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '0.75rem 1.25rem',
+                            border: 'none',
+                            background: 'transparent',
+                            color: '#803e2f',
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: '0.9rem',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            transition: 'all 0.2s',
+                          }}
+                          onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(222, 154, 73, 0.1)';
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                          }}
+                        >
+                          <LogOut size={16} />
+                          Sign Out
+                        </button>
+                      </motion.div>
+                    )}
+                  </div>
                 </>
               ) : (
                 <>
@@ -3068,6 +3273,14 @@
               )}
             </div>
             <div className={styles.navMobileToggle}>
+              <button
+                className={styles.navMobileBtn}
+                style={{ color: currentView === 'home' && !scrolled ? '#f9ecb6' : '#334b46', padding: '0.5rem' }}
+                onClick={() => setIsSearchModalOpen(true)}
+                aria-label="Search and filter"
+              >
+                <Search size={24} />
+              </button>
               <button
                 className={styles.navMobileBtn}
                 style={{ color: currentView === 'home' && !scrolled ? '#f9ecb6' : '#334b46' }}
@@ -3088,6 +3301,7 @@
                 <button onClick={() => { navigateTo('about'); setIsMenuOpen(false); }} className={styles.mobileMenuItem}>Overview</button>
                 <button onClick={() => { navigateTo('major-events'); setIsMenuOpen(false); }} className={styles.mobileMenuItem}>Featured</button>
                 <button onClick={() => { navigateTo('classes'); setIsMenuOpen(false); }} className={styles.mobileMenuItem}>Classes</button>
+                {user && <button onClick={() => { navigateTo('saved-classes'); setIsMenuOpen(false); }} className={styles.mobileMenuItem}>Saved Classes</button>}
                 <button onClick={() => { navigateTo('faq'); setIsMenuOpen(false); }} className={styles.mobileMenuItem}>FAQs</button>
                 {userProfile?.role === 'admin' && <button onClick={() => { setIsAdminView(true); setIsMenuOpen(false); }} className={`${styles.mobileMenuItem} ${styles.adminLink}`}>Admin Dashboard</button>}
                 {user ? (
@@ -3100,14 +3314,77 @@
           )}
         </AnimatePresence>
 
+        {/* Search Modal */}
+        <AnimatePresence>
+          {isSearchModalOpen && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2000, background: 'rgba(8,10,8,0.7)', backdropFilter: 'blur(4px)' }} onClick={() => setIsSearchModalOpen(false)}>
+              <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }} onClick={(e) => e.stopPropagation()} style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 2001, background: '#fdf7e8', borderRadius: '1.5rem 1.5rem 0 0', padding: '1.5rem 1rem', maxHeight: '85vh', overflow: 'auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', fontWeight: 700, color: '#3a2a10', margin: 0 }}>Search & Filter</h2>
+                  <button onClick={() => setIsSearchModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7c6040' }}><X size={24} /></button>
+                </div>
+
+                {/* Search Input */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <input
+                    type="text"
+                    placeholder="Search classes by name, org..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.9rem 1rem',
+                      borderRadius: 12,
+                      border: '1.5px solid rgba(222,154,73,0.3)',
+                      background: 'rgba(255,253,245,0.95)',
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: '0.95rem',
+                      color: '#3a2a10',
+                      boxSizing: 'border-box',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+
+                {/* Sort Options */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label style={{ display: 'block', fontFamily: "'DM Sans', sans-serif", fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#de9a49', marginBottom: '0.5rem' }}>Sort By</label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    style={{
+                      width: '100%',
+                      padding: '0.8rem 1rem',
+                      borderRadius: 10,
+                      border: '1.5px solid rgba(222,154,73,0.3)',
+                      background: 'rgba(255,253,245,0.95)',
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: '0.9rem',
+                      color: '#3a2a10',
+                      cursor: 'pointer',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    <option value="title-asc">Title (A-Z)</option>
+                    <option value="title-desc">Title (Z-A)</option>
+                    <option value="slots-desc">Most Slots</option>
+                    <option value="slots-asc">Least Slots</option>
+                  </select>
+                </div>
+
+                {/* Close Button */}
+                <button onClick={() => setIsSearchModalOpen(false)} style={{ width: '100%', padding: '0.95rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #fae185 0%, #de9a49 55%, #c07830 100%)', color: '#1a1008', fontFamily: "'DM Sans', sans-serif", fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}>Apply & Close</button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', padding: '6rem 0' }}><div className="leap-spinner" /></div>}>
           {currentView === 'home' && (
             <Home
               user={user} classes={classes}
-              searchQuery={searchQuery} onSearchChange={(q) => { setSearchQuery(q); setCurrentPage(1); }}
-              sortBy={sortBy} onSortChange={(s) => setSortBy(s)}
               filteredAndSortedClasses={filteredAndSortedClasses} uniqueDays={uniqueDays}
-              selectedDay={selectedDay} onDaySelect={(d) => { setSelectedDay(null); setCurrentPage(1); }}
+              selectedDay={selectedDay} onDaySelect={(d) => { setSelectedDay(d); setCurrentPage(1); }}
               viewingClass={viewingClass} onClassSelect={(c) => { setViewingClass(c) }}
               onSignIn={handleSignIn} onHeroScroll={() => navigateTo('classes')}
               HeroSection={HeroSection} HeroExtras={HeroExtras} renderClassCard={renderClassCard}
@@ -3120,10 +3397,19 @@
               user={user} searchQuery={searchQuery} onSearchChange={(q) => { setSearchQuery(q); setCurrentPage(1); }}
               sortBy={sortBy} onSortChange={(s) => setSortBy(s)}
               filteredAndSortedClasses={filteredAndSortedClasses} uniqueDays={uniqueDays}
-              selectedDay={selectedDay} onDaySelect={(d) => { setSelectedDay(null); setCurrentPage(1); }}
+              selectedDay={selectedDay} onDaySelect={(d) => { setSelectedDay(d); setCurrentPage(1); }}
               currentPage={currentPage} onPageChange={(p) => { setCurrentPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
               viewingClass={viewingClass} onClassSelect={(c) => { setViewingClass(c) }}
               onSignIn={handleSignIn} renderClassCard={renderClassCard}
+            />
+          )}
+          {currentView === 'saved-classes' && (
+            <SavedClasses
+              filteredAndSortedClasses={filteredAndSortedClasses}
+              savedClassIds={savedClassIds}
+              onClassSelect={(c) => { setViewingClass(c) }}
+              onSignIn={handleSignIn}
+              renderClassCard={renderClassCard}
             />
           )}
           {currentView === 'faq' && <FAQs />}

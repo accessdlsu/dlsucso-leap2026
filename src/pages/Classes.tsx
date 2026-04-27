@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
-import { Search, Calendar, MapPin, Users, ChevronRight, ChevronLeft, Info, X } from 'lucide-react';
+import { Search, Calendar, MapPin, Users, ChevronRight, Info, X } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { User as FirebaseUser } from 'firebase/auth';
 
 interface LeapClass {
@@ -133,8 +133,6 @@ export default function Classes({
   uniqueDays,
   selectedDay,
   onDaySelect,
-  currentPage,
-  onPageChange,
   viewingClass,
   onClassSelect,
   onSignIn,
@@ -146,6 +144,15 @@ export default function Classes({
     : filteredAndSortedClasses
     ).slice().sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+  const isMobile = windowWidth < 768;
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 const sentinelRef = useRef<HTMLDivElement | null>(null);
 
 useEffect(() => {
@@ -190,7 +197,7 @@ useEffect(() => {
           maxWidth: '100vw',
           overflowX: 'hidden',
           boxSizing: 'border-box',
-          padding: '0 clamp(0.75rem, 3vw, 1.5rem) 6rem',
+          padding: '0 clamp(0.75rem, 3vw, 1.5rem) clamp(4.1rem, 8vw, 6rem)',
           background: 'transparent',
         }}
       >
@@ -350,38 +357,20 @@ useEffect(() => {
                   </div>
 
                   {/* Date filter pills */}
-                  <div
-                    className="classes-date-row"
-                    style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: '0.5rem',
-                      width: '100%',
-                    }}
-                  >
-                    <button
-                      className="classes-date-pill"
-                      onClick={() => onDaySelect(null)}
+                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', width: '100%' }}>
+                    <div
+                      className="classes-date-row"
                       style={{
-                        padding: '0.4rem 1rem',
-                        borderRadius: '999px',
-                        fontSize: '0.8rem',
-                        fontWeight: 600,
-                        fontFamily: "'DM Sans', sans-serif",
-                        border: 'none',
-                        cursor: 'pointer',
-                        transition: 'all 0.18s',
-                        background: selectedDay === null ? '#de9a49' : 'rgba(249,236,182,0.5)',
-                        color: selectedDay === null ? '#1a1008' : '#7c6b4b',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '0.5rem',
+                        flex: 1,
+                        minWidth: 0,
                       }}
                     >
-                      All Dates
-                    </button>
-                    {uniqueDays.map((day) => (
                       <button
-                        key={day}
                         className="classes-date-pill"
-                        onClick={() => onDaySelect(day)}
+                        onClick={() => onDaySelect(null)}
                         style={{
                           padding: '0.4rem 1rem',
                           borderRadius: '999px',
@@ -391,13 +380,89 @@ useEffect(() => {
                           border: 'none',
                           cursor: 'pointer',
                           transition: 'all 0.18s',
-                          background: selectedDay === day ? '#de9a49' : 'rgba(249,236,182,0.5)',
-                          color: selectedDay === day ? '#1a1008' : '#7c6b4b',
+                          background: selectedDay === null ? '#de9a49' : 'rgba(249,236,182,0.5)',
+                          color: selectedDay === null ? '#1a1008' : '#7c6b4b',
                         }}
                       >
-                        {day}
+                        All Dates
                       </button>
-                    ))}
+                      {uniqueDays.map((day) => (
+                        <button
+                          key={day}
+                          className="classes-date-pill"
+                          onClick={() => onDaySelect(day)}
+                          style={{
+                            padding: '0.4rem 1rem',
+                            borderRadius: '999px',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            fontFamily: "'DM Sans', sans-serif",
+                            border: 'none',
+                            cursor: 'pointer',
+                            transition: 'all 0.18s',
+                            background: selectedDay === day ? '#de9a49' : 'rgba(249,236,182,0.5)',
+                            color: selectedDay === day ? '#1a1008' : '#7c6b4b',
+                          }}
+                        >
+                          {day}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* View toggle - only show on mobile */}
+                    {isMobile && (
+                      <div style={{ display: 'flex', gap: '0.3rem', flexShrink: 0 }}>
+                        <button
+                          onClick={() => setViewMode('grid')}
+                          title="Grid view"
+                          style={{
+                            width: 36,
+                            height: 36,
+                            padding: '0.5rem',
+                            borderRadius: '0.6rem',
+                            border: viewMode === 'grid' ? '1.5px solid #de9a49' : '1px solid rgba(210,175,110,0.3)',
+                            background: viewMode === 'grid' ? 'rgba(222,154,73,0.15)' : 'transparent',
+                            cursor: 'pointer',
+                            transition: 'all 0.18s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: viewMode === 'grid' ? '#de9a49' : '#9c7a4a',
+                          }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <rect x="1" y="1" width="6" height="6" />
+                            <rect x="9" y="1" width="6" height="6" />
+                            <rect x="1" y="9" width="6" height="6" />
+                            <rect x="9" y="9" width="6" height="6" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => setViewMode('list')}
+                          title="List view"
+                          style={{
+                            width: 36,
+                            height: 36,
+                            padding: '0.5rem',
+                            borderRadius: '0.6rem',
+                            border: viewMode === 'list' ? '1.5px solid #de9a49' : '1px solid rgba(210,175,110,0.3)',
+                            background: viewMode === 'list' ? 'rgba(222,154,73,0.15)' : 'transparent',
+                            cursor: 'pointer',
+                            transition: 'all 0.18s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: viewMode === 'list' ? '#de9a49' : '#9c7a4a',
+                          }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <rect x="1" y="2" width="14" height="2" />
+                            <rect x="1" y="7" width="14" height="2" />
+                            <rect x="1" y="12" width="14" height="2" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </section>
@@ -441,10 +506,104 @@ useEffect(() => {
                     @media (min-width: 1024px) {
                       .classes-grid { grid-template-columns: repeat(3, 1fr); }
                     }
+
+                    /* 2-column on mobile when grid view */
+                    @media (max-width: 768px) {
+                      .classes-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 0.9rem;
+                      }
+                    }
+
+                    .class-list-item {
+                      display: flex;
+                      gap: 0.9rem;
+                      padding: 0.9rem;
+                      border-radius: 0.85rem;
+                      background: linear-gradient(135deg, rgba(255,252,241,0.96), rgba(253,247,228,0.94));
+                      border: 1px solid rgba(222,154,73,0.2);
+                      cursor: pointer;
+                      transition: all 0.2s ease;
+                    }
+
+                    .class-list-item:active,
+                    .class-list-item:hover {
+                      transform: translateY(-2px);
+                      box-shadow: 0 8px 24px rgba(180,120,30,0.15);
+                      border-color: rgba(222,154,73,0.4);
+                    }
+
+                    .class-list-item img {
+                      width: 70px;
+                      height: 70px;
+                      border-radius: 0.7rem;
+                      object-fit: cover;
+                      flex-shrink: 0;
+                    }
+
+                    .class-list-item-content {
+                      flex: 1;
+                      min-width: 0;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 0.3rem;
+                    }
+
+                    .class-list-item-title {
+                      font-weight: 700;
+                      color: #3a2a10;
+                      font-size: 0.9rem;
+                      line-height: 1.2;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      display: -webkit-box;
+                      -webkit-line-clamp: 2;
+                      -webkit-box-orient: vertical;
+                    }
+
+                    .class-list-item-org {
+                      font-size: 0.7rem;
+                      color: #de9a49;
+                      font-weight: 600;
+                      text-transform: uppercase;
+                      letter-spacing: 0.05em;
+                    }
+
+                    .class-list-item-meta {
+                      font-size: 0.65rem;
+                      color: #9c7a4a;
+                      display: flex;
+                      gap: 0.4rem;
+                      flex-wrap: wrap;
+                    }
                   `}</style>
-                  <div className="classes-grid" style={{ marginBottom: '2rem' }}>
-                    {visibleClasses.map((item, index) => renderClassCard(item, index))}
-                  </div>
+
+                  {viewMode === 'grid' ? (
+                    <div className="classes-grid" style={{ marginBottom: '2rem' }}>
+                      {visibleClasses.map((item, index) => renderClassCard(item, index))}
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem', marginBottom: '2rem' }}>
+                      {visibleClasses.map((item) => (
+                        <div
+                          key={item.id}
+                          className="class-list-item"
+                          onClick={() => onClassSelect(item)}
+                        >
+                          <img src={item.image} alt={item.title} referrerPolicy="no-referrer" />
+                          <div className="class-list-item-content">
+                            <div className="class-list-item-title">{item.title}</div>
+                            <div className="class-list-item-org">{item.org}</div>
+                            <div className="class-list-item-meta">
+                              <span>📅 {item.date}</span>
+                              <span>🕐 {item.time}</span>
+                              <span>👥 {item.slots}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   {/* ── PAGINATION ── */}
                   {/* Infinite scroll sentinel */}
@@ -475,6 +634,7 @@ useEffect(() => {
       {/* ── CLASS DETAIL MODAL ── */}
       {user && viewingClass && (
         <motion.div
+          className="classes-modal-overlay"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -494,6 +654,7 @@ useEffect(() => {
           }}
         >
           <motion.div
+            className="classes-modal-panel"
             initial={{ opacity: 0, y: 32, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
@@ -539,26 +700,56 @@ useEffect(() => {
             </button>
 
             {/* Modal inner: image + detail — stacks on mobile */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'min(340px, 38%) 1fr',
-                overflow: 'auto',
-                maxHeight: 'calc(100dvh - 2rem)',
-              }}
-            >
-              <style>{`
-                @media (max-width: 640px) {
-                  .modal-grid { grid-template-columns: 1fr !important; }
-                  .modal-image { min-height: 200px !important; max-height: 240px !important; }
+            <style>{`
+              .classes-modal-grid {
+                display: grid;
+                grid-template-columns: min(340px, 38%) 1fr;
+                overflow: auto;
+                max-height: calc(100dvh - 2rem);
+                width: 100%;
+              }
+
+              @media (max-width: 640px) {
+                .classes-modal-overlay {
+                  padding: 0 !important;
                 }
-              `}</style>
-              <div
-                className="modal-grid"
-                style={{
-                  display: 'contents',
-                }}
-              >
+
+                .classes-modal-panel {
+                  width: 100vw !important;
+                  max-height: 100dvh !important;
+                  height: 100dvh !important;
+                  border-radius: 0 !important;
+                  border: none !important;
+                }
+
+                .classes-modal-grid {
+                  display: flex;
+                  flex-direction: column;
+                  overflow: auto;
+                  max-height: 100dvh;
+                }
+
+                .modal-image { 
+                  min-height: 200px !important;
+                  max-height: 240px !important;
+                  order: -1 !important;
+                }
+
+                .classes-modal-detail {
+                  padding: 1rem 0.95rem 1.2rem !important;
+                  overflow-y: auto;
+                }
+
+                .classes-modal-meta {
+                  grid-template-columns: 1fr !important;
+                }
+
+                .classes-modal-cta {
+                  width: 100% !important;
+                }
+              }
+            `}</style>
+            <div className="classes-modal-grid">
                 {/* Image panel */}
                 <div
                   className="modal-image"
@@ -614,6 +805,7 @@ useEffect(() => {
 
                 {/* Detail panel */}
                 <div
+                  className="classes-modal-detail"
                   style={{
                     padding: 'clamp(1.25rem, 3vw, 2rem)',
                     overflowY: 'auto',
@@ -651,6 +843,7 @@ useEffect(() => {
 
                   {/* Metadata grid */}
                   <div
+                    className="classes-modal-meta"
                     style={{
                       display: 'grid',
                       gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
@@ -722,7 +915,7 @@ useEffect(() => {
                       href={viewingClass.googleFormUrl || '#'}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn-leap-primary"
+                      className="btn-leap-primary classes-modal-cta"
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -737,7 +930,6 @@ useEffect(() => {
                     </a>
                   </div>
                 </div>
-              </div>
             </div>
           </motion.div>
         </motion.div>
