@@ -3407,8 +3407,6 @@
             <SavedClasses
               filteredAndSortedClasses={filteredAndSortedClasses}
               savedClassIds={savedClassIds}
-              onClassSelect={(c) => { setViewingClass(c) }}
-              onSignIn={handleSignIn}
               renderClassCard={renderClassCard}
             />
           )}

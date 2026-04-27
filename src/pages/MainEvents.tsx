@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, MapPin, Users, ExternalLink } from 'lucide-react';
-import { PageWrapper, PageHero } from '../components/PageCommon';
+import { PageWrapper } from '../components/PageCommon';
 import { contentfulClient } from '../services/contentful';
 
 const ACCENT_COLORS = ['#de9a49', '#4ab09a', '#b05a32', '#5ca0a8', '#803e2f'];

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Mail } from 'lucide-react';
-import { PageWrapper, PageHero } from '../components/PageCommon';
+import { PageWrapper } from '../components/PageCommon';
 
 export default function FAQs() {
   const [open, setOpen] = useState<number | null>(null);

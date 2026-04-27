@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Sparkles, Users, Leaf, Heart } from 'lucide-react';
-import { PageWrapper, PageHero } from '../components/PageCommon';
+import { PageWrapper } from '../components/PageCommon';
 
 export default function About() {
   const values = [

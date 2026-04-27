@@ -22,8 +22,6 @@ interface LeapClass {
 interface SavedClassesProps {
   filteredAndSortedClasses: LeapClass[];
   savedClassIds: Set<string>;
-  onClassSelect: (leapClass: LeapClass | null) => void;
-  onSignIn: () => void;
   renderClassCard: (item: LeapClass, index: number) => ReactNode;
 }
 
@@ -112,8 +110,6 @@ const PageHero = ({ title, subtitle, accent }: { title: string; subtitle: string
 export default function SavedClasses({
   filteredAndSortedClasses,
   savedClassIds,
-  onClassSelect,
-  onSignIn,
   renderClassCard,
 }: SavedClassesProps) {
   const savedClasses = filteredAndSortedClasses.filter(cls => savedClassIds.has(cls.id));
