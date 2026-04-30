@@ -5,10 +5,10 @@
   import { useState, useEffect, useRef, useMemo, Suspense, lazy, type CSSProperties, type ErrorInfo, type ReactNode, Component } from 'react';
   import { motion, AnimatePresence } from 'framer-motion';
   import {
-    Search, Calendar, MapPin, Users, ChevronRight, ChevronLeft,
-    Menu, X, Info, LogOut, LogIn, AlertCircle,
+    Calendar, MapPin, Users, ChevronRight, ChevronLeft,
+    X, AlertCircle, LogIn,
     Edit, ArrowLeft, ExternalLink, Sparkles, Palette, Mail, Clock, ChevronUp,
-    User, BookOpen, Wrench, Handshake, HeartPulse, Bookmark, ArrowDown
+    BookOpen, Wrench, Handshake, HeartPulse, ArrowDown
   } from 'lucide-react';
 
   import { contentfulClient } from './services/contentful';
@@ -25,6 +25,7 @@
   const Classes = lazy(() => import('./pages/Classes'));
   const SavedClasses = lazy(() => import('./pages/SavedClasses'));
 
+  import { ClassCard, Navbar, Footer } from './components';
   import leapLogo from './assets/leap.webp';
   import styles from './App.module.css';
 
@@ -2244,112 +2245,14 @@
     };
 
     const renderClassCard = (item: LeapClass, index: number) => (
-      <motion.div
-        key={item.id}
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: index * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className={styles.classCardWrapper}
-      >
-        {/* Image section */}
-        <div className={styles.cardImageWrapper}>
-          <img src={item.image} alt={item.title} className={styles.cardImage} referrerPolicy="no-referrer" />
-          <div className={styles.cardImageGradient} />
-          {/* Slots label - prioritized */}
-          <div className={styles.cardSlotsLabel}>{item.slots} SLOTS</div>
-
-          {/* Save button - bookmark icon */}
-          {user && (
-            <button
-              onClick={(e) => { e.stopPropagation(); toggleSaveClass(item.id); }}
-              title={savedClassIds.has(item.id) ? "Unbookmark class" : "Bookmark class"}
-              style={{
-                position: 'absolute',
-                bottom: 12,
-                left: 12,
-                width: 40,
-                height: 40,
-                borderRadius: '50%',
-                background: 'rgba(0, 0, 0, 0.6)',
-                backdropFilter: 'blur(8px)',
-                border: '1.5px solid rgba(250, 225, 133, 0.35)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 100,
-                transition: 'all 0.2s',
-                pointerEvents: 'auto',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0, 0, 0, 0.8)';
-                (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1.1)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(0, 0, 0, 0.6)';
-                (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)';
-              }}
-            >
-              {savedClassIds.has(item.id) ? (
-                <Bookmark size={20} fill="#fae185" color="#fae185" />
-              ) : (
-                <Bookmark size={20} color="#fae185" />
-              )}
-            </button>
-          )}
-
-          {/* Overlay content - desktop only */}
-          <div className={styles.cardOverlayContent}>
-            <p className={styles.cardOrganization}>{item.org}</p>
-            <h3 className={styles.cardTitle} style={{ fontFamily: "'Playfair Display', serif" }}
-              onClick={() => { setViewingClass(item)}}>
-              {item.title}
-            </h3>
-            <div className={styles.cardMetadataOverlay}>
-              <div className={styles.metadataItem}><Calendar size={12} className={styles.metadataIcon} /><span>{item.date} · {item.time}</span></div>
-              <div className={styles.metadataItem}><MapPin size={12} className={styles.metadataIcon} /><span>{item.venue} ({item.modality})</span></div>
-            </div>
-            <div className={styles.cardActionsOverlay}>
-              <a href={item.googleFormUrl || "#"} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className={styles.registerBtnOverlay}>
-                Register <ExternalLink size={13} />
-              </a>
-              <button onClick={() => { setViewingClass(item)}} className={styles.learnMoreBtnOverlay}>
-                Learn More <ChevronRight size={13} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Details section - mobile only, shown below the image */}
-        <div className={styles.cardDetailsSection}>
-          <div className={styles.cardOverlayTopRow}>
-            {item.orgLogo ? (
-              <img src={item.orgLogo} alt={item.org} className={styles.cardOrgLogo} referrerPolicy="no-referrer" />
-            ) : (
-              <div className={styles.cardOrgLogoPlaceholder}>{item.org.charAt(0).toUpperCase()}</div>
-            )}
-          </div>
-          <p className={styles.cardOrganization}>{item.org}</p>
-          
-          <h3 className={styles.cardTitle} style={{ fontFamily: "'Playfair Display', serif" }}
-            onClick={() => { setViewingClass(item)}}>
-            {item.title}
-          </h3>
-          <div className={styles.cardMetadataOverlay}>
-            <div className={styles.metadataItem}><Calendar size={12} className={styles.metadataIcon} /><span>{item.date} · {item.time}</span></div>
-            <div className={styles.metadataItem}><MapPin size={12} className={styles.metadataIcon} /><span>{item.venue} ({item.modality})</span></div>
-          </div>
-          <div className={styles.cardActionsOverlay}>
-            <a href={item.googleFormUrl || "#"} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className={styles.registerBtnOverlay}>
-              Register <ExternalLink size={13} />
-            </a>
-            <button onClick={() => { setViewingClass(item)}} className={styles.learnMoreBtnOverlay}>
-              Learn More <ChevronRight size={13} />
-            </button>
-          </div>
-        </div>
-      </motion.div>
+      <ClassCard
+        item={item}
+        index={index}
+        isLoggedIn={!!user}
+        isSaved={savedClassIds.has(item.id)}
+        onToggleSave={toggleSaveClass}
+        onLearnMore={setViewingClass}
+      />
     );
 
     const AdminDashboard = () => (
@@ -2413,11 +2316,7 @@
       return <ErrorBoundary><AdminDashboard /></ErrorBoundary>;
     }
 
-    const navClass = scrolled
-    ? 'scrolled-nav py-3'
-    : currentView === 'home'
-      ? 'py-5'
-      : 'dark-page-nav py-5';
+
 
     const HeroSection = (
       <header className={styles.heroSection} style={{
@@ -3131,188 +3030,22 @@
 
     return (
       <div className={styles.appContainer}>
-        <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${navClass}`}
-          style={!scrolled && currentView === 'home' ? {
-            background: 'linear-gradient(180deg, #1a2940 0%, #1d3148 50%, #1f3a4c 100%)',
-            backdropFilter: 'none', WebkitBackdropFilter: 'none', boxShadow: 'none', border: 'none', borderBottom: 'none',
-          } : undefined}>
-
-          {!scrolled && currentView === 'home' && (
-            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
-              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '40%', height: '120%', background: 'radial-gradient(ellipse, rgba(222,154,73,0.08) 0%, transparent 70%)', animation: 'navGlowCenter 4s ease-in-out infinite' }} />
-              <div style={{ position: 'absolute', top: 0, left: '-5%', width: '30%', height: '100%', background: 'radial-gradient(ellipse at 0% 50%, rgba(74,176,100,0.12) 0%, transparent 70%)', animation: 'navGlowSide 5s ease-in-out infinite' }} />
-              <div style={{ position: 'absolute', top: 0, right: '-5%', width: '30%', height: '100%', background: 'radial-gradient(ellipse at 100% 50%, rgba(74,176,100,0.1) 0%, transparent 70%)', animation: 'navGlowSide 5s ease-in-out infinite 1.5s' }} />
-              <div style={{ position: 'absolute', bottom: 0, left: '10%', right: '10%', height: 1, background: 'linear-gradient(90deg, transparent, rgba(222,154,73,0.25), rgba(250,225,133,0.4), rgba(222,154,73,0.25), transparent)', animation: 'navShimmer 3s ease-in-out infinite' }} />
-              {[15, 35, 55, 72, 88].map((x, i) => (
-                <div key={i} style={{ position: 'absolute', left: `${x}%`, top: `${30 + (i % 3) * 20}%`, width: 2, height: 2, borderRadius: '50%', background: '#fae185', boxShadow: '0 0 4px 2px rgba(250,225,133,0.6)', animation: `navFirefly ${2.5 + i * 0.4}s ease-in-out infinite`, animationDelay: `${i * 0.7}s` }} />
-              ))}
-              <style>{`
-                @keyframes navGlowCenter { 0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scaleX(1); } 50% { opacity: 1; transform: translate(-50%, -50%) scaleX(1.1); } }
-                @keyframes navGlowSide { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
-                @keyframes navShimmer { 0%, 100% { opacity: 0.4; transform: scaleX(0.85); } 50% { opacity: 0.9; transform: scaleX(1); } }
-                @keyframes navFirefly { 0%, 100% { opacity: 0.1; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.2); } }
-              `}</style>
-            </div>
-          )}
-
-          <div className={styles.navInner}>
-            <div className={styles.navLogo} onClick={() => navigateTo('home')}>
-              <img src={leapLogo} alt="LEAP 2026" width="74" height="42" className={styles.navLogoImg} style={{ mixBlendMode: 'screen' }} />
-            </div>
-            <div className={styles.navCenter}>
-              <button onClick={() => navigateTo('home')} className={`nav-link ${currentView === 'home' ? 'active' : ''}`}>Home</button>
-              <button onClick={() => navigateTo('about')} className={`nav-link ${currentView === 'about' ? 'active' : ''}`}>Overview</button>
-              <button onClick={() => navigateTo('major-events')} className={`nav-link ${currentView === 'major-events' ? 'active' : ''}`}>Featured</button>
-              <button onClick={() => navigateTo('classes')} className={`nav-link ${currentView === 'classes' ? 'active' : ''}`}>Classes</button>
-              <button onClick={() => navigateTo('faq')} className={`nav-link ${currentView === 'faq' ? 'active' : ''}`}>FAQs</button>
-              {userProfile?.role === 'admin' && <button onClick={() => setIsAdminView(true)} className="leap-admin-link">Admin</button>}
-            </div>
-            <div className="leap-nav-right hidden md:flex">
-              <button className="nav-icon-btn" onClick={() => setIsSearchModalOpen(true)} title="Search classes"><Search size={17} /></button>
-              {user ? (
-                <>
-                  <div ref={profileDropdownRef} style={{ position: 'relative' }}>
-                    <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="nav-icon-btn" title={user.displayName || 'Profile'}>
-                      {user.photoURL
-                        ? <img src={user.photoURL} alt="Profile" style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover' }} referrerPolicy="no-referrer" />
-                        : <User size={17} />}
-                    </button>
-                    {isProfileOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.2 }}
-                        style={{
-                          position: 'absolute',
-                          top: '100%',
-                          right: 0,
-                          marginTop: '0.5rem',
-                          background: '#fdf7e8',
-                          borderRadius: '0.75rem',
-                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                          border: '1px solid rgba(222, 154, 73, 0.2)',
-                          zIndex: 1000,
-                          minWidth: '200px',
-                        }}
-                      >
-                        <button
-                          onClick={() => {
-                            navigateTo('saved-classes');
-                            setIsProfileOpen(false);
-                          }}
-                          style={{
-                            width: '100%',
-                            padding: '0.75rem 1.25rem',
-                            border: 'none',
-                            background: 'transparent',
-                            color: '#803e2f',
-                            fontFamily: "'DM Sans', sans-serif",
-                            fontSize: '0.9rem',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            textAlign: 'left',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            transition: 'all 0.2s',
-                          }}
-                          onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(222, 154, 73, 0.1)';
-                          }}
-                          onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-                          }}
-                        >
-                          <Bookmark size={16} />
-                          Saved Classes
-                        </button>
-                        <div style={{ borderTop: '1px solid rgba(222, 154, 73, 0.2)' }} />
-                        <button
-                          onClick={() => {
-                            handleSignOut();
-                            setIsProfileOpen(false);
-                          }}
-                          style={{
-                            width: '100%',
-                            padding: '0.75rem 1.25rem',
-                            border: 'none',
-                            background: 'transparent',
-                            color: '#803e2f',
-                            fontFamily: "'DM Sans', sans-serif",
-                            fontSize: '0.9rem',
-                            fontWeight: 500,
-                            cursor: 'pointer',
-                            textAlign: 'left',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            transition: 'all 0.2s',
-                          }}
-                          onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(222, 154, 73, 0.1)';
-                          }}
-                          onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-                          }}
-                        >
-                          <LogOut size={16} />
-                          Sign Out
-                        </button>
-                      </motion.div>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <button className="nav-icon-btn" title="Sign in" onClick={handleSignIn}><User size={17} /></button>
-                  <button onClick={handleSignIn} className="btn-leap-primary" style={{ padding: '0.55rem 1.1rem', fontSize: '0.76rem', borderRadius: 8, gap: '0.45rem' }}>
-                    <LogIn size={14} /> Register
-                  </button>
-                </>
-              )}
-            </div>
-            <div className={styles.navMobileToggle}>
-              <button
-                className={styles.navMobileBtn}
-                style={{ color: currentView === 'home' && !scrolled ? '#f9ecb6' : '#334b46', padding: '0.5rem' }}
-                onClick={() => setIsSearchModalOpen(true)}
-                aria-label="Search and filter"
-              >
-                <Search size={24} />
-              </button>
-              <button
-                className={styles.navMobileBtn}
-                style={{ color: currentView === 'home' && !scrolled ? '#f9ecb6' : '#334b46' }}
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-              >
-                {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
-              </button>
-            </div>
-          </div>
-        </nav>
-
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className={styles.mobileMenu}>
-              <div className={styles.mobileMenuContent}>
-                <button onClick={() => { navigateTo('home'); setIsMenuOpen(false); }} className={styles.mobileMenuItem}>Home</button>
-                <button onClick={() => { navigateTo('about'); setIsMenuOpen(false); }} className={styles.mobileMenuItem}>Overview</button>
-                <button onClick={() => { navigateTo('major-events'); setIsMenuOpen(false); }} className={styles.mobileMenuItem}>Featured</button>
-                <button onClick={() => { navigateTo('classes'); setIsMenuOpen(false); }} className={styles.mobileMenuItem}>Classes</button>
-                {user && <button onClick={() => { navigateTo('saved-classes'); setIsMenuOpen(false); }} className={styles.mobileMenuItem}>Saved Classes</button>}
-                <button onClick={() => { navigateTo('faq'); setIsMenuOpen(false); }} className={styles.mobileMenuItem}>FAQs</button>
-                {userProfile?.role === 'admin' && <button onClick={() => { setIsAdminView(true); setIsMenuOpen(false); }} className={`${styles.mobileMenuItem} ${styles.adminLink}`}>Admin Dashboard</button>}
-                {user ? (
-                  <button onClick={handleSignOut} className={styles.mobileMenuSignOutBtn}><LogOut size={22} /> Sign Out</button>
-                ) : (
-                  <button onClick={handleSignIn} className={styles.mobileMenuSignInBtn}><LogIn size={22} /> Sign In</button>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <Navbar
+          isLoggedIn={!!user}
+          user={user}
+          userProfile={userProfile}
+          currentView={currentView}
+          scrolled={scrolled}
+          isMenuOpen={isMenuOpen}
+          authError={authError}
+          onMenuToggle={setIsMenuOpen}
+          onSearchClick={() => setIsSearchModalOpen(true)}
+          onNavigate={navigateTo as (view: string) => void}
+          onSignIn={handleSignIn}
+          onSignOut={handleSignOut}
+          onAdminClick={() => setIsAdminView(true)}
+          logoImg={leapLogo}
+        />
 
         {/* Search Modal */}
         <AnimatePresence>
@@ -3414,39 +3147,7 @@
           {currentView === 'contact' && <Contact />}
         </Suspense>
 
-        <footer className={styles.footer}>
-          <div className={styles.footerContainer}>
-            <div className={styles.footerBrand}>
-              <div className={styles.footerLogoWrapper}>
-                <img src={leapLogo} alt="LEAP 2026" width="120" height="68" className={styles.footerLogo} />
-              </div>
-              <p className={styles.footerBrandText}>Lasallian Enrichment Alternative Program. Empowering students through diverse learning experiences and community building.</p>
-              <div className={styles.footerSocialIcons}>
-                <div className={styles.footerSocialIcon}><Info size={16} /></div>
-              </div>
-            </div>
-            <div>
-              <h4 className={styles.footerColumnTitle}>Quick Links</h4>
-              <ul className={styles.footerColumnLinks}>
-                <li><button onClick={() => navigateTo('about')} className={styles.footerLink}>About LEAP</button></li>
-                <li><button onClick={() => navigateTo('classes')} className={styles.footerLink}>Class List</button></li>
-                <li><button onClick={() => navigateTo('major-events')} className={styles.footerLink}>Major Events</button></li>
-                <li><button onClick={() => navigateTo('faq')} className={styles.footerLink}>FAQs</button></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className={styles.footerColumnTitle}>Support</h4>
-              <ul className={styles.footerColumnLinks}>
-                <li><button onClick={() => navigateTo('contact')} className={styles.footerLink}>Contact OPS</button></li>
-                <li><button onClick={() => navigateTo('contact')} className={styles.footerLink}>Technical Issues</button></li>
-                <li><button onClick={() => navigateTo('contact')} className={styles.footerLink}>Privacy Policy</button></li>
-              </ul>
-            </div>
-          </div>
-          <div className={styles.footerBottom}>
-            <p>© 2026 LEAP Operations Team · De La Salle University · Council of Student Organizations</p>
-          </div>
-        </footer>
+        <Footer logoImg={leapLogo} onNavigate={navigateTo as (view: string) => void} />
 
         <AnimatePresence>
           {showBackToTop && !viewingClass && (

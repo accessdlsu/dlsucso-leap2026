@@ -1229,13 +1229,15 @@
   justify-self: end;
   align-self: center;
   grid-column: 3;
+  gap: 0.5rem;
+  align-items: center;
 }
 
 .navMobileBtn {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
