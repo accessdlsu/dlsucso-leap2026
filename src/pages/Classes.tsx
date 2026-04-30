@@ -42,6 +42,119 @@ interface PageWrapperProps {
   children: ReactNode;
 }
 
+/* ════════════════════════════════════════════
+   SUBTHEME FILTER PILLS
+   ════════════════════════════════════════════ */
+const SubthemeFilterPills = ({
+  selectedSubtheme,
+  onSubthemeSelect,
+  isMobile,
+}: {
+  selectedSubtheme: string | null;
+  onSubthemeSelect: (subtheme: string | null) => void;
+  isMobile: boolean;
+}) => {
+  // Minimal subtheme keys for filter display
+  const subthemeKeys = [
+    'Palayan ng Karunungan',
+    'Pamilihan ng Kakayahan',
+    'Plaza ng Malikhaing Diwa',
+    'Dambana ng Pagkakaisa',
+    'Palaisdaan ng Kalusugan',
+    'Bahay ng Bayanihan',
+  ];
+
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '0.75rem',
+      flexWrap: 'wrap',
+      padding: isMobile ? '1.5rem 1rem' : '2rem 0',
+    }}>
+      {/* All Classes pill */}
+      <button
+        onClick={() => onSubthemeSelect(null)}
+        style={{
+          padding: '0.65rem 1.3rem',
+          borderRadius: 999,
+          background: selectedSubtheme === null
+            ? 'linear-gradient(135deg, rgba(191,110,25,0.25), rgba(191,110,25,0.15))'
+            : 'rgba(191,110,25,0.08)',
+          border: selectedSubtheme === null
+            ? '1.5px solid rgba(191,110,25,0.55)'
+            : '1.5px solid rgba(191,110,25,0.25)',
+          color: selectedSubtheme === null ? '#8b4a06' : '#9a7a50',
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: '0.75rem',
+          fontWeight: 700,
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          cursor: 'pointer',
+          transition: 'all 0.2s',
+        }}
+        onMouseEnter={e => {
+          const b = e.currentTarget as HTMLButtonElement;
+          b.style.background = 'linear-gradient(135deg, rgba(191,110,25,0.28), rgba(191,110,25,0.18))';
+          b.style.borderColor = 'rgba(191,110,25,0.65)';
+          b.style.transform = 'translateY(-2px)';
+        }}
+        onMouseLeave={e => {
+          const b = e.currentTarget as HTMLButtonElement;
+          b.style.background = selectedSubtheme === null
+            ? 'linear-gradient(135deg, rgba(191,110,25,0.25), rgba(191,110,25,0.15))'
+            : 'rgba(191,110,25,0.08)';
+          b.style.borderColor = selectedSubtheme === null
+            ? '1.5px solid rgba(191,110,25,0.55)'
+            : '1.5px solid rgba(191,110,25,0.25)';
+          b.style.transform = 'translateY(0)';
+        }}
+      >
+        All Classes
+      </button>
+
+      {/* Subtheme pills */}
+      {subthemeKeys.map((key) => (
+        <button
+          key={key}
+          onClick={() => onSubthemeSelect(selectedSubtheme === key ? null : key)}
+          style={{
+            padding: '0.65rem 1.3rem',
+            borderRadius: 999,
+            background: selectedSubtheme === key
+              ? 'linear-gradient(135deg, rgba(191,110,25,0.22), rgba(191,110,25,0.12))'
+              : 'rgba(191,110,25,0.08)',
+            border: selectedSubtheme === key
+              ? '1.5px solid rgba(191,110,25,0.45)'
+              : '1.5px solid rgba(191,110,25,0.22)',
+            color: selectedSubtheme === key ? '#8b4a06' : '#9a7a50',
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+          }}
+          onMouseEnter={e => {
+            const b = e.currentTarget as HTMLButtonElement;
+            b.style.transform = 'translateY(-2px)';
+            b.style.opacity = '0.95';
+          }}
+          onMouseLeave={e => {
+            const b = e.currentTarget as HTMLButtonElement;
+            b.style.transform = 'translateY(0)';
+            b.style.opacity = '1';
+          }}
+        >
+          {key.split(' ng ')[0]}
+        </button>
+      ))}
+    </div>
+  );
+};
+
 const PageWrapper = ({ children }: PageWrapperProps) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -139,10 +252,12 @@ export default function Classes({
   renderClassCard,
 }: ClassesPageProps) {
   const ITEMS_PER_PAGE = 6;
+  const [selectedSubtheme, setSelectedSubtheme] = useState<string | null>(null);
   const dateFilteredClasses = (selectedDay 
     ? filteredAndSortedClasses.filter((c) => c.date === selectedDay)
     : filteredAndSortedClasses
-    ).slice().sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    ).filter(c => selectedSubtheme ? c.subtheme === selectedSubtheme : true)
+    .slice().sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
@@ -157,7 +272,7 @@ const sentinelRef = useRef<HTMLDivElement | null>(null);
 
 useEffect(() => {
   setVisibleCount(ITEMS_PER_PAGE);
-}, [searchQuery, sortBy, selectedDay]);
+}, [searchQuery, sortBy, selectedDay, selectedSubtheme]);
 
 const visibleClasses = dateFilteredClasses.slice(0, visibleCount);
 const hasMore = visibleCount < dateFilteredClasses.length;
@@ -466,6 +581,13 @@ useEffect(() => {
                   </div>
                 </div>
               </section>
+
+              {/* ── SUBTHEME FILTER PILLS ── */}
+              <SubthemeFilterPills
+                selectedSubtheme={selectedSubtheme}
+                onSubthemeSelect={setSelectedSubtheme}
+                isMobile={isMobile}
+              />
 
               <div style={{ height: '0.5rem' }} />
 

@@ -2941,7 +2941,7 @@
           <SubthemesStrip activeTheme={activeSubtheme} onSelect={handleSubthemeSelect} compact />
 
           {activeSubtheme && (
-            <div style={{ textAlign: 'center', paddingBottom: '1rem' }}>
+            <div style={{ textAlign: 'center', paddingBottom: '0.5rem' }}>
               <button
                 onClick={() => handleSubthemeSelect(null)}
                 style={{ background: 'rgba(222,154,73,0.15)', border: '1px solid rgba(222,154,73,0.4)', borderRadius: 999, padding: '0.28rem 0.9rem', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#fae185', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
@@ -2950,6 +2950,57 @@
               </button>
             </div>
           )}
+
+          {/* View Classes CTA */}
+          <div style={{ textAlign: 'center', paddingBottom: '1.5rem' }}>
+            <button
+              onClick={() => {
+                const el = document.getElementById('classes-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                gap: '0.6rem',
+                padding: '0.75rem 2rem',
+                borderRadius: 50,
+                background: 'linear-gradient(135deg, rgba(250,225,133,0.18), rgba(250,225,133,0.08))',
+                border: '1.5px solid rgba(250,225,133,0.45)',
+                color: '#fae185',
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: '0.78rem',
+                fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase',
+                cursor: 'pointer', transition: 'all 0.3s ease',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+              }}
+              onMouseEnter={e => {
+                const b = e.currentTarget as HTMLButtonElement;
+                b.style.background = 'linear-gradient(135deg, rgba(250,225,133,0.28), rgba(250,225,133,0.15))';
+                b.style.borderColor = 'rgba(250,225,133,0.7)';
+                b.style.transform = 'translateY(-2px)';
+                b.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)';
+              }}
+              onMouseLeave={e => {
+                const b = e.currentTarget as HTMLButtonElement;
+                b.style.background = 'linear-gradient(135deg, rgba(250,225,133,0.18), rgba(250,225,133,0.08))';
+                b.style.borderColor = 'rgba(250,225,133,0.45)';
+                b.style.transform = 'translateY(0)';
+                b.style.boxShadow = '0 4px 16px rgba(0,0,0,0.2)';
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                <ellipse cx="11" cy="16" rx="7.5" ry="2" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                <path d="M7 16 Q8 11 11 8 Q14 11 15 16" fill="rgba(250,225,133,0.2)" stroke="currentColor" strokeWidth="1.2"/>
+                <line x1="11" y1="8" x2="11" y2="3.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
+                <path d="M11 3.5 L16.5 8 L11 9 Z" fill="currentColor" opacity="0.7"/>
+              </svg>
+              View Classes
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"
+                style={{ animation: 'leapBounce 1.7s ease-in-out infinite' }}>
+                <path d="M4 6 L8 10 L12 6" stroke="currentColor" strokeWidth="1.8"
+                  strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
 
           
           <div style={{ position: 'relative', lineHeight: 0, marginTop: '-2px', overflow: 'hidden' }}>

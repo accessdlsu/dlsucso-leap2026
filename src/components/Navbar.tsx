@@ -117,7 +117,7 @@ export const Navbar = ({
       <nav
         className={`fixed top-0 w-full z-50 transition-all duration-300 ${navClass}`}
         style={isHeroNav ? {
-          background: 'linear-gradient(180deg, #334b46 0%, #334b46 50%, #334b46 100%)',
+          background: 'linear-gradient(180deg, #1a2940 0%, #1d3148 50%, #1f3a4c 100%)',
           backdropFilter: 'none', WebkitBackdropFilter: 'none',
           boxShadow: 'none', border: 'none', borderBottom: 'none',
         } : undefined}
@@ -126,8 +126,8 @@ export const Navbar = ({
         {isHeroNav && (
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '40%', height: '120%', background: 'radial-gradient(ellipse, rgba(222,154,73,0.08) 0%, transparent 70%)', animation: 'navGlowCenter 4s ease-in-out infinite' }} />
-            <div style={{ position: 'absolute', top: 0, left: '-5%', width: '30%', height: '100%', background: 'radial-gradient(ellipse at 0% 50%, rgba(74,176,154,0.12) 0%, transparent 70%)', animation: 'navGlowSide 5s ease-in-out infinite' }} />
-            <div style={{ position: 'absolute', top: 0, right: '-5%', width: '30%', height: '100%', background: 'radial-gradient(ellipse at 100% 50%, rgba(74,176,154,0.1) 0%, transparent 70%)', animation: 'navGlowSide 5s ease-in-out infinite 1.5s' }} />
+            <div style={{ position: 'absolute', top: 0, left: '-5%', width: '30%', height: '100%', background: 'radial-gradient(ellipse at 0% 50%, rgba(74,176,100,0.12) 0%, transparent 70%)', animation: 'navGlowSide 5s ease-in-out infinite' }} />
+            <div style={{ position: 'absolute', top: 0, right: '-5%', width: '30%', height: '100%', background: 'radial-gradient(ellipse at 100% 50%, rgba(74,176,100,0.1) 0%, transparent 70%)', animation: 'navGlowSide 5s ease-in-out infinite 1.5s' }} />
             <div style={{ position: 'absolute', bottom: 0, left: '10%', right: '10%', height: 1, background: 'linear-gradient(90deg, transparent, rgba(222,154,73,0.25), rgba(250,225,133,0.4), rgba(222,154,73,0.25), transparent)', animation: 'navShimmer 3s ease-in-out infinite' }} />
             {[15, 35, 55, 72, 88].map((x, i) => (
               <div key={i} style={{ position: 'absolute', left: `${x}%`, top: `${30 + (i % 3) * 20}%`, width: 2, height: 2, borderRadius: '50%', background: '#fae185', boxShadow: '0 0 4px 2px rgba(250,225,133,0.6)', animation: `navFirefly ${2.5 + i * 0.4}s ease-in-out infinite`, animationDelay: `${i * 0.7}s` }} />
@@ -180,7 +180,7 @@ export const Navbar = ({
                     transition={{ duration: 0.15 }}
                     style={{
                       position: 'absolute', top: '100%', right: 0, marginTop: '0.5rem',
-                      background: '#f9ecb6', borderRadius: '0.75rem',
+                      background: '#fdf7e8', borderRadius: '0.75rem',
                       boxShadow: '0 8px 24px rgba(0,0,0,0.12)', border: '1px solid rgba(222,154,73,0.22)',
                       zIndex: 1000, minWidth: '200px', overflow: 'hidden',
                     }}
@@ -264,8 +264,8 @@ export const Navbar = ({
                 position: 'fixed', top: 0, right: 0, bottom: 0,
                 width: 'min(320px, 88vw)',
                 zIndex: 999,
-                background: 'linear-gradient(175deg, #f9ecb6 0%, #e0b788 50%, #fae185 100%)',
-                boxShadow: '-8px 0 40px rgba(128,62,47,0.18)',
+                background: 'linear-gradient(175deg, #fffdf6 0%, #fdf5e0 50%, #f8eccc 100%)',
+                boxShadow: '-8px 0 40px rgba(30,18,5,0.18)',
                 display: 'flex', flexDirection: 'column',
                 overflow: 'hidden',
               }}
@@ -274,8 +274,8 @@ export const Navbar = ({
               <div style={{
                 padding: '1.1rem 1.25rem 0.9rem',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                borderBottom: '1px solid rgba(222,154,73,0.18)',
-                background: 'rgba(250,225,133,0.8)',
+                borderBottom: '1px solid rgba(200,160,80,0.18)',
+                background: 'rgba(255,252,240,0.8)',
                 flexShrink: 0,
               }}>
                 {/* User info or brand */}
@@ -283,28 +283,28 @@ export const Navbar = ({
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
                     {user.photoURL ? (
                       <img src={user.photoURL} alt="Profile"
-                        style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid rgba(222,154,73,0.4)' }}
+                        style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid rgba(200,146,62,0.4)' }}
                         referrerPolicy="no-referrer" />
                     ) : (
                       <div style={{
                         width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
-                        background: 'rgba(222,154,73,0.15)', border: '1.5px solid rgba(222,154,73,0.3)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#de9a49',
+                        background: 'rgba(200,146,62,0.15)', border: '1.5px solid rgba(200,146,62,0.3)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c8923e',
                       }}>
                         <User size={16} />
                       </div>
                     )}
                     <div style={{ minWidth: 0 }}>
-                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', fontWeight: 700, color: '#803e2f', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', fontWeight: 700, color: '#2e1e08', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {user.displayName || 'Signed in'}
                       </p>
-                      <p style={{ fontSize: '0.68rem', color: '#7c6b4b', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <p style={{ fontSize: '0.68rem', color: '#9a7a50', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {user.email}
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <p style={{ fontFamily: "'Tropikal', 'Playfair Display', serif", fontSize: '1rem', fontWeight: 700, color: '#803e2f', margin: 0 }}>
+                  <p style={{ fontFamily: "'Tropikal', 'Playfair Display', serif", fontSize: '1rem', fontWeight: 700, color: '#2e1e08', margin: 0 }}>
                     LEAP 2026
                   </p>
                 )}
@@ -315,14 +315,14 @@ export const Navbar = ({
                   aria-label="Close menu"
                   style={{
                     width: 36, height: 36, borderRadius: '50%',
-                    border: '1px solid rgba(222,154,73,0.25)',
-                    background: 'rgba(250,225,133,0.9)',
+                    border: '1px solid rgba(200,160,80,0.25)',
+                    background: 'rgba(255,252,240,0.9)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer', color: '#803e2f', flexShrink: 0,
+                    cursor: 'pointer', color: '#5a4030', flexShrink: 0,
                     transition: 'all 0.15s',
                   }}
-                  onTouchStart={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(222,154,73,0.12)'; }}
-                  onTouchEnd={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(250,225,133,0.9)'; }}
+                  onTouchStart={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(200,146,62,0.12)'; }}
+                  onTouchEnd={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,252,240,0.9)'; }}
                 >
                   <X size={18} />
                 </button>
@@ -330,7 +330,7 @@ export const Navbar = ({
 
               {/* Nav links */}
               <nav style={{ flex: 1, overflowY: 'auto', padding: '0.6rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                <p style={{ fontSize: '0.58rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.22em', color: '#de9a49', padding: '0.5rem 0.6rem 0.25rem', margin: 0 }}>
+                <p style={{ fontSize: '0.58rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.22em', color: '#c8923e', padding: '0.5rem 0.6rem 0.25rem', margin: 0 }}>
                   Navigate
                 </p>
                 {NAV_LINKS.map(link => {
@@ -341,25 +341,25 @@ export const Navbar = ({
                       onClick={() => { onNavigate(link.id); onMenuToggle(false); }}
                       style={{
                         width: '100%', padding: '0.8rem 0.9rem',
-                        border: isActive ? '1px solid rgba(222,154,73,0.35)' : '1px solid transparent',
+                        border: isActive ? '1px solid rgba(200,146,62,0.35)' : '1px solid transparent',
                         borderRadius: 12,
                         background: isActive
-                          ? 'linear-gradient(135deg, rgba(250,225,133,0.95), rgba(224,183,136,0.9))'
+                          ? 'linear-gradient(135deg, rgba(254,246,220,0.95), rgba(252,238,195,0.9))'
                           : 'transparent',
-                        color: isActive ? '#803e2f' : '#7c6b4b',
+                        color: isActive ? '#8a4e1a' : '#4a3820',
                         fontFamily: "'DM Sans', sans-serif",
                         fontSize: '0.95rem', fontWeight: isActive ? 700 : 500,
                         cursor: 'pointer', textAlign: 'left',
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                         transition: 'all 0.15s',
                         WebkitTapHighlightColor: 'transparent',
-                        boxShadow: isActive ? '0 2px 8px rgba(222,154,73,0.1)' : 'none',
+                        boxShadow: isActive ? '0 2px 8px rgba(160,100,20,0.1)' : 'none',
                       }}
-                      onTouchStart={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(222,154,73,0.07)'; }}
+                      onTouchStart={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(200,146,62,0.07)'; }}
                       onTouchEnd={e => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
                     >
                       <span>{link.label}</span>
-                      {isActive && <ChevronRight size={14} style={{ color: '#de9a49', flexShrink: 0 }} />}
+                      {isActive && <ChevronRight size={14} style={{ color: '#c8923e', flexShrink: 0 }} />}
                     </button>
                   );
                 })}
@@ -367,18 +367,18 @@ export const Navbar = ({
                 {/* Saved Classes (logged in only) */}
                 {isLoggedIn && (
                   <>
-                    <div style={{ height: 1, background: 'rgba(222,154,73,0.15)', margin: '0.4rem 0.6rem' }} />
-                    <p style={{ fontSize: '0.58rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.22em', color: '#de9a49', padding: '0.25rem 0.6rem', margin: 0 }}>
+                    <div style={{ height: 1, background: 'rgba(200,160,80,0.15)', margin: '0.4rem 0.6rem' }} />
+                    <p style={{ fontSize: '0.58rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.22em', color: '#c8923e', padding: '0.25rem 0.6rem', margin: 0 }}>
                       My Account
                     </p>
                     <button
                       onClick={() => { onNavigate('saved-classes'); onMenuToggle(false); }}
                       style={{
                         width: '100%', padding: '0.8rem 0.9rem',
-                        border: currentView === 'saved-classes' ? '1px solid rgba(222,154,73,0.35)' : '1px solid transparent',
+                        border: currentView === 'saved-classes' ? '1px solid rgba(200,146,62,0.35)' : '1px solid transparent',
                         borderRadius: 12,
-                        background: currentView === 'saved-classes' ? 'linear-gradient(135deg, rgba(250,225,133,0.95), rgba(224,183,136,0.9))' : 'transparent',
-                        color: currentView === 'saved-classes' ? '#803e2f' : '#7c6b4b',
+                        background: currentView === 'saved-classes' ? 'linear-gradient(135deg, rgba(254,246,220,0.95), rgba(252,238,195,0.9))' : 'transparent',
+                        color: currentView === 'saved-classes' ? '#8a4e1a' : '#4a3820',
                         fontFamily: "'DM Sans', sans-serif",
                         fontSize: '0.95rem', fontWeight: currentView === 'saved-classes' ? 700 : 500,
                         cursor: 'pointer', textAlign: 'left',
@@ -387,7 +387,7 @@ export const Navbar = ({
                         WebkitTapHighlightColor: 'transparent',
                       }}
                     >
-                      <Bookmark size={16} style={{ color: '#de9a49', flexShrink: 0 }} />
+                      <Bookmark size={16} style={{ color: '#c8923e', flexShrink: 0 }} />
                       Saved Classes
                     </button>
                   </>
@@ -399,10 +399,10 @@ export const Navbar = ({
                     onClick={() => { onAdminClick(); onMenuToggle(false); }}
                     style={{
                       width: '100%', padding: '0.8rem 0.9rem',
-                      border: '1px solid rgba(128,62,47,0.2)',
+                      border: '1px solid rgba(120,60,20,0.2)',
                       borderRadius: 12,
-                      background: 'rgba(128,62,47,0.07)',
-                      color: '#803e2f',
+                      background: 'rgba(120,60,20,0.07)',
+                      color: '#7a3e18',
                       fontFamily: "'DM Sans', sans-serif",
                       fontSize: '0.88rem', fontWeight: 700,
                       cursor: 'pointer', textAlign: 'left',
@@ -420,8 +420,8 @@ export const Navbar = ({
               {/* Drawer footer: auth action */}
               <div style={{
                 padding: '0.85rem 1rem',
-                borderTop: '1px solid rgba(222,154,73,0.18)',
-                background: 'rgba(250,225,133,0.7)',
+                borderTop: '1px solid rgba(200,160,80,0.18)',
+                background: 'rgba(255,252,240,0.7)',
                 flexShrink: 0,
               }}>
                 {isLoggedIn ? (
@@ -430,9 +430,9 @@ export const Navbar = ({
                     style={{
                       width: '100%', padding: '0.85rem',
                       borderRadius: 13,
-                      border: '1px solid rgba(128,62,47,0.2)',
-                      background: 'rgba(128,62,47,0.06)',
-                      color: '#803e2f',
+                      border: '1px solid rgba(200,80,50,0.2)',
+                      background: 'rgba(200,80,50,0.06)',
+                      color: '#8a3820',
                       fontFamily: "'DM Sans', sans-serif",
                       fontSize: '0.9rem', fontWeight: 700,
                       cursor: 'pointer',
@@ -440,8 +440,8 @@ export const Navbar = ({
                       transition: 'all 0.18s',
                       WebkitTapHighlightColor: 'transparent',
                     }}
-                    onTouchStart={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(128,62,47,0.12)'; }}
-                    onTouchEnd={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(128,62,47,0.06)'; }}
+                    onTouchStart={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(200,80,50,0.12)'; }}
+                    onTouchEnd={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(200,80,50,0.06)'; }}
                   >
                     <LogOut size={17} />
                     Sign Out
