@@ -7,7 +7,7 @@
   import {
     Calendar, MapPin, Users, ChevronRight, ChevronLeft,
     X, AlertCircle, LogIn,
-    Edit, ArrowLeft, ExternalLink, Sparkles, Palette, Mail, Clock, ChevronUp,
+    Edit, ArrowLeft, ExternalLink, Palette, Mail, Clock, ChevronUp,
     BookOpen, Wrench, Handshake, HeartPulse, ArrowDown
   } from 'lucide-react';
 
@@ -1458,65 +1458,123 @@
     { icon: <Users size={20} />, label: 'Bahay ng Bayanihan' },
   ];
 
-  const SubthemesStrip = ({
+  /* ══════════════════════════════════════════════════════
+    SUBTHEME ABOUT SECTION
+  ══════════════════════════════════════════════════════ */
+  const SubthemeAboutSection = ({
     activeTheme,
-    onSelect,
-    compact = false,
   }: {
     activeTheme: string | null;
-    onSelect: (t: string | null) => void;
-    compact?: boolean;
-  }) => (
-    <div className={compact ? styles.subthemesCompactShell : styles.subthemesSection}>
-      <div
-        className={compact ? styles.subthemesCompactInner : styles.subthemesInner}
-        style={compact ? { overflow: 'visible' } : undefined}
-      >
-        <span className={compact ? styles.subthemesCompactLabel : styles.subthemesLabel}>Subthemes</span>
-        {compact ? (
-          <div className={`${styles.subthemesRow} ${styles.subthemesRowCompact}`}>
+  }) => {
+    const selectedSubtheme = SUBTHEMES.find(s => s.label === activeTheme);
+    const accentColor = activeTheme ? '#de9a49' : '#fae185'; // Dynamic accent color
+    
+    return (
+      <div style={{
+        position: 'relative',
+        padding: 'clamp(2.5rem, 5vw, 4.5rem) clamp(1rem, 4vw, 2rem)',
+        textAlign: 'center',
+        background: 'linear-gradient(180deg, transparent 0%, rgba(222,154,73,0.05) 50%, transparent 100%)',
+      }}>
+        {/* Selected subtheme display or invitation */}
+        {selectedSubtheme ? (
+          <>
+            {/* Large icon */}
+            <div style={{
+              width: 'clamp(80px, 15vw, 140px)',
+              height: 'clamp(80px, 15vw, 140px)',
+              margin: '0 auto 1.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '50%',
+              background: `linear-gradient(135deg, rgba(222,154,73,0.12), rgba(222,154,73,0.06))`,
+              border: `2px solid ${accentColor}`,
+              color: accentColor,
+              fontSize: 'clamp(48px, 12vw, 80px)',
+            }}>
+              {selectedSubtheme.icon}
+            </div>
+
+            {/* Subtheme title */}
+            <h2 style={{
+              fontFamily: "'Tropikal', 'Playfair Display', serif",
+              fontSize: 'clamp(1.8rem, 4vw, 3rem)',
+              fontWeight: 700,
+              color: '#1a0e04',
+              margin: '0 0 2rem',
+              letterSpacing: '0.01em',
+              lineHeight: 1.2,
+            }}>
+              {selectedSubtheme.label}
+            </h2>
+
+            {/* View Classes CTA */}
             <button
-              className={`${styles.subthemeAssetButton} ${activeTheme === null ? styles.subthemeAssetActive : ''}`}
-              onClick={() => onSelect(null)}
+              onClick={() => {
+                const el = document.getElementById('classes-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              style={{
+                fontFamily: "'Tropikal', 'Playfair Display', serif",
+                fontSize: '0.9rem',
+                fontWeight: 700,
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                color: accentColor,
+                background: 'transparent',
+                border: `2px solid ${accentColor}`,
+                borderRadius: 8,
+                padding: '0.8rem 1.8rem',
+                cursor: 'pointer',
+                transition: 'all 0.3s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = `rgba(222,154,73,0.1)`;
+                e.currentTarget.style.transform = 'translateY(-3px)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
             >
-              <span className={styles.subthemeAssetIcon}><Sparkles size={20} /></span>
-              <span className={styles.subthemeAssetLabel}>All Themes</span>
+              View Classes →
             </button>
-            {SUBTHEMES.map((s, i) => (
-              <button
-                key={i}
-                className={`${styles.subthemeAssetButton} ${activeTheme === s.label ? styles.subthemeAssetActive : ''}`}
-                onClick={() => onSelect(activeTheme === s.label ? null : s.label)}
-              >
-                <span className={styles.subthemeAssetIcon}>{s.icon}</span>
-                <span className={styles.subthemeAssetLabel}>{s.label}</span>
-              </button>
-            ))}
-          </div>
+          </>
         ) : (
-          <div className={styles.subthemesRow}>
-            <button
-              className={`${styles.subthemePill} ${activeTheme === null ? styles.subthemePillActive : ''}`}
-              onClick={() => onSelect(null)}
-            >
-              <span className={styles.subthemePillIcon}><Sparkles size={20} /></span>
-              <span className={styles.subthemePillLabel}>All</span>
-            </button>
-            {SUBTHEMES.map((s, i) => (
-              <button
-                key={i}
-                className={`${styles.subthemePill} ${activeTheme === s.label ? styles.subthemePillActive : ''}`}
-                onClick={() => onSelect(activeTheme === s.label ? null : s.label)}
-              >
-                <span className={styles.subthemePillIcon}>{s.icon}</span>
-                <span className={styles.subthemePillLabel}>{s.label}</span>
-              </button>
-            ))}
-          </div>
+          <>
+            {/* Default state: invite to explore */}
+            <div style={{
+              fontSize: 'clamp(48px, 12vw, 72px)',
+              marginBottom: '1.5rem',
+            }}>
+              ✨
+            </div>
+            <h2 style={{
+              fontFamily: "'Tropikal', 'Playfair Display', serif",
+              fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
+              fontWeight: 700,
+              color: '#1a0e04',
+              margin: '0 0 1rem',
+              letterSpacing: '0.01em',
+            }}>
+              Explore All Themes
+            </h2>
+            <p style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 'clamp(0.9rem, 1.8vw, 1.1rem)',
+              color: '#7a6040',
+              maxWidth: 500,
+              margin: '0 auto 1.5rem',
+              lineHeight: 1.7,
+            }}>
+              Browse the class catalog below to discover classes across all six subthemes.
+            </p>
+          </>
         )}
       </div>
-    </div>
-  );
+    );
+  };
 
   /* ══════════════════════════════════════════════════════
     SPINNING GLOW RING
@@ -1645,7 +1703,7 @@
  
       <h2 style={{ fontFamily: "'Tropikal', 'Playfair Display', serif", fontSize: 'clamp(1.6rem, 4.5vw, 3.2rem)', fontWeight: 700, color: '#fff8e0', lineHeight: 1.15, margin: '0 0 1rem', letterSpacing: '0.01em', textShadow: '0 2px 0 rgba(60,30,5,0.5), 0 4px 28px rgba(0,0,0,0.6), 0 0 48px rgba(222,154,73,0.3)' }}>
         Piliin ang iyong landas.<br/>
-        <span style={{ background: 'linear-gradient(135deg, #fff5c4 0%, #fae185 40%, #de9a49 80%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))' }}>
+        <span style={{ fontFamily: "'Tropikal', 'Playfair Display', serif", fontSize: '0.9em', fontWeight: 700, color: '#fae185', textShadow: 'none' }}>
           Palawakin ang iyong mundo.
         </span>
       </h2>
@@ -2007,7 +2065,6 @@
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState<'title-asc' | 'title-desc' | 'slots-desc' | 'slots-asc'>('title-asc');
-    const [activeSubtheme, setActiveSubtheme] = useState<string | null>(null);
     const [selectedDay, setSelectedDay] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [viewingClass, setViewingClass] = useState<LeapClass | null>(null);
@@ -2036,25 +2093,12 @@
       window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
     };
 
-    const handleSubthemeSelect = (theme: string | null) => {
-      setActiveSubtheme(theme);
-      setCurrentPage(1);
-      setSelectedDay(null);
-      requestAnimationFrame(() => {
-        scrollToClassesSection();
-        setTimeout(scrollToClassesSection, 140);
-      });
-    };
-
     const filteredAndSortedClasses: LeapClass[] = useMemo(() => {
       let result = classes.filter((c) => (
         c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.org.toLowerCase().includes(searchQuery.toLowerCase()) ||
         c.subtheme.toLowerCase().includes(searchQuery.toLowerCase())
       ));
-      if (currentView === 'home' && activeSubtheme) {
-        result = result.filter((c) => c.subtheme.toLowerCase().includes(activeSubtheme.toLowerCase()));
-      }
       result.sort((a, b) => {
         if (sortBy === 'title-asc') return a.title.localeCompare(b.title);
         if (sortBy === 'title-desc') return b.title.localeCompare(a.title);
@@ -2063,7 +2107,7 @@
         return 0;
       });
       return result;
-    }, [classes, searchQuery, sortBy, activeSubtheme, currentView]);
+    }, [classes, searchQuery, sortBy]);
 
     const uniqueDays: string[] = useMemo(() => (
       Array.from(new Set(filteredAndSortedClasses.map((c) => c.date)))
@@ -2938,69 +2982,7 @@
             </svg>
           </div>
 
-          <SubthemesStrip activeTheme={activeSubtheme} onSelect={handleSubthemeSelect} compact />
-
-          {activeSubtheme && (
-            <div style={{ textAlign: 'center', paddingBottom: '0.5rem' }}>
-              <button
-                onClick={() => handleSubthemeSelect(null)}
-                style={{ background: 'rgba(222,154,73,0.15)', border: '1px solid rgba(222,154,73,0.4)', borderRadius: 999, padding: '0.28rem 0.9rem', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#fae185', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}
-              >
-                Clear {activeSubtheme}
-              </button>
-            </div>
-          )}
-
-          {/* View Classes CTA */}
-          <div style={{ textAlign: 'center', paddingBottom: '1.5rem' }}>
-            <button
-              onClick={() => {
-                const el = document.getElementById('classes-section');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
-              style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                gap: '0.6rem',
-                padding: '0.75rem 2rem',
-                borderRadius: 50,
-                background: 'linear-gradient(135deg, rgba(250,225,133,0.18), rgba(250,225,133,0.08))',
-                border: '1.5px solid rgba(250,225,133,0.45)',
-                color: '#fae185',
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: '0.78rem',
-                fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase',
-                cursor: 'pointer', transition: 'all 0.3s ease',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-              }}
-              onMouseEnter={e => {
-                const b = e.currentTarget as HTMLButtonElement;
-                b.style.background = 'linear-gradient(135deg, rgba(250,225,133,0.28), rgba(250,225,133,0.15))';
-                b.style.borderColor = 'rgba(250,225,133,0.7)';
-                b.style.transform = 'translateY(-2px)';
-                b.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)';
-              }}
-              onMouseLeave={e => {
-                const b = e.currentTarget as HTMLButtonElement;
-                b.style.background = 'linear-gradient(135deg, rgba(250,225,133,0.18), rgba(250,225,133,0.08))';
-                b.style.borderColor = 'rgba(250,225,133,0.45)';
-                b.style.transform = 'translateY(0)';
-                b.style.boxShadow = '0 4px 16px rgba(0,0,0,0.2)';
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-                <ellipse cx="11" cy="16" rx="7.5" ry="2" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-                <path d="M7 16 Q8 11 11 8 Q14 11 15 16" fill="rgba(250,225,133,0.2)" stroke="currentColor" strokeWidth="1.2"/>
-                <line x1="11" y1="8" x2="11" y2="3.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
-                <path d="M11 3.5 L16.5 8 L11 9 Z" fill="currentColor" opacity="0.7"/>
-              </svg>
-              View Classes
-              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true"
-                style={{ animation: 'leapBounce 1.7s ease-in-out infinite' }}>
-                <path d="M4 6 L8 10 L12 6" stroke="currentColor" strokeWidth="1.8"
-                  strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          </div>
+          <SubthemeAboutSection activeTheme={null} />
 
           
           <div style={{ position: 'relative', lineHeight: 0, marginTop: '-2px', overflow: 'hidden' }}>
