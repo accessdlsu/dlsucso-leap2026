@@ -427,97 +427,94 @@ const SubthemeFilterPills = ({
   selectedSubtheme: string | null;
   onSubthemeSelect: (subtheme: string | null) => void;
   isMobile: boolean;
-}) => (
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '0.75rem',
-    flexWrap: 'wrap',
-    padding: isMobile ? '1.5rem 1rem' : '2rem 0',
-    maxWidth: 1260,
-    margin: '0 auto',
-  }}>
-    {/* All Classes pill */}
-    <button
-      onClick={() => onSubthemeSelect(null)}
-      style={{
-        padding: '0.7rem 1.4rem',
-        borderRadius: 999,
-        background: selectedSubtheme === null
-          ? 'linear-gradient(135deg, rgba(191,110,25,0.25), rgba(191,110,25,0.15))'
-          : 'rgba(191,110,25,0.08)',
-        border: selectedSubtheme === null
-          ? '1.5px solid rgba(191,110,25,0.55)'
-          : '1.5px solid rgba(191,110,25,0.25)',
-        color: selectedSubtheme === null ? '#8b4a06' : '#9a7a50',
-        fontFamily: "'DM Sans', sans-serif",
-        fontSize: '0.78rem',
-        fontWeight: 700,
-        letterSpacing: '0.1em',
-        textTransform: 'uppercase',
-        cursor: 'pointer',
-        transition: 'all 0.2s',
-      }}
-      onMouseEnter={e => {
-        const b = e.currentTarget as HTMLButtonElement;
-        b.style.background = 'linear-gradient(135deg, rgba(191,110,25,0.28), rgba(191,110,25,0.18))';
-        b.style.borderColor = 'rgba(191,110,25,0.65)';
-        b.style.transform = 'translateY(-2px)';
-      }}
-      onMouseLeave={e => {
-        const b = e.currentTarget as HTMLButtonElement;
-        b.style.background = selectedSubtheme === null
-          ? 'linear-gradient(135deg, rgba(191,110,25,0.25), rgba(191,110,25,0.15))'
-          : 'rgba(191,110,25,0.08)';
-        b.style.borderColor = selectedSubtheme === null
-          ? '1.5px solid rgba(191,110,25,0.55)'
-          : '1.5px solid rgba(191,110,25,0.25)';
-        b.style.transform = 'translateY(0)';
-      }}
-    >
-      All Classes
-    </button>
+}) => {
+  const allThemesEntry = SUBTHEMES[0];
 
-    {/* Subtheme pills */}
-    {SUBTHEMES.slice(1).map((theme) => (
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '0.6rem',
+      flexWrap: 'wrap',
+      padding: isMobile ? '1rem 0.5rem' : '1.5rem 0',
+      maxWidth: 1260,
+      margin: '0 auto',
+    }}>
+      {/* All Classes pill - compact */}
       <button
-        key={theme.key}
-        onClick={() => onSubthemeSelect(selectedSubtheme === theme.key ? null : theme.key)}
+        onClick={() => onSubthemeSelect(null)}
         style={{
-          padding: '0.7rem 1.4rem',
+          padding: '0.5rem 1.1rem',
           borderRadius: 999,
-          background: selectedSubtheme === theme.key
-            ? `linear-gradient(135deg, ${theme.bgColor}, rgba(191,110,25,0.12))`
-            : theme.bgColor,
-          border: selectedSubtheme === theme.key
-            ? `1.5px solid ${theme.borderColor}`
-            : `1.5px solid ${theme.borderColor}`,
-          color: theme.textColor,
+          background: selectedSubtheme === null
+            ? `linear-gradient(135deg, ${allThemesEntry.bgColor}dd, ${allThemesEntry.bgColor}88)`
+            : allThemesEntry.bgColor,
+          border: `1.5px solid ${allThemesEntry.borderColor}`,
+          color: allThemesEntry.textColor,
           fontFamily: "'DM Sans', sans-serif",
-          fontSize: '0.78rem',
+          fontSize: '0.7rem',
           fontWeight: 700,
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
           cursor: 'pointer',
-          transition: 'all 0.2s',
+          transition: 'all 0.2s ease',
+          boxShadow: selectedSubtheme === null ? `0 2px 8px ${allThemesEntry.iconColor}22` : 'none',
+          textTransform: 'uppercase',
         }}
         onMouseEnter={e => {
           const b = e.currentTarget as HTMLButtonElement;
           b.style.transform = 'translateY(-2px)';
-          b.style.opacity = '0.95';
+          b.style.boxShadow = `0 4px 12px ${allThemesEntry.iconColor}33`;
         }}
         onMouseLeave={e => {
           const b = e.currentTarget as HTMLButtonElement;
           b.style.transform = 'translateY(0)';
-          b.style.opacity = '1';
+          b.style.boxShadow = selectedSubtheme === null ? `0 2px 8px ${allThemesEntry.iconColor}22` : 'none';
         }}
       >
-        {theme.label}
+        All Classes
       </button>
-    ))}
-  </div>
-);
+
+      {/* Subtheme pills - compact horizontal layout */}
+      {SUBTHEMES.slice(1).map((theme) => (
+        <button
+          key={theme.key}
+          onClick={() => onSubthemeSelect(selectedSubtheme === theme.key ? null : theme.key)}
+          style={{
+            padding: '0.5rem 1rem',
+            borderRadius: 999,
+            background: selectedSubtheme === theme.key
+              ? `linear-gradient(135deg, ${theme.bgColor}dd, ${theme.bgColor}88)`
+              : theme.bgColor,
+            border: `1.5px solid ${theme.borderColor}`,
+            color: theme.textColor,
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: '0.68rem',
+            fontWeight: 700,
+            letterSpacing: '0.02em',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: selectedSubtheme === theme.key ? `0 2px 8px ${theme.iconColor}22` : 'none',
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+          }}
+          onMouseEnter={e => {
+            const b = e.currentTarget as HTMLButtonElement;
+            b.style.transform = 'translateY(-2px)';
+            b.style.boxShadow = `0 4px 12px ${theme.iconColor}33`;
+          }}
+          onMouseLeave={e => {
+            const b = e.currentTarget as HTMLButtonElement;
+            b.style.transform = 'translateY(0)';
+            b.style.boxShadow = selectedSubtheme === theme.key ? `0 2px 8px ${theme.iconColor}22` : 'none';
+          }}
+        >
+          {theme.sublabel}
+        </button>
+      ))}
+    </div>
+  );
+};
 
 /* ════════════════════════════════════════════
    MAIN HOME COMPONENT

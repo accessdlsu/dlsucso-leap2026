@@ -1461,117 +1461,158 @@
   /* ══════════════════════════════════════════════════════
     SUBTHEME ABOUT SECTION
   ══════════════════════════════════════════════════════ */
-  const SubthemeAboutSection = ({
-    activeTheme,
-  }: {
-    activeTheme: string | null;
-  }) => {
-    const selectedSubtheme = SUBTHEMES.find(s => s.label === activeTheme);
-    const accentColor = activeTheme ? '#de9a49' : '#fae185'; // Dynamic accent color
-    
+  const SubthemeAboutSection = () => {
+    const w = typeof window !== 'undefined' ? window.innerWidth : 1280;
+    const isMobile = w < 768;
+
+    // Subtheme colors matching Home.tsx
+    const themeColors: Record<string, { bgColor: string; iconColor: string; borderColor: string; textColor: string; shortLabel: string }> = {
+      'Palayan ng Karunungan': { 
+        bgColor: 'rgba(201,224,228,0.15)', 
+        iconColor: '#C9E0E4', 
+        borderColor: 'rgba(201,224,228,0.3)', 
+        textColor: '#C9E0E4',
+        shortLabel: 'Karunungan'
+      },
+      'Pamilihan ng Kakayahan': { 
+        bgColor: 'rgba(250,225,133,0.12)', 
+        iconColor: '#fae185', 
+        borderColor: 'rgba(250,225,133,0.3)', 
+        textColor: '#fae185',
+        shortLabel: 'Kakayahan'
+      },
+      'Plaza ng Malikhaing Diwa': { 
+        bgColor: 'rgba(139,74,6,0.2)', 
+        iconColor: '#d4956a', 
+        borderColor: 'rgba(139,74,6,0.45)', 
+        textColor: '#d4956a',
+        shortLabel: 'Malikhaing Diwa'
+      },
+      'Dambana ng Pagkakaisa': { 
+        bgColor: 'rgba(22,164,96,0.15)', 
+        iconColor: '#16a460', 
+        borderColor: 'rgba(22,164,96,0.35)', 
+        textColor: '#4ecf8a',
+        shortLabel: 'Pagkakaisa'
+      },
+      'Palaisdaan ng Kalusugan': { 
+        bgColor: 'rgba(153,217,235,0.12)', 
+        iconColor: '#99d9eb', 
+        borderColor: 'rgba(153,217,235,0.3)', 
+        textColor: '#99d9eb',
+        shortLabel: 'Kalusugan'
+      },
+      'Bahay ng Bayanihan': { 
+        bgColor: 'rgba(239,230,173,0.12)', 
+        iconColor: '#efe6ad', 
+        borderColor: 'rgba(239,230,173,0.3)', 
+        textColor: '#efe6ad',
+        shortLabel: 'Bayanihan'
+      },
+    };
+
     return (
       <div style={{
         position: 'relative',
-        padding: 'clamp(2.5rem, 5vw, 4.5rem) clamp(1rem, 4vw, 2rem)',
-        textAlign: 'center',
-        background: 'linear-gradient(180deg, transparent 0%, rgba(222,154,73,0.05) 50%, transparent 100%)',
+        padding: 'clamp(3rem, 6vw, 5rem) clamp(1rem, 4vw, 2rem)',
+        background: 'linear-gradient(180deg, transparent 0%, rgba(222,154,73,0.04) 50%, transparent 100%)',
       }}>
-        {/* Selected subtheme display or invitation */}
-        {selectedSubtheme ? (
-          <>
-            {/* Large icon */}
-            <div style={{
-              width: 'clamp(80px, 15vw, 140px)',
-              height: 'clamp(80px, 15vw, 140px)',
-              margin: '0 auto 1.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '50%',
-              background: `linear-gradient(135deg, rgba(222,154,73,0.12), rgba(222,154,73,0.06))`,
-              border: `2px solid ${accentColor}`,
-              color: accentColor,
-              fontSize: 'clamp(48px, 12vw, 80px)',
-            }}>
-              {selectedSubtheme.icon}
-            </div>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
+          gap: isMobile ? '2rem' : '2.5rem',
+          maxWidth: 'clamp(600px, 85vw, 1100px)',
+          margin: '0 auto',
+        }}>
+          {SUBTHEMES.map((theme) => {
+            const colors = themeColors[theme.label];
+            return (
+              <div
+                key={theme.label}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  gap: '1rem',
+                  transition: 'all 0.35s cubic-bezier(0.22, 1, 0.36, 1)',
+                  cursor: 'default',
+                }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLDivElement;
+                  el.style.transform = 'translateY(-8px)';
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget as HTMLDivElement;
+                  el.style.transform = 'translateY(0)';
+                }}
+              >
+                {/* Circular icon - solid and embossed */}
+                <div style={{
+                  position: 'relative',
+                  width: 'clamp(80px, 18vw, 120px)',
+                  height: 'clamp(80px, 18vw, 120px)',
+                  borderRadius: '50%',
+                  background: `linear-gradient(135deg, ${colors.iconColor}ee, ${colors.iconColor}cc)`,
+                  border: `2.5px solid ${colors.borderColor}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: colors.iconColor,
+                  fontSize: 'clamp(42px, 10vw, 64px)',
+                  boxShadow: `
+                    inset -3px -3px 8px rgba(0, 0, 0, 0.15),
+                    inset 3px 3px 8px rgba(255, 255, 255, 0.3),
+                    0 8px 24px ${colors.iconColor}28,
+                    0 2px 4px rgba(0, 0, 0, 0.1)
+                  `,
+                  transition: 'all 0.35s cubic-bezier(0.22, 1, 0.36, 1)',
+                }}>
+                  {/* Embossed highlight overlay */}
+                  <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    borderRadius: '50%',
+                    background: `radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.25) 0%, transparent 50%)`,
+                    pointerEvents: 'none',
+                    zIndex: 0,
+                  }} />
+                  
+                  {/* Icon */}
+                  <div style={{ position: 'relative', zIndex: 1, display: 'flex', filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))' }}>
+                    {theme.icon}
+                  </div>
+                </div>
 
-            {/* Subtheme title */}
-            <h2 style={{
-              fontFamily: "'Tropikal', 'Playfair Display', serif",
-              fontSize: 'clamp(1.8rem, 4vw, 3rem)',
-              fontWeight: 700,
-              color: '#1a0e04',
-              margin: '0 0 2rem',
-              letterSpacing: '0.01em',
-              lineHeight: 1.2,
-            }}>
-              {selectedSubtheme.label}
-            </h2>
-
-            {/* View Classes CTA */}
-            <button
-              onClick={() => {
-                const el = document.getElementById('classes-section');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
-              style={{
-                fontFamily: "'Tropikal', 'Playfair Display', serif",
-                fontSize: '0.9rem',
-                fontWeight: 700,
-                letterSpacing: '0.15em',
-                textTransform: 'uppercase',
-                color: accentColor,
-                background: 'transparent',
-                border: `2px solid ${accentColor}`,
-                borderRadius: 8,
-                padding: '0.8rem 1.8rem',
-                cursor: 'pointer',
-                transition: 'all 0.3s',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = `rgba(222,154,73,0.1)`;
-                e.currentTarget.style.transform = 'translateY(-3px)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              View Classes →
-            </button>
-          </>
-        ) : (
-          <>
-            {/* Default state: invite to explore */}
-            <div style={{
-              fontSize: 'clamp(48px, 12vw, 72px)',
-              marginBottom: '1.5rem',
-            }}>
-              ✨
-            </div>
-            <h2 style={{
-              fontFamily: "'Tropikal', 'Playfair Display', serif",
-              fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
-              fontWeight: 700,
-              color: '#1a0e04',
-              margin: '0 0 1rem',
-              letterSpacing: '0.01em',
-            }}>
-              Explore All Themes
-            </h2>
-            <p style={{
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: 'clamp(0.9rem, 1.8vw, 1.1rem)',
-              color: '#7a6040',
-              maxWidth: 500,
-              margin: '0 auto 1.5rem',
-              lineHeight: 1.7,
-            }}>
-              Browse the class catalog below to discover classes across all six subthemes.
-            </p>
-          </>
-        )}
+                {/* Text content */}
+                <div style={{ textAlign: 'center', width: '100%' }}>
+                  <h3 style={{
+                    fontFamily: "'Tropikal', 'Playfair Display', serif",
+                    fontSize: 'clamp(0.9rem, 2.5vw, 1.1rem)',
+                    fontWeight: 700,
+                    color: '#1a0e04',
+                    margin: '0.5rem 0 0.35rem',
+                    lineHeight: 1.2,
+                    letterSpacing: '0.01em',
+                  }}>
+                    {theme.label.split(' ng ')[0]}
+                  </h3>
+                  <p style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: 'clamp(0.7rem, 1.8vw, 0.85rem)',
+                    fontWeight: 600,
+                    color: colors.textColor,
+                    margin: '0',
+                    opacity: 0.9,
+                    letterSpacing: '0.03em',
+                  }}>
+                    {colors.shortLabel}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     );
   };
@@ -2982,7 +3023,7 @@
             </svg>
           </div>
 
-          <SubthemeAboutSection activeTheme={null} />
+          <SubthemeAboutSection />
 
           
           <div style={{ position: 'relative', lineHeight: 0, marginTop: '-2px', overflow: 'hidden' }}>
