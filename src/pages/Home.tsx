@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback, type ReactNode } fro
 import { createPortal } from 'react-dom';
 import { ExternalLink, X, ChevronDown, ChevronUp, LayoutGrid, List } from 'lucide-react';
 import type { User as FirebaseUser } from 'firebase/auth';
+import { ThemeBackground } from '../components/ThemeBackground';
 import styles from '../App.module.css';
 
 /* ════════════════════════════════════════════
@@ -57,17 +58,17 @@ const PalayOrnament = ({ flip = false }: { flip?: boolean }) => (
   <svg viewBox="0 0 100 24" width="90" height="24" aria-hidden="true"
     style={{ display: 'block', transform: flip ? 'scaleX(-1)' : undefined, opacity: 0.5 }}>
     <path d="M4 20 Q22 15 40 17 Q58 19 74 13 Q88 8 96 10"
-      stroke="#bf6e19" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+      stroke="#bf6e19" strokeWidth="1.2" fill="none" strokeLinecap="round" />
     {[22, 40, 58, 76].map((x, i) => {
       const y = i % 2 === 0 ? 14 : 12;
       return (
         <g key={i}>
-          <path d={`M${x} ${y+3} Q${x-2} ${y-3} ${x} ${y-7}`}
-            stroke="#16a460" strokeWidth="1" fill="none" strokeLinecap="round"/>
+          <path d={`M${x} ${y + 3} Q${x - 2} ${y - 3} ${x} ${y - 7}`}
+            stroke="#16a460" strokeWidth="1" fill="none" strokeLinecap="round" />
           <ellipse cx={x - 3} cy={y - 8} rx="3" ry="4.5"
-            fill="#bf6e19" opacity="0.7" transform={`rotate(-20, ${x-3}, ${y-8})`}/>
+            fill="#bf6e19" opacity="0.7" transform={`rotate(-20, ${x - 3}, ${y - 8})`} />
           <ellipse cx={x + 2.5} cy={y - 6} rx="2.5" ry="4"
-            fill="#8b4a06" opacity="0.6" transform={`rotate(20, ${x+2.5}, ${y-6})`}/>
+            fill="#8b4a06" opacity="0.6" transform={`rotate(20, ${x + 2.5}, ${y - 6})`} />
         </g>
       );
     })}
@@ -84,22 +85,22 @@ const SunOrnament = ({ size = 32, opacity = 0.18 }: { size?: number; opacity?: n
         <line key={i}
           x1={30 + Math.cos(rad) * inner} y1={30 + Math.sin(rad) * inner}
           x2={30 + Math.cos(rad) * outer} y2={30 + Math.sin(rad) * outer}
-          stroke="#bf6e19" strokeWidth={i % 3 === 0 ? 1.5 : 1} strokeLinecap="round"/>
+          stroke="#bf6e19" strokeWidth={i % 3 === 0 ? 1.5 : 1} strokeLinecap="round" />
       );
     })}
-    <circle cx="30" cy="30" r="11" fill="none" stroke="#bf6e19" strokeWidth="1.3"/>
-    <circle cx="30" cy="30" r="5" fill="rgba(191,110,25,0.28)"/>
+    <circle cx="30" cy="30" r="11" fill="none" stroke="#bf6e19" strokeWidth="1.3" />
+    <circle cx="30" cy="30" r="5" fill="rgba(191,110,25,0.28)" />
   </svg>
 );
 
 /* ─── Diamond divider ─── */
 const DiamondDivider = () => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', margin: '0.5rem 0 1rem', padding: '0 0.2rem' }}>
-    <span style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(191,110,25,0.4))' }}/>
+    <span style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(191,110,25,0.4))' }} />
     <svg viewBox="0 0 12 12" width="10" height="10" style={{ opacity: 0.55 }} aria-hidden="true">
-      <path d="M6 1 L11 6 L6 11 L1 6 Z" fill="#bf6e19"/>
+      <path d="M6 1 L11 6 L6 11 L1 6 Z" fill="#bf6e19" />
     </svg>
-    <span style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, rgba(191,110,25,0.4), transparent)' }}/>
+    <span style={{ flex: 1, height: '1px', background: 'linear-gradient(90deg, rgba(191,110,25,0.4), transparent)' }} />
   </div>
 );
 
@@ -165,31 +166,31 @@ const AccentLine = ({ bright = false }: { bright?: boolean }) => (
 /* Paraw (outrigger sailboat) — Date & Time */
 const IconParaw = ({ size = 15 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 22 22" fill="none" aria-hidden="true">
-    <ellipse cx="11" cy="16" rx="7.5" ry="2" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-    <path d="M7 16 Q8 11 11 8 Q14 11 15 16" fill="rgba(191,110,25,0.18)" stroke="currentColor" strokeWidth="1.2"/>
-    <line x1="11" y1="8" x2="11" y2="3.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
-    <path d="M11 3.5 L16.5 8 L11 9 Z" fill="currentColor" opacity="0.55"/>
-    <path d="M3.5 15.5 Q5 14.5 6.5 15.5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" fill="none"/>
-    <line x1="5" y1="15" x2="7" y2="14" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round"/>
+    <ellipse cx="11" cy="16" rx="7.5" ry="2" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    <path d="M7 16 Q8 11 11 8 Q14 11 15 16" fill="rgba(191,110,25,0.18)" stroke="currentColor" strokeWidth="1.2" />
+    <line x1="11" y1="8" x2="11" y2="3.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+    <path d="M11 3.5 L16.5 8 L11 9 Z" fill="currentColor" opacity="0.55" />
+    <path d="M3.5 15.5 Q5 14.5 6.5 15.5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" fill="none" />
+    <line x1="5" y1="15" x2="7" y2="14" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" />
   </svg>
 );
 
 /* Bahay Kubo — Location */
 const IconBahayKubo = ({ size = 15 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 22 22" fill="none" aria-hidden="true">
-    <line x1="8" y1="19" x2="8" y2="17" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/>
-    <line x1="14" y1="19" x2="14" y2="17" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/>
-    <rect x="6.5" y="12" width="9" height="5.5" rx="0.8" fill="rgba(191,110,25,0.15)" stroke="currentColor" strokeWidth="1.2"/>
-    <path d="M4 12.5 L11 5.5 L18 12.5" fill="rgba(191,110,25,0.22)" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
-    <path d="M3 12.8 L4.5 11.5 M19 12.8 L17.5 11.5" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round"/>
-    <rect x="10" y="14.5" width="2" height="3" rx="0.4" fill="currentColor" opacity="0.45"/>
+    <line x1="8" y1="19" x2="8" y2="17" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+    <line x1="14" y1="19" x2="14" y2="17" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+    <rect x="6.5" y="12" width="9" height="5.5" rx="0.8" fill="rgba(191,110,25,0.15)" stroke="currentColor" strokeWidth="1.2" />
+    <path d="M4 12.5 L11 5.5 L18 12.5" fill="rgba(191,110,25,0.22)" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+    <path d="M3 12.8 L4.5 11.5 M19 12.8 L17.5 11.5" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" />
+    <rect x="10" y="14.5" width="2" height="3" rx="0.4" fill="currentColor" opacity="0.45" />
   </svg>
 );
 
 /* Sampaguita — Slots */
 const IconSampaguita = ({ size = 15 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 22 22" fill="none" aria-hidden="true">
-    <circle cx="11" cy="11" r="2.2" fill="currentColor" opacity="0.55"/>
+    <circle cx="11" cy="11" r="2.2" fill="currentColor" opacity="0.55" />
     {[0, 51.4, 102.8, 154.2, 205.6, 257, 308.4].map((deg, i) => {
       const r = (deg * Math.PI) / 180;
       const cx = 11 + Math.cos(r) * 4.8;
@@ -197,7 +198,7 @@ const IconSampaguita = ({ size = 15 }: { size?: number }) => (
       return (
         <ellipse key={i} cx={cx} cy={cy} rx="1.7" ry="2.9"
           fill="rgba(191,110,25,0.22)" stroke="currentColor" strokeWidth="0.9"
-          transform={`rotate(${deg + 90} ${cx} ${cy})`}/>
+          transform={`rotate(${deg + 90} ${cx} ${cy})`} />
       );
     })}
   </svg>
@@ -234,13 +235,13 @@ const IconAllThemes = ({ color }: { color: string }) => (
 const IconKarunungan = ({ color }: { color: string }) => (
   <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
     <path d="M5 7 Q5 4 8 4 L18 4 Q21 4 21 7 L21 20 Q21 23 18 23 L8 23 Q5 23 5 20 Z"
-      stroke={color} strokeWidth="1.3" strokeLinejoin="round"/>
-    <path d="M8 4 Q6 4 6 6 Q6 8 8 8" stroke={color} strokeWidth="1" strokeLinecap="round"/>
-    <path d="M8 23 Q6 23 6 21 Q6 19 8 19" stroke={color} strokeWidth="1" strokeLinecap="round"/>
-    <line x1="9" y1="10.5" x2="17" y2="10.5" stroke={color} strokeWidth="1" strokeLinecap="round" opacity="0.7"/>
-    <line x1="9" y1="13" x2="17" y2="13" stroke={color} strokeWidth="1" strokeLinecap="round" opacity="0.7"/>
-    <line x1="9" y1="15.5" x2="14" y2="15.5" stroke={color} strokeWidth="1" strokeLinecap="round" opacity="0.7"/>
-    <circle cx="15.5" cy="15.5" r="1.2" fill={color} opacity="0.5"/>
+      stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
+    <path d="M8 4 Q6 4 6 6 Q6 8 8 8" stroke={color} strokeWidth="1" strokeLinecap="round" />
+    <path d="M8 23 Q6 23 6 21 Q6 19 8 19" stroke={color} strokeWidth="1" strokeLinecap="round" />
+    <line x1="9" y1="10.5" x2="17" y2="10.5" stroke={color} strokeWidth="1" strokeLinecap="round" opacity="0.7" />
+    <line x1="9" y1="13" x2="17" y2="13" stroke={color} strokeWidth="1" strokeLinecap="round" opacity="0.7" />
+    <line x1="9" y1="15.5" x2="14" y2="15.5" stroke={color} strokeWidth="1" strokeLinecap="round" opacity="0.7" />
+    <circle cx="15.5" cy="15.5" r="1.2" fill={color} opacity="0.5" />
   </svg>
 );
 
@@ -249,15 +250,15 @@ const IconKarunungan = ({ color }: { color: string }) => (
 const IconKakayahan = ({ color }: { color: string }) => (
   <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
     {/* Basket body */}
-    <path d="M6 10 L20 10 L18 22 L8 22 Z" stroke={color} strokeWidth="1.3" strokeLinejoin="round"/>
+    <path d="M6 10 L20 10 L18 22 L8 22 Z" stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
     {/* Handles */}
-    <path d="M9 10 Q9 4.5 13 4.5 Q17 4.5 17 10" stroke={color} strokeWidth="1.3" strokeLinecap="round"/>
+    <path d="M9 10 Q9 4.5 13 4.5 Q17 4.5 17 10" stroke={color} strokeWidth="1.3" strokeLinecap="round" />
     {/* Weave accents */}
-    <line x1="10" y1="10" x2="9.3" y2="22" stroke={color} strokeWidth="1" opacity="0.5" strokeLinecap="round"/>
-    <line x1="13" y1="10" x2="13" y2="22" stroke={color} strokeWidth="1" opacity="0.5" strokeLinecap="round"/>
-    <line x1="16" y1="10" x2="16.7" y2="22" stroke={color} strokeWidth="1" opacity="0.5" strokeLinecap="round"/>
-    <line x1="7.5" y1="14" x2="18.5" y2="14" stroke={color} strokeWidth="1" opacity="0.5" strokeLinecap="round"/>
-    <line x1="7" y1="18" x2="19" y2="18" stroke={color} strokeWidth="1" opacity="0.5" strokeLinecap="round"/>
+    <line x1="10" y1="10" x2="9.3" y2="22" stroke={color} strokeWidth="1" opacity="0.5" strokeLinecap="round" />
+    <line x1="13" y1="10" x2="13" y2="22" stroke={color} strokeWidth="1" opacity="0.5" strokeLinecap="round" />
+    <line x1="16" y1="10" x2="16.7" y2="22" stroke={color} strokeWidth="1" opacity="0.5" strokeLinecap="round" />
+    <line x1="7.5" y1="14" x2="18.5" y2="14" stroke={color} strokeWidth="1" opacity="0.5" strokeLinecap="round" />
+    <line x1="7" y1="18" x2="19" y2="18" stroke={color} strokeWidth="1" opacity="0.5" strokeLinecap="round" />
   </svg>
 );
 
@@ -266,15 +267,15 @@ const IconKakayahan = ({ color }: { color: string }) => (
 const IconMalikhaing = ({ color }: { color: string }) => (
   <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
     {/* Pot silhouette */}
-    <path d="M10 7 C10 7 8 11 6 15 C4 19 8 22 13 22 C18 22 22 19 20 15 C18 11 16 7 16 7" 
-      stroke={color} strokeWidth="1.3" strokeLinejoin="round" strokeLinecap="round"/>
-    <ellipse cx="13" cy="7" rx="3" ry="1.5" stroke={color} strokeWidth="1.3"/>
+    <path d="M10 7 C10 7 8 11 6 15 C4 19 8 22 13 22 C18 22 22 19 20 15 C18 11 16 7 16 7"
+      stroke={color} strokeWidth="1.3" strokeLinejoin="round" strokeLinecap="round" />
+    <ellipse cx="13" cy="7" rx="3" ry="1.5" stroke={color} strokeWidth="1.3" />
     {/* Decorative etched lines */}
-    <path d="M7.5 14 Q13 12 18.5 14" stroke={color} strokeWidth="1" opacity="0.6" strokeLinecap="round"/>
-    <path d="M8 17 Q13 15.5 18 17" stroke={color} strokeWidth="1" opacity="0.6" strokeLinecap="round"/>
+    <path d="M7.5 14 Q13 12 18.5 14" stroke={color} strokeWidth="1" opacity="0.6" strokeLinecap="round" />
+    <path d="M8 17 Q13 15.5 18 17" stroke={color} strokeWidth="1" opacity="0.6" strokeLinecap="round" />
     {/* Paint brush accent */}
-    <path d="M17 7 Q21 4 21 8" stroke={color} strokeWidth="1.3" strokeLinecap="round"/>
-    <circle cx="21" cy="5" r="1.5" fill={color} opacity="0.6"/>
+    <path d="M17 7 Q21 4 21 8" stroke={color} strokeWidth="1.3" strokeLinecap="round" />
+    <circle cx="21" cy="5" r="1.5" fill={color} opacity="0.6" />
   </svg>
 );
 
@@ -283,18 +284,18 @@ const IconMalikhaing = ({ color }: { color: string }) => (
 const IconPagkakaisa = ({ color }: { color: string }) => (
   <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
     {/* Kubo Outline */}
-    <path d="M9 10 L13 6 L17 10 L16 10 L16 13 L10 13 L10 10 Z" stroke={color} strokeWidth="1.3" strokeLinejoin="round"/>
+    <path d="M9 10 L13 6 L17 10 L16 10 L16 13 L10 13 L10 10 Z" stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
     {/* Carrying pole */}
-    <line x1="4" y1="15" x2="22" y2="15" stroke={color} strokeWidth="1.3" strokeLinecap="round"/>
+    <line x1="4" y1="15" x2="22" y2="15" stroke={color} strokeWidth="1.3" strokeLinecap="round" />
     {/* Support beams */}
-    <line x1="11" y1="13" x2="11" y2="15" stroke={color} strokeWidth="1.3"/>
-    <line x1="15" y1="13" x2="15" y2="15" stroke={color} strokeWidth="1.3"/>
+    <line x1="11" y1="13" x2="11" y2="15" stroke={color} strokeWidth="1.3" />
+    <line x1="15" y1="13" x2="15" y2="15" stroke={color} strokeWidth="1.3" />
     {/* Left figure */}
-    <path d="M6 21 L6 16 M4 17 L6 15 L8 17" stroke={color} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-    <circle cx="6" cy="13" r="1.5" fill={color} opacity="0.6"/>
+    <path d="M6 21 L6 16 M4 17 L6 15 L8 17" stroke={color} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="6" cy="13" r="1.5" fill={color} opacity="0.6" />
     {/* Right figure */}
-    <path d="M20 21 L20 16 M18 17 L20 15 L22 17" stroke={color} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-    <circle cx="20" cy="13" r="1.5" fill={color} opacity="0.6"/>
+    <path d="M20 21 L20 16 M18 17 L20 15 L22 17" stroke={color} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="20" cy="13" r="1.5" fill={color} opacity="0.6" />
   </svg>
 );
 
@@ -303,14 +304,14 @@ const IconPagkakaisa = ({ color }: { color: string }) => (
 const IconKalusugan = ({ color }: { color: string }) => (
   <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
     {/* Mortar */}
-    <path d="M6 14 L8 20 Q13 23 18 20 L20 14" stroke={color} strokeWidth="1.3" strokeLinejoin="round"/>
-    <ellipse cx="13" cy="14" rx="7" ry="2.5" stroke={color} strokeWidth="1.3"/>
+    <path d="M6 14 L8 20 Q13 23 18 20 L20 14" stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
+    <ellipse cx="13" cy="14" rx="7" ry="2.5" stroke={color} strokeWidth="1.3" />
     {/* Pestle */}
-    <path d="M15 6 L12 16" stroke={color} strokeWidth="1.3" strokeLinecap="round"/>
-    <circle cx="15.5" cy="5.5" r="1.5" fill={color} opacity="0.6"/>
+    <path d="M15 6 L12 16" stroke={color} strokeWidth="1.3" strokeLinecap="round" />
+    <circle cx="15.5" cy="5.5" r="1.5" fill={color} opacity="0.6" />
     {/* Herbal Leaves (Lagundi motif) */}
-    <path d="M6 11 C6 6 10 7 10 11 C10 14 6 13 6 11 Z" stroke={color} strokeWidth="1" opacity="0.7"/>
-    <path d="M20 11 C20 6 16 7 16 11 C16 14 20 13 20 11 Z" stroke={color} strokeWidth="1" opacity="0.7"/>
+    <path d="M6 11 C6 6 10 7 10 11 C10 14 6 13 6 11 Z" stroke={color} strokeWidth="1" opacity="0.7" />
+    <path d="M20 11 C20 6 16 7 16 11 C16 14 20 13 20 11 Z" stroke={color} strokeWidth="1" opacity="0.7" />
   </svg>
 );
 
@@ -319,14 +320,14 @@ const IconKalusugan = ({ color }: { color: string }) => (
 const IconBayanihan = ({ color }: { color: string }) => (
   <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
     {/* Roof */}
-    <path d="M3 12 L13 4 L23 12" stroke={color} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M3 12 L13 4 L23 12" stroke={color} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
     {/* House body */}
-    <path d="M6 11 L6 21 L20 21 L20 11" stroke={color} strokeWidth="1.3" strokeLinejoin="round"/>
+    <path d="M6 11 L6 21 L20 21 L20 11" stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
     {/* Bamboo stilts/accents */}
-    <line x1="4" y1="21" x2="22" y2="21" stroke={color} strokeWidth="1.3" strokeLinecap="round"/>
+    <line x1="4" y1="21" x2="22" y2="21" stroke={color} strokeWidth="1.3" strokeLinecap="round" />
     {/* Glowing Heart inside */}
-    <path d="M13 18 C13 18 8.5 15 8.5 12.5 C8.5 10.5 10.5 9.5 11.5 10.5 C12.5 11.5 13 13 13 13 C13 13 13.5 11.5 14.5 10.5 C15.5 9.5 17.5 10.5 17.5 12.5 C17.5 15 13 18 13 18 Z" 
-      fill={color} opacity="0.7"/>
+    <path d="M13 18 C13 18 8.5 15 8.5 12.5 C8.5 10.5 10.5 9.5 11.5 10.5 C12.5 11.5 13 13 13 13 C13 13 13.5 11.5 14.5 10.5 C15.5 9.5 17.5 10.5 17.5 12.5 C17.5 15 13 18 13 18 Z"
+      fill={color} opacity="0.7" />
   </svg>
 );
 /* ════════════════════════════════════════════
@@ -632,12 +633,10 @@ export default function Home({
         <section id="classes-section" style={{
           padding: isMobile ? '1.5rem 0 5rem' : '3rem 0 7rem',
           position: 'relative',
-          background: `
-            radial-gradient(ellipse 55% 35% at 12% 20%, rgba(22,164,96,0.04) 0%, transparent 55%),
-            radial-gradient(ellipse 50% 30% at 90% 80%, rgba(191,110,25,0.06) 0%, transparent 50%),
-            linear-gradient(180deg, #fffdf6 0%, #fdf7e8 30%, #f8efcf 65%, #f0e0b0 100%)
-          `,
+          minHeight: '100vh',
+          background: 'transparent',
         }}>
+          <ThemeBackground selectedSubtheme={selectedSubtheme} />
           <div style={{
             position: 'absolute', top: 0, left: 0, right: 0, height: 3,
             background: 'linear-gradient(90deg, transparent 0%, rgba(191,110,25,0.3) 15%, rgba(250,225,133,0.7) 50%, rgba(191,110,25,0.3) 85%, transparent 100%)',
@@ -653,7 +652,20 @@ export default function Home({
             {/* Subtheme filter pills */}
             <SubthemeFilterPills
               selectedSubtheme={selectedSubtheme}
-              onSubthemeSelect={setSelectedSubtheme}
+              onSubthemeSelect={(val) => {
+                const el = document.getElementById('classes-section');
+                if (el) {
+                  const y = el.getBoundingClientRect().top + window.scrollY - (isMobile ? 100 : 140);
+                  const distance = Math.abs(window.scrollY - y);
+                  const duration = distance > 100 ? 500 : 50;
+                  window.scrollTo({ top: y, behavior: 'smooth' });
+                  setTimeout(() => {
+                    setSelectedSubtheme(val);
+                  }, duration);
+                } else {
+                  setSelectedSubtheme(val);
+                }
+              }}
               isMobile={isMobile}
             />
 
@@ -902,7 +914,7 @@ export default function Home({
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>
                             <PalayOrnament flip />
                             <span style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: isActive ? '#bf6e19' : '#9a7a50', textAlign: 'right' }}>
-                              {dayClasses.length}<br/>{dayClasses.length === 1 ? 'class' : 'classes'}
+                              {dayClasses.length}<br />{dayClasses.length === 1 ? 'class' : 'classes'}
                             </span>
                           </div>
                         </div>
