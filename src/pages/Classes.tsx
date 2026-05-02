@@ -1005,7 +1005,7 @@ export default function Classes({
                       </div>
                     </div>
                   ))}
-                </div>
+                </motion.div>
               )}
 
               {/* ── PAGINATION ── */}
@@ -1029,8 +1029,6 @@ export default function Classes({
               )}
             </>
           )}
-        </>
-            )}
       </div>
     </main>
 
@@ -1165,8 +1163,8 @@ export default function Classes({
               }}
             >
               <img
-                src={viewingClass.image}
-                alt={viewingClass.title}
+                src={viewingClass!.image}
+                alt={viewingClass!.title}
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 referrerPolicy="no-referrer"
               />
@@ -1187,10 +1185,10 @@ export default function Classes({
                   gap: '0.5rem',
                 }}
               >
-                {viewingClass.orgLogo && (
+                {viewingClass!.orgLogo && (
                   <img
-                    src={viewingClass.orgLogo}
-                    alt={viewingClass.org}
+                    src={viewingClass!.orgLogo ?? undefined}
+                    alt={viewingClass!.org}
                     style={{
                       width: 32,
                       height: 32,
@@ -1201,8 +1199,8 @@ export default function Classes({
                     referrerPolicy="no-referrer"
                   />
                 )}
-                {viewingClass.subtheme && (
-                  <span className="leap-detail-badge">{viewingClass.subtheme}</span>
+                {viewingClass!.subtheme && (
+                  <span className="leap-detail-badge">{viewingClass!.subtheme}</span>
                 )}
               </div>
             </div>
@@ -1229,7 +1227,7 @@ export default function Classes({
                     marginBottom: '0.5rem',
                   }}
                 >
-                  {viewingClass.title}
+                  {viewingClass!.title}
                 </h1>
                 <p
                   style={{
@@ -1241,7 +1239,7 @@ export default function Classes({
                     color: '#b05a32',
                   }}
                 >
-                  Organized by {viewingClass.org}
+                  Organized by {viewingClass!.org}
                 </p>
               </div>
 
@@ -1260,7 +1258,7 @@ export default function Classes({
                   </div>
                   <div>
                     <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7c6b4b', marginBottom: 2 }}>Date & Time</p>
-                    <p style={{ fontFamily: "'DM Sans',sans-serif", fontWeight: 600, color: '#334b46', fontSize: '0.9rem' }}>{viewingClass.date} · {viewingClass.time}</p>
+                    <p style={{ fontFamily: "'DM Sans',sans-serif", fontWeight: 600, color: '#334b46', fontSize: '0.9rem' }}>{viewingClass!.date} · {viewingClass!.time}</p>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
@@ -1269,7 +1267,7 @@ export default function Classes({
                   </div>
                   <div>
                     <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7c6b4b', marginBottom: 2 }}>Location</p>
-                    <p style={{ fontFamily: "'DM Sans',sans-serif", fontWeight: 600, color: '#334b46', fontSize: '0.9rem' }}>{viewingClass.venue} ({viewingClass.modality})</p>
+                    <p style={{ fontFamily: "'DM Sans',sans-serif", fontWeight: 600, color: '#334b46', fontSize: '0.9rem' }}>{viewingClass!.venue} ({viewingClass!.modality})</p>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
@@ -1278,7 +1276,7 @@ export default function Classes({
                   </div>
                   <div>
                     <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7c6b4b', marginBottom: 2 }}>Slots</p>
-                    <p style={{ fontFamily: "'DM Sans',sans-serif", fontWeight: 600, color: '#334b46', fontSize: '0.9rem' }}>{viewingClass.slots} participants</p>
+                    <p style={{ fontFamily: "'DM Sans',sans-serif", fontWeight: 600, color: '#334b46', fontSize: '0.9rem' }}>{viewingClass!.slots} participants</p>
                   </div>
                 </div>
               </div>
@@ -1309,14 +1307,14 @@ export default function Classes({
                     color: 'rgba(51,75,70,0.8)',
                   }}
                 >
-                  {viewingClass.description || 'No description provided.'}
+                  {viewingClass!.description || 'No description provided.'}
                 </p>
               </div>
 
               {/* CTA */}
               <div style={{ paddingTop: '0.5rem', paddingBottom: '0.5rem' }}>
                 <a
-                  href={viewingClass.googleFormUrl || '#'}
+                  href={viewingClass!.googleFormUrl || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-leap-primary classes-modal-cta"
