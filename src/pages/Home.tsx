@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useMemo, useCallback, type ReactNode } fro
 import { createPortal } from 'react-dom';
 import { ExternalLink, X, ChevronDown, ChevronUp, LayoutGrid, List } from 'lucide-react';
 import type { User as FirebaseUser } from 'firebase/auth';
-import { ThemeBackground } from '../components/ThemeBackground';
 import styles from '../App.module.css';
 import { SubthemeFilterPills } from '../components/shared/SubthemeFilterPills';
 
@@ -120,7 +119,7 @@ const DayBadge = ({ num, active }: { num: number; active: boolean }) => (
 );
 
 /* ─── Catalog header ─── */
-const CatalogHeader = () => (
+const CatalogHeader = ({ accentColor = '#bf6e19' }: { accentColor?: string }) => (
   <div style={{ textAlign: 'center', marginBottom: '2rem', position: 'relative', zIndex: 2 }}>
     <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
@@ -134,7 +133,10 @@ const CatalogHeader = () => (
       </div>
       <p style={{
         fontFamily: "'DM Sans', sans-serif", fontSize: '0.65rem', fontWeight: 700,
-        letterSpacing: '0.3em', textTransform: 'uppercase', color: '#bf6e19', opacity: 0.85, margin: 0,
+        letterSpacing: '0.3em', textTransform: 'uppercase',
+        color: accentColor,
+        opacity: 0.9, margin: 0,
+        transition: 'color 0.5s ease',
       }}>LEAP 2026 · Isang Nayon, Isang Layunin</p>
     </div>
   </div>
@@ -150,13 +152,16 @@ const surface: React.CSSProperties = {
 };
 
 /* ─── Accent line ─── */
-const AccentLine = ({ bright = false }: { bright?: boolean }) => (
+const AccentLine = ({ bright = false, color }: { bright?: boolean; color?: string }) => (
   <div style={{
     position: 'absolute', top: 0, left: '1.5rem', right: '1.5rem', height: 2,
     borderRadius: '0 0 2px 2px',
-    background: bright
-      ? 'linear-gradient(90deg, transparent, rgba(191,110,25,0.75), rgba(250,225,133,0.95), rgba(191,110,25,0.75), transparent)'
-      : 'linear-gradient(90deg, transparent, rgba(191,110,25,0.45), rgba(250,225,133,0.7), rgba(191,110,25,0.45), transparent)',
+    background: color
+      ? `linear-gradient(90deg, transparent, ${color}99, ${color}ee, ${color}99, transparent)`
+      : bright
+        ? 'linear-gradient(90deg, transparent, rgba(191,110,25,0.75), rgba(250,225,133,0.95), rgba(191,110,25,0.75), transparent)'
+        : 'linear-gradient(90deg, transparent, rgba(191,110,25,0.45), rgba(250,225,133,0.7), rgba(191,110,25,0.45), transparent)',
+    transition: 'background 0.5s ease',
   }} />
 );
 
@@ -206,13 +211,9 @@ const IconSampaguita = ({ size = 15 }: { size?: number }) => (
 );
 
 /* ════════════════════════════════════════════
-   SUBTHEME ICON COMPONENTS (Line-Art Filipino Style)
-   Consistent 26x26 viewBox, 1.3 stroke width, and 
-   opacity accents based on the 'Karunungan' scroll.
+   SUBTHEME ICON COMPONENTS
    ════════════════════════════════════════════ */
 
-/* ALL THEMES — Araw ng Watawat (Philippine Sun)
-   Clean 8-ray sun motif representing all sectors */
 const IconAllThemes = ({ color }: { color: string }) => (
   <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
     <circle cx="13" cy="13" r="5.5" stroke={color} strokeWidth="1.3" />
@@ -231,8 +232,6 @@ const IconAllThemes = ({ color }: { color: string }) => (
   </svg>
 );
 
-/* PALAYAN NG KARUNUNGAN — Scroll/Manuscript
-   (knowledge, learning) */
 const IconKarunungan = ({ color }: { color: string }) => (
   <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
     <path d="M5 7 Q5 4 8 4 L18 4 Q21 4 21 7 L21 20 Q21 23 18 23 L8 23 Q5 23 5 20 Z"
@@ -246,15 +245,10 @@ const IconKarunungan = ({ color }: { color: string }) => (
   </svg>
 );
 
-/* PAMILIHAN NG KAKAYAHAN — Bayong (Woven Market Basket)
-   (livelihood, skills market) */
 const IconKakayahan = ({ color }: { color: string }) => (
   <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-    {/* Basket body */}
     <path d="M6 10 L20 10 L18 22 L8 22 Z" stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
-    {/* Handles */}
     <path d="M9 10 Q9 4.5 13 4.5 Q17 4.5 17 10" stroke={color} strokeWidth="1.3" strokeLinecap="round" />
-    {/* Weave accents */}
     <line x1="10" y1="10" x2="9.3" y2="22" stroke={color} strokeWidth="1" opacity="0.5" strokeLinecap="round" />
     <line x1="13" y1="10" x2="13" y2="22" stroke={color} strokeWidth="1" opacity="0.5" strokeLinecap="round" />
     <line x1="16" y1="10" x2="16.7" y2="22" stroke={color} strokeWidth="1" opacity="0.5" strokeLinecap="round" />
@@ -263,85 +257,69 @@ const IconKakayahan = ({ color }: { color: string }) => (
   </svg>
 );
 
-/* PLAZA NG MALIKHAING DIWA — Burnay (Traditional Pottery)
-   (creativity, arts) */
 const IconMalikhaing = ({ color }: { color: string }) => (
   <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-    {/* Pot silhouette */}
     <path d="M10 7 C10 7 8 11 6 15 C4 19 8 22 13 22 C18 22 22 19 20 15 C18 11 16 7 16 7"
       stroke={color} strokeWidth="1.3" strokeLinejoin="round" strokeLinecap="round" />
     <ellipse cx="13" cy="7" rx="3" ry="1.5" stroke={color} strokeWidth="1.3" />
-    {/* Decorative etched lines */}
     <path d="M7.5 14 Q13 12 18.5 14" stroke={color} strokeWidth="1" opacity="0.6" strokeLinecap="round" />
     <path d="M8 17 Q13 15.5 18 17" stroke={color} strokeWidth="1" opacity="0.6" strokeLinecap="round" />
-    {/* Paint brush accent */}
     <path d="M17 7 Q21 4 21 8" stroke={color} strokeWidth="1.3" strokeLinecap="round" />
     <circle cx="21" cy="5" r="1.5" fill={color} opacity="0.6" />
   </svg>
 );
 
-/* DAMBANA NG PAGKAKAISA — Bayanihan (Carrying the Kubo)
-   (unity, community) */
 const IconPagkakaisa = ({ color }: { color: string }) => (
   <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-    {/* Kubo Outline */}
     <path d="M9 10 L13 6 L17 10 L16 10 L16 13 L10 13 L10 10 Z" stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
-    {/* Carrying pole */}
     <line x1="4" y1="15" x2="22" y2="15" stroke={color} strokeWidth="1.3" strokeLinecap="round" />
-    {/* Support beams */}
     <line x1="11" y1="13" x2="11" y2="15" stroke={color} strokeWidth="1.3" />
     <line x1="15" y1="13" x2="15" y2="15" stroke={color} strokeWidth="1.3" />
-    {/* Left figure */}
     <path d="M6 21 L6 16 M4 17 L6 15 L8 17" stroke={color} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
     <circle cx="6" cy="13" r="1.5" fill={color} opacity="0.6" />
-    {/* Right figure */}
     <path d="M20 21 L20 16 M18 17 L20 15 L22 17" stroke={color} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
     <circle cx="20" cy="13" r="1.5" fill={color} opacity="0.6" />
   </svg>
 );
 
-/* PALAISDAAN NG KALUSUGAN — Dikdikan (Mortar, Pestle & Herbs)
-   (health, wellness, traditional medicine) */
 const IconKalusugan = ({ color }: { color: string }) => (
   <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-    {/* Mortar */}
     <path d="M6 14 L8 20 Q13 23 18 20 L20 14" stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
     <ellipse cx="13" cy="14" rx="7" ry="2.5" stroke={color} strokeWidth="1.3" />
-    {/* Pestle */}
     <path d="M15 6 L12 16" stroke={color} strokeWidth="1.3" strokeLinecap="round" />
     <circle cx="15.5" cy="5.5" r="1.5" fill={color} opacity="0.6" />
-    {/* Herbal Leaves (Lagundi motif) */}
     <path d="M6 11 C6 6 10 7 10 11 C10 14 6 13 6 11 Z" stroke={color} strokeWidth="1" opacity="0.7" />
     <path d="M20 11 C20 6 16 7 16 11 C16 14 20 13 20 11 Z" stroke={color} strokeWidth="1" opacity="0.7" />
   </svg>
 );
 
-/* BAHAY NG BAYANIHAN — Bahay Kubo with Heart
-   (community service, shelter) */
 const IconBayanihan = ({ color }: { color: string }) => (
   <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-    {/* Roof */}
     <path d="M3 12 L13 4 L23 12" stroke={color} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-    {/* House body */}
     <path d="M6 11 L6 21 L20 21 L20 11" stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
-    {/* Bamboo stilts/accents */}
     <line x1="4" y1="21" x2="22" y2="21" stroke={color} strokeWidth="1.3" strokeLinecap="round" />
-    {/* Glowing Heart inside */}
     <path d="M13 18 C13 18 8.5 15 8.5 12.5 C8.5 10.5 10.5 9.5 11.5 10.5 C12.5 11.5 13 13 13 13 C13 13 13.5 11.5 14.5 10.5 C15.5 9.5 17.5 10.5 17.5 12.5 C17.5 15 13 18 13 18 Z"
       fill={color} opacity="0.7" />
   </svg>
 );
+
 /* ════════════════════════════════════════════
-   SUBTHEME CONFIG — 7 entries with palette colors
+   SUBTHEME CONFIG
+   solidColor = the raw hex/rgb used for CSS gradients
    ════════════════════════════════════════════ */
 interface SubthemeMeta {
   key: string;
   label: string;
   sublabel: string;
   bgColor: string;
+  solidColor: string;         // pure color for gradient math
   iconColor: string;
   borderColor: string;
   textColor: string;
+  /* multi-layer bg for the catalog section */
+  sectionBg: string;
+  topBarGradient: string;
+  radialGlow: string;
   Icon: React.ComponentType<{ color: string }>;
 }
 
@@ -351,9 +329,21 @@ const SUBTHEMES: SubthemeMeta[] = [
     label: 'All Themes',
     sublabel: '',
     bgColor: '#006937',
+    solidColor: '#006937',
     iconColor: '#fae185',
     borderColor: 'rgba(250,225,133,0.45)',
     textColor: '#fae185',
+    sectionBg: `linear-gradient(180deg,
+      rgba(0,105,55,0.13) 0%,
+      rgba(0,105,55,0.07) 35%,
+      rgba(250,225,133,0.05) 70%,
+      rgba(255,252,243,0) 100%)`,
+    topBarGradient: `linear-gradient(90deg,
+      transparent 0%, rgba(250,225,133,0.4) 15%,
+      rgba(250,225,133,0.85) 50%,
+      rgba(250,225,133,0.4) 85%, transparent 100%)`,
+    radialGlow: `radial-gradient(ellipse 70% 40% at 50% 0%, rgba(0,105,55,0.18) 0%, transparent 70%),
+                 radial-gradient(ellipse 40% 30% at 20% 60%, rgba(250,225,133,0.08) 0%, transparent 60%)`,
     Icon: IconAllThemes,
   },
   {
@@ -361,9 +351,21 @@ const SUBTHEMES: SubthemeMeta[] = [
     label: 'Palayan ng',
     sublabel: 'Karunungan',
     bgColor: 'rgba(201,224,228,0.15)',
+    solidColor: '#C9E0E4',
     iconColor: '#C9E0E4',
     borderColor: 'rgba(201,224,228,0.3)',
     textColor: '#C9E0E4',
+    sectionBg: `linear-gradient(180deg,
+      rgba(201,224,228,0.18) 0%,
+      rgba(201,224,228,0.09) 35%,
+      rgba(153,217,235,0.05) 70%,
+      rgba(255,252,243,0) 100%)`,
+    topBarGradient: `linear-gradient(90deg,
+      transparent 0%, rgba(201,224,228,0.5) 15%,
+      rgba(201,224,228,0.9) 50%,
+      rgba(201,224,228,0.5) 85%, transparent 100%)`,
+    radialGlow: `radial-gradient(ellipse 70% 40% at 50% 0%, rgba(201,224,228,0.22) 0%, transparent 70%),
+                 radial-gradient(ellipse 35% 25% at 80% 50%, rgba(153,217,235,0.1) 0%, transparent 55%)`,
     Icon: IconKarunungan,
   },
   {
@@ -371,9 +373,21 @@ const SUBTHEMES: SubthemeMeta[] = [
     label: 'Pamilihan ng',
     sublabel: 'Kakayahan',
     bgColor: 'rgba(250,225,133,0.12)',
+    solidColor: '#fae185',
     iconColor: '#fae185',
     borderColor: 'rgba(250,225,133,0.3)',
     textColor: '#fae185',
+    sectionBg: `linear-gradient(180deg,
+      rgba(250,225,133,0.2) 0%,
+      rgba(250,225,133,0.1) 35%,
+      rgba(239,230,173,0.06) 70%,
+      rgba(255,252,243,0) 100%)`,
+    topBarGradient: `linear-gradient(90deg,
+      transparent 0%, rgba(250,225,133,0.55) 15%,
+      rgba(250,225,133,0.95) 50%,
+      rgba(250,225,133,0.55) 85%, transparent 100%)`,
+    radialGlow: `radial-gradient(ellipse 70% 40% at 50% 0%, rgba(250,225,133,0.25) 0%, transparent 70%),
+                 radial-gradient(ellipse 40% 30% at 75% 40%, rgba(239,230,173,0.12) 0%, transparent 60%)`,
     Icon: IconKakayahan,
   },
   {
@@ -381,9 +395,21 @@ const SUBTHEMES: SubthemeMeta[] = [
     label: 'Plaza ng',
     sublabel: 'Malikhaing Diwa',
     bgColor: 'rgba(139,74,6,0.2)',
+    solidColor: '#8b4a06',
     iconColor: '#d4956a',
     borderColor: 'rgba(139,74,6,0.45)',
     textColor: '#d4956a',
+    sectionBg: `linear-gradient(180deg,
+      rgba(139,74,6,0.16) 0%,
+      rgba(139,74,6,0.08) 35%,
+      rgba(212,149,106,0.05) 70%,
+      rgba(255,252,243,0) 100%)`,
+    topBarGradient: `linear-gradient(90deg,
+      transparent 0%, rgba(212,149,106,0.5) 15%,
+      rgba(212,149,106,0.9) 50%,
+      rgba(212,149,106,0.5) 85%, transparent 100%)`,
+    radialGlow: `radial-gradient(ellipse 70% 40% at 50% 0%, rgba(139,74,6,0.2) 0%, transparent 70%),
+                 radial-gradient(ellipse 45% 30% at 15% 55%, rgba(212,149,106,0.1) 0%, transparent 60%)`,
     Icon: IconMalikhaing,
   },
   {
@@ -391,9 +417,21 @@ const SUBTHEMES: SubthemeMeta[] = [
     label: 'Dambana ng',
     sublabel: 'Pagkakaisa',
     bgColor: 'rgba(22,164,96,0.15)',
+    solidColor: '#16a460',
     iconColor: '#16a460',
     borderColor: 'rgba(22,164,96,0.35)',
     textColor: '#4ecf8a',
+    sectionBg: `linear-gradient(180deg,
+      rgba(22,164,96,0.16) 0%,
+      rgba(22,164,96,0.08) 35%,
+      rgba(78,207,138,0.05) 70%,
+      rgba(255,252,243,0) 100%)`,
+    topBarGradient: `linear-gradient(90deg,
+      transparent 0%, rgba(78,207,138,0.45) 15%,
+      rgba(78,207,138,0.85) 50%,
+      rgba(78,207,138,0.45) 85%, transparent 100%)`,
+    radialGlow: `radial-gradient(ellipse 70% 40% at 50% 0%, rgba(22,164,96,0.2) 0%, transparent 70%),
+                 radial-gradient(ellipse 38% 28% at 85% 45%, rgba(78,207,138,0.1) 0%, transparent 55%)`,
     Icon: IconPagkakaisa,
   },
   {
@@ -401,9 +439,21 @@ const SUBTHEMES: SubthemeMeta[] = [
     label: 'Palaisdaan ng',
     sublabel: 'Kalusugan',
     bgColor: 'rgba(153,217,235,0.12)',
+    solidColor: '#99d9eb',
     iconColor: '#99d9eb',
     borderColor: 'rgba(153,217,235,0.3)',
     textColor: '#99d9eb',
+    sectionBg: `linear-gradient(180deg,
+      rgba(153,217,235,0.18) 0%,
+      rgba(153,217,235,0.09) 35%,
+      rgba(201,224,228,0.05) 70%,
+      rgba(255,252,243,0) 100%)`,
+    topBarGradient: `linear-gradient(90deg,
+      transparent 0%, rgba(153,217,235,0.5) 15%,
+      rgba(153,217,235,0.9) 50%,
+      rgba(153,217,235,0.5) 85%, transparent 100%)`,
+    radialGlow: `radial-gradient(ellipse 70% 40% at 50% 0%, rgba(153,217,235,0.22) 0%, transparent 70%),
+                 radial-gradient(ellipse 35% 25% at 70% 60%, rgba(201,224,228,0.1) 0%, transparent 55%)`,
     Icon: IconKalusugan,
   },
   {
@@ -411,14 +461,25 @@ const SUBTHEMES: SubthemeMeta[] = [
     label: 'Bahay ng',
     sublabel: 'Bayanihan',
     bgColor: 'rgba(239,230,173,0.12)',
+    solidColor: '#efe6ad',
     iconColor: '#efe6ad',
     borderColor: 'rgba(239,230,173,0.3)',
     textColor: '#efe6ad',
+    sectionBg: `linear-gradient(180deg,
+      rgba(239,230,173,0.2) 0%,
+      rgba(239,230,173,0.1) 35%,
+      rgba(250,225,133,0.05) 70%,
+      rgba(255,252,243,0) 100%)`,
+    topBarGradient: `linear-gradient(90deg,
+      transparent 0%, rgba(239,230,173,0.5) 15%,
+      rgba(239,230,173,0.92) 50%,
+      rgba(239,230,173,0.5) 85%, transparent 100%)`,
+    radialGlow: `radial-gradient(ellipse 70% 40% at 50% 0%, rgba(239,230,173,0.24) 0%, transparent 70%),
+                 radial-gradient(ellipse 40% 28% at 25% 50%, rgba(250,225,133,0.1) 0%, transparent 60%)`,
     Icon: IconBayanihan,
   },
 ];
 
-/* ════════════════════════════════════════════
 /* ════════════════════════════════════════════
    MAIN HOME COMPONENT
    ════════════════════════════════════════════ */
@@ -432,11 +493,14 @@ export default function Home({
   const isDesktop = w >= 1024;
   const stickyTop = isDesktop ? 168 : isMobile ? 110 : 134;
 
-  // Declare state first (before useMemo that uses selectedSubtheme)
   const [activeDay, setActiveDay] = useState<string | null>(null);
   const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({});
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedSubtheme, setSelectedSubtheme] = useState<string | null>(null);
+
+  // Derive the active subtheme meta — null selectedSubtheme → 'all'
+  const activeSubtheme = SUBTHEMES.find(s => s.key === (selectedSubtheme ?? 'all')) ?? SUBTHEMES[0];
+
   const daySectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const displayedDays = useMemo(() => uniqueDays, [uniqueDays]);
@@ -502,6 +566,10 @@ export default function Home({
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(4px); }
         }
+        @keyframes catalogBgFade {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
       `}</style>
 
       {/* Fireflies */}
@@ -532,42 +600,72 @@ export default function Home({
         {HeroExtras}
 
         {/* ══ CLASS CATALOG ══ */}
-        <section id="classes-section" style={{
-          padding: isMobile ? '1.5rem 0 5rem' : '3rem 0 7rem',
-          position: 'relative',
-          minHeight: '100vh',
-          background: 'transparent',
-        }}>
-          <ThemeBackground selectedSubtheme={selectedSubtheme} />
+        <section
+          id="classes-section"
+          style={{
+            padding: isMobile ? '1.5rem 0 5rem' : '3rem 0 7rem',
+            position: 'relative',
+            minHeight: '100vh',
+            // Base warm parchment underneath everything
+            background: '#fdf8ed',
+          }}
+        >
+          {/*
+            ── Layered theme background ──
+            Rendered as absolutely-positioned divs so we can
+            CSS-transition opacity independently per layer,
+            giving a smooth crossfade when the subtheme changes.
+          */}
+
+          {/* Layer 1: directional gradient */}
+          <div
+            key={`bg-grad-${activeSubtheme.key}`}
+            style={{
+              position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
+              background: activeSubtheme.sectionBg,
+              animation: 'catalogBgFade 0.55s ease forwards',
+            }}
+          />
+
+          {/* Layer 2: radial glows */}
+          <div
+            key={`bg-glow-${activeSubtheme.key}`}
+            style={{
+              position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none',
+              background: activeSubtheme.radialGlow,
+              animation: 'catalogBgFade 0.65s ease forwards',
+            }}
+          />
+
+          {/* Layer 3: subtle dot-matrix texture overlay */}
           <div style={{
-            position: 'absolute', top: 0, left: 0, right: 0, height: 3,
-            background: 'linear-gradient(90deg, transparent 0%, rgba(191,110,25,0.3) 15%, rgba(250,225,133,0.7) 50%, rgba(191,110,25,0.3) 85%, transparent 100%)',
+            position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.018,
+            backgroundImage: 'radial-gradient(circle, #6b4c1e 1px, transparent 1px)',
+            backgroundSize: '22px 22px',
           }} />
 
+          {/* Top accent bar — themed */}
+          <div
+            key={`top-bar-${activeSubtheme.key}`}
+            style={{
+              position: 'absolute', top: 0, left: 0, right: 0, height: 3, zIndex: 1,
+              background: activeSubtheme.topBarGradient,
+              animation: 'catalogBgFade 0.4s ease forwards',
+            }}
+          />
+
           <div style={{
+            position: 'relative', zIndex: 2,
             maxWidth: 1260, margin: '0 auto',
             padding: `0 clamp(0.75rem, 3vw, 1.75rem)`,
             boxSizing: 'border-box', width: '100%',
           }}>
-            <CatalogHeader />
+            <CatalogHeader accentColor={activeSubtheme.iconColor} />
 
             {/* Subtheme filter pills */}
             <SubthemeFilterPills
               selectedSubtheme={selectedSubtheme}
-              onSubthemeSelect={(val) => {
-                const el = document.getElementById('classes-section');
-                if (el) {
-                  const y = el.getBoundingClientRect().top + window.scrollY - (isMobile ? 100 : 140);
-                  const distance = Math.abs(window.scrollY - y);
-                  const duration = distance > 100 ? 500 : 50;
-                  window.scrollTo({ top: y, behavior: 'smooth' });
-                  setTimeout(() => {
-                    setSelectedSubtheme(val);
-                  }, duration);
-                } else {
-                  setSelectedSubtheme(val);
-                }
-              }}
+              onSubthemeSelect={(val) => setSelectedSubtheme(val)}
               isMobile={isMobile}
             />
 
@@ -589,7 +687,7 @@ export default function Home({
                   scrollbarWidth: 'thin',
                   scrollbarColor: 'rgba(191,110,25,0.25) transparent',
                 }}>
-                  <AccentLine />
+                  <AccentLine color={activeSubtheme.iconColor} />
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.1rem' }}>
                     <p style={{
                       fontFamily: "'Tropikal', 'Playfair Display', serif",
@@ -625,7 +723,8 @@ export default function Home({
                             <div style={{
                               position: 'absolute', left: -1, top: '18%', bottom: '18%',
                               width: 3, borderRadius: 99,
-                              background: 'linear-gradient(180deg, #fae185, #bf6e19, #8b4a06)',
+                              background: `linear-gradient(180deg, ${activeSubtheme.iconColor}, ${activeSubtheme.solidColor}88, ${activeSubtheme.iconColor})`,
+                              transition: 'background 0.5s ease',
                             }} />
                           )}
                           <DayBadge num={idx + 1} active={isActive} />
@@ -667,7 +766,7 @@ export default function Home({
                 {/* Mobile day selector */}
                 {isMobile && displayedDays.length > 0 && (
                   <div style={{ ...surface, padding: '1rem 1.1rem' }}>
-                    <AccentLine />
+                    <AccentLine color={activeSubtheme.iconColor} />
                     <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.75rem' }}>
                       <div style={{ flex: 1 }}>
                         <label style={{
@@ -795,7 +894,7 @@ export default function Home({
                           : surface.boxShadow,
                         transition: 'border-color 0.3s, box-shadow 0.3s',
                       }}>
-                        <AccentLine bright={isActive} />
+                        <AccentLine bright={isActive} color={isActive ? activeSubtheme.iconColor : undefined} />
                         <div style={{
                           padding: '1.4rem 1.6rem 1rem',
                           borderBottom: '1px solid rgba(191,110,25,0.15)',
@@ -906,7 +1005,6 @@ function ClassModal({ cls, onClose, isMobile, w }: {
 }) {
   const twoCol = w >= 640;
 
-  /* Find subtheme color for badge */
   const subthemeMeta = SUBTHEMES.find(s => s.key === cls.subtheme);
   const badgeColor = subthemeMeta?.iconColor ?? '#bf6e19';
   const badgeBorder = subthemeMeta?.borderColor ?? 'rgba(191,110,25,0.4)';
@@ -957,7 +1055,6 @@ function ClassModal({ cls, onClose, isMobile, w }: {
                   style={{ width: 30, height: 30, borderRadius: 8, objectFit: 'cover', border: '2px solid rgba(191,110,25,0.55)' }}
                   referrerPolicy="no-referrer" />
               )}
-              {/* Subtheme — display only, colored per theme */}
               {cls.subtheme && (
                 <span style={{
                   padding: '3px 10px', borderRadius: 6,
@@ -987,7 +1084,6 @@ function ClassModal({ cls, onClose, isMobile, w }: {
               </p>
             </div>
 
-            {/* Meta chips — Filipino cultural icons */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
               {[
                 { icon: <IconParaw size={15} />, label: 'Date & Time', val: `${cls.date} · ${cls.time}` },
@@ -1010,7 +1106,6 @@ function ClassModal({ cls, onClose, isMobile, w }: {
               ))}
             </div>
 
-            {/* Description */}
             <div style={{ borderTop: '1px solid rgba(191,110,25,0.2)', paddingTop: '1rem' }}>
               <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1rem', fontWeight: 700, color: '#2e1e08', marginBottom: '0.55rem' }}>
                 About this class
@@ -1020,7 +1115,6 @@ function ClassModal({ cls, onClose, isMobile, w }: {
               </p>
             </div>
 
-            {/* CTA */}
             <a href={cls.googleFormUrl || '#'} target="_blank" rel="noopener noreferrer"
               className="btn-leap-primary"
               style={{
