@@ -12,6 +12,17 @@ export function scrollToElement(elementId: string, offset = 104): void {
   window.scrollTo({ top: position, behavior: 'smooth' });
 }
 
+export function optimizeContentfulImage(
+  url: string,
+  { width, quality = 80, format = 'webp' }: { width?: number; quality?: number; format?: string } = {}
+): string {
+  if (!url || !url.includes('ctfassets.net')) return url;
+  const separator = url.includes('?') ? '&' : '?';
+  let params = `fm=${format}&q=${quality}`;
+  if (width) params += `&w=${width}`;
+  return `${url}${separator}${params}`;
+}
+
 /**
  * Scroll to top of page
  */

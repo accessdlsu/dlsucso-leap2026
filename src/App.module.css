@@ -1492,6 +1492,7 @@
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
+  min-height: 300px;
 }
 
 .footerContainer {

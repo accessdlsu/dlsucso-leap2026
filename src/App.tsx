@@ -2,20 +2,19 @@
    * @license
    * SPDX-License-Identifier: Apache-2.0
    */
+import {
+  auth, googleProvider, signInWithPopup, signOut, onAuthStateChanged
+} from './services/firebase';
 import { useState, useEffect, useRef, useMemo, Suspense, lazy, type CSSProperties, type ErrorInfo, type ReactNode, Component } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence, LazyMotion, domAnimation } from 'framer-motion';
 import {
   Calendar, MapPin, Users, ChevronRight, ChevronLeft,
   X, AlertCircle, LogIn,
   Edit, ArrowLeft, ExternalLink, Palette, Mail, Clock, ChevronUp,
   BookOpen, Wrench, Handshake, HeartPulse, ArrowDown
 } from 'lucide-react';
-
+import { optimizeContentfulImage } from './utils';
 import { contentfulClient } from './services/contentful';
-import {
-  auth, db, googleProvider, signInWithPopup, signOut,
-  onAuthStateChanged, doc, getDocFromServer, setDoc
-} from './services/firebase';
 import type { User as FirebaseUser } from "firebase/auth";
 
 const Home = lazy(() => import('./pages/Home'));
@@ -755,7 +754,7 @@ const MabuhayGreeting = () => {
   SCROLL INVITATION — minimalist chevron
 ══════════════════════════════════════════════════════ */
 const ScrollInvitation = ({ onClick }: { onClick: () => void }) => (
-  <motion.button
+  <m.button
     onClick={onClick}
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
@@ -774,7 +773,7 @@ const ScrollInvitation = ({ onClick }: { onClick: () => void }) => (
       minWidth: 'fit-content',
     }}
   >
-    <motion.div
+    <m.div
       animate={{ y: [0, 6, 0] }}
       transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
       style={{
@@ -805,8 +804,8 @@ const ScrollInvitation = ({ onClick }: { onClick: () => void }) => (
           filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.45))',
         }}
       />
-    </motion.div>
-  </motion.button>
+    </m.div>
+  </m.button>
 );
 
 const TOOLTIPS: Record<string, { label: string; desc: string }> = {
@@ -841,7 +840,7 @@ const NayonScene = () => {
     <>
       <AnimatePresence>
         {hovered && (
-          <motion.div
+          <m.div
             key={hovered}
             initial={{ opacity: 0, y: 8, scale: 0.92 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -864,7 +863,7 @@ const NayonScene = () => {
           >
             <p style={{ fontFamily: "'Playfair Display',serif", fontSize: 14, color: '#fae185', margin: 0, fontWeight: 700 }}>{TOOLTIPS[hovered]?.label}</p>
             <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 11, color: 'rgba(249,236,182,0.52)', margin: 0, marginTop: 2 }}>{TOOLTIPS[hovered]?.desc}</p>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -1302,7 +1301,7 @@ const AnimatedTagline = () => {
   }, []);
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.15 }}
@@ -1317,6 +1316,7 @@ const AnimatedTagline = () => {
         margin: '0 auto',
         padding: '0 0.5rem',
         boxSizing: 'border-box',
+        minHeight: 'clamp(80px, 12vw, 120px)',
       }}
     >
       <div className="leap-tagline-ornament" style={{
@@ -1391,7 +1391,7 @@ const AnimatedTagline = () => {
       </span>
 
       {done && (
-        <motion.span
+        <m.span
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
@@ -1406,7 +1406,7 @@ const AnimatedTagline = () => {
             padding: '0 0.5rem',
           }}>
           One Village · One Purpose
-        </motion.span>
+        </m.span>
       )}
 
       <div className="leap-tagline-ornament" style={{
@@ -1443,7 +1443,7 @@ const AnimatedTagline = () => {
             .leap-tagline-ornament { max-width: 240px !important; }
           }
         `}</style>
-    </motion.div>
+    </m.div>
   );
 };
 
@@ -1488,12 +1488,12 @@ const SubthemeAboutSection = ({ onScrollToClasses }: { onScrollToClasses: () => 
       {/* ── Modal (UNCHANGED) ── */}
       <AnimatePresence>
         {activeSubtheme && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => setActiveSubtheme(null)}
             style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(4,8,4,0.85)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(1rem,3vw,2rem)' }}
           >
-            <motion.div
+            <m.div
               initial={{ scale: 0.86, y: 28, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.92, y: 14, opacity: 0 }}
               transition={{ type: 'spring', damping: 26, stiffness: 300 }}
               onClick={e => e.stopPropagation()}
@@ -1521,8 +1521,8 @@ const SubthemeAboutSection = ({ onScrollToClasses }: { onScrollToClasses: () => 
               <p style={{ fontFamily: "'Tropikal','Playfair Display',serif", fontSize: 'clamp(0.8rem,1.7vw,0.92rem)', fontStyle: 'italic', color: themeColors[activeSubtheme].text, lineHeight: 1.65, opacity: 0.78 }}>
                 "{SUBTHEME_INFO[activeSubtheme]?.fil}"
               </p>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -1582,7 +1582,7 @@ const SubthemeAboutSection = ({ onScrollToClasses }: { onScrollToClasses: () => 
             <span style={{ flex: '0 1 80px', height: 1, background: 'linear-gradient(90deg,rgba(250,225,133,0.3),transparent)' }} />
           </div>
 
-          <motion.button
+          <m.button
             onClick={onScrollToClasses}
             animate={{ y: [0, 7, 0] }}
             transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
@@ -1592,7 +1592,7 @@ const SubthemeAboutSection = ({ onScrollToClasses }: { onScrollToClasses: () => 
               View Classes
             </span>
             <ArrowDown size={22} strokeWidth={2} style={{ color: 'rgba(250,225,133,0.82)', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.5))' }} />
-          </motion.button>
+          </m.button>
         </div>
       </section>
     </>
@@ -1790,9 +1790,10 @@ const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => v
             const mediaAsset = Array.isArray(pubMat) ? pubMat[0] : pubMat;
             let imgUrl = `https://placehold.co/812x510?text=No+Image+Found`;
             if (mediaAsset?.fields?.file?.url) {
-              imgUrl = mediaAsset.fields.file.url.startsWith('http')
+              const rawUrl = mediaAsset.fields.file.url.startsWith('http')
                 ? mediaAsset.fields.file.url
                 : `https:${mediaAsset.fields.file.url}`;
+              imgUrl = optimizeContentfulImage(rawUrl, { width: 800 });
             }
             let formattedDate = '', formattedTime = '';
             if (item.fields.mainEventStartDate) {
@@ -1823,7 +1824,9 @@ const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => v
               venue: item.fields.mainEventVenue || '',
               slots: item.fields.mainEventNumberOfSlots || 0,
               subtheme: item.fields.mainEventSubtheme || '',
-              orgLogo: orgLogoAsset?.fields?.file?.url ? `https:${orgLogoAsset.fields.file.url}` : null,
+              orgLogo: orgLogoAsset?.fields?.file?.url
+              ? optimizeContentfulImage(`https:${orgLogoAsset.fields.file.url}`, { width: 64 })
+              : null,
               googleFormUrl: item.fields.mainEventRegistrationLink || '',
               description: item.fields.mainEventDescription || ''
             };
@@ -1891,7 +1894,7 @@ const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => v
             const isLeft = slot === 0;
 
             return (
-              <motion.div
+              <m.div
                 key={`${event.id}-slot${slot}`}
                 onClick={() => goTo(eventIndex)}
                 initial={false}
@@ -1949,25 +1952,25 @@ const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => v
                           </div>
                         )}
                         {event.subtheme && (
-                          <motion.span
+                          <m.span
                             initial={{ opacity: 0, x: -8 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.22, duration: 0.32 }}
                             style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', background: 'rgba(20,30,25,0.92)', color: '#ffeaa3', padding: '0.2rem 0.55rem', borderRadius: 4, backdropFilter: 'blur(12px)', border: '1px solid rgba(250,225,133,0.35)', boxShadow: '0 2px 8px rgba(0,0,0,0.3)', textShadow: '0 1px 4px rgba(0,0,0,0.6)', maxWidth: 'clamp(80px, 22vw, 160px)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 1 }}>
                             {event.subtheme}
-                          </motion.span>
+                          </m.span>
                         )}
                       </div>
-                      <motion.div
+                      <m.div
                         initial={{ opacity: 0, x: 8 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.22, duration: 0.32 }}
                         style={{ fontFamily: "'DM Sans',sans-serif", fontSize: '0.55rem', fontWeight: 800, letterSpacing: '0.1em', background: 'rgba(0,0,0,0.72)', color: '#fae185', padding: '0.2rem 0.5rem', borderRadius: 4, backdropFilter: 'blur(10px)', border: '1px solid rgba(250,225,133,0.15)', boxShadow: '0 0 8px rgba(250,225,133,0.12)', flexShrink: 0, whiteSpace: 'nowrap' }}>
                         {event.slots} SLOTS
-                      </motion.div>
+                      </m.div>
                     </div>
 
-                    <motion.div
+                    <m.div
                       initial={{ opacity: 0, y: 18 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
@@ -2007,10 +2010,10 @@ const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => v
                           Learn More <ChevronRight size={11} />
                         </button>
                       </div>
-                    </motion.div>
+                    </m.div>
                   </>
                 )}
-              </motion.div>
+              </m.div>
             );
           })}
         </div>
@@ -2154,6 +2157,9 @@ const LeapApp = () => {
               return;
             }
             try {
+              const { doc, getDocFromServer, setDoc } = await import('firebase/firestore');
+              const { getDb } = await import('./services/firebase-lazy');
+              const db = await getDb();
               const userDoc = await getDocFromServer(doc(db, 'users', currentUser.uid));
               if (userDoc.exists()) {
                 setUserProfile(userDoc.data() as UserProfile);
@@ -2221,8 +2227,12 @@ const LeapApp = () => {
             id: item.sys.id, title: item.fields.title || '', org: item.fields.organizationInCharge || '',
             modality: item.fields.classModality || 'Face-to-Face', date: formattedDate, time: formattedTime,
             venue: item.fields.venue || '', slots: item.fields.numberOfSlots || 0, subtheme: item.fields.subtheme || '',
-            image: item.fields.posterPublishingMaterial?.fields?.file?.url ? `https:${item.fields.posterPublishingMaterial.fields.file.url}` : 'https://picsum.photos/seed/leap/400/250',
-            orgLogo: item.fields.organizationInChargeLogo?.fields?.file?.url ? `https:${item.fields.organizationInChargeLogo.fields.file.url}` : null,
+            image: item.fields.posterPublishingMaterial?.fields?.file?.url
+            ? optimizeContentfulImage(`https:${item.fields.posterPublishingMaterial.fields.file.url}`, { width: 480 })
+            : 'https://picsum.photos/seed/leap/400/250',
+            orgLogo: item.fields.organizationInChargeLogo?.fields?.file?.url
+            ? optimizeContentfulImage(`https:${item.fields.organizationInChargeLogo.fields.file.url}`, { width: 64 })
+            : null,
             googleFormUrl: item.fields.registrationLink || '',
             description: item.fields.description || 'No description provided for this class.'
           };
@@ -2302,6 +2312,9 @@ const LeapApp = () => {
     setSavedClassIds(newSavedIds);
 
     try {
+      const { doc, setDoc } = await import('firebase/firestore');
+      const { getDb } = await import('./services/firebase-lazy');
+      const db = await getDb();
       const updatedProfile = { ...userProfile, savedClasses: Array.from(newSavedIds) };
       await setDoc(doc(db, 'users', user.uid), updatedProfile, { merge: true });
       setUserProfile(updatedProfile);
@@ -2630,16 +2643,16 @@ const LeapApp = () => {
       <Fireflies />
 
       <div className={styles.heroContent}>
-        <motion.div
+        <m.div
           initial={{ opacity: 0, scale: 0.88, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="mb-4 fade-up"
         >
-          <img src={leapLogo} alt="LEAP 2026 — Isang Nayon, Isang Layunin" width="280" height="158" className={styles.heroLogo} />
-        </motion.div>
+          <img src={leapLogo} alt="LEAP 2026 — Isang Nayon, Isang Layunin" width="280" height="158" className={styles.heroLogo} loading="eager" fetchPriority="high" />
+        </m.div>
 
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
@@ -2648,7 +2661,7 @@ const LeapApp = () => {
           <AnimatedTagline />
 
           {!user && (
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.5 }}
@@ -2670,9 +2683,9 @@ const LeapApp = () => {
               >
                 <LogIn size={20} /> Sign In
               </button>
-            </motion.div>
+            </m.div>
           )}
-        </motion.div>
+        </m.div>
       </div>
 
       {hasAppAccess && currentView === 'home' && (
@@ -2888,7 +2901,7 @@ const LeapApp = () => {
         </svg>
 
         {/* Grand Editorial Header */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -2925,7 +2938,7 @@ const LeapApp = () => {
             <circle cx="234" cy="12" r="1.2" fill="rgba(80,40,10,0.7)" />
           </svg>
 
-        </motion.div>
+        </m.div>
 
         <div style={{
           position: 'absolute', left: '50%', top: '52%', transform: 'translate(-50%, -50%)',
@@ -3055,7 +3068,7 @@ const LeapApp = () => {
       <div className={styles.appContainer}>
         <AnimatePresence>
           {authError && (
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: -40, x: '-50%' }}
               animate={{ opacity: 1, y: 0, x: '-50%' }}
               exit={{ opacity: 0, y: -20, x: '-50%' }}
@@ -3066,7 +3079,7 @@ const LeapApp = () => {
               <button onClick={() => setAuthError(null)} style={{ background: 'transparent', border: 'none', color: '#fae185', cursor: 'pointer', padding: 0, display: 'flex', marginLeft: '0.5rem' }}>
                 <X size={16} />
               </button>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
         <nav className={`fixed top-0 w-full z-50 transition-all duration-300 py-5`}
@@ -3107,8 +3120,8 @@ const LeapApp = () => {
       {/* Search Modal */}
       <AnimatePresence>
         {isSearchModalOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2000, background: 'rgba(8,10,8,0.7)', backdropFilter: 'blur(4px)' }} onClick={() => setIsSearchModalOpen(false)}>
-            <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }} onClick={(e) => e.stopPropagation()} style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 2001, background: '#fdf7e8', borderRadius: '1.5rem 1.5rem 0 0', padding: '1.5rem 1rem', maxHeight: '85vh', overflow: 'auto' }}>
+          <m.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2000, background: 'rgba(8,10,8,0.7)', backdropFilter: 'blur(4px)' }} onClick={() => setIsSearchModalOpen(false)}>
+            <m.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 30, stiffness: 300 }} onClick={(e) => e.stopPropagation()} style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 2001, background: '#fdf7e8', borderRadius: '1.5rem 1.5rem 0 0', padding: '1.5rem 1rem', maxHeight: '85vh', overflow: 'auto' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', fontWeight: 700, color: '#3a2a10', margin: 0 }}>Search & Filter</h2>
                 <button onClick={() => setIsSearchModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7c6040' }}><X size={24} /></button>
@@ -3164,8 +3177,8 @@ const LeapApp = () => {
 
               {/* Close Button */}
               <button onClick={() => setIsSearchModalOpen(false)} style={{ width: '100%', padding: '0.95rem', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #fae185 0%, #de9a49 55%, #c07830 100%)', color: '#1a1008', fontFamily: "'DM Sans', sans-serif", fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}>Apply & Close</button>
-            </motion.div>
-          </motion.div>
+            </m.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -3208,7 +3221,7 @@ const LeapApp = () => {
 
       <AnimatePresence>
         {showBackToTop && !viewingClass && (
-          <motion.button
+          <m.button
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
@@ -3218,7 +3231,7 @@ const LeapApp = () => {
           >
             <ChevronUp size={14} />
             Top
-          </motion.button>
+          </m.button>
         )}
       </AnimatePresence>
 
@@ -3228,5 +3241,11 @@ const LeapApp = () => {
 };
 
 export default function App() {
-  return <ErrorBoundary><LeapApp /></ErrorBoundary>;
+  return (
+    <LazyMotion features={domAnimation} strict>
+      <ErrorBoundary>
+        <LeapApp />
+      </ErrorBoundary>
+    </LazyMotion>
+  );
 }
