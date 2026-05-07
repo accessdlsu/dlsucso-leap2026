@@ -1,7 +1,16 @@
-import { motion } from 'framer-motion';
-import { Search, Calendar, MapPin, Users, ChevronRight, ChevronLeft, Info, X } from 'lucide-react';
-import type { ReactNode } from 'react';
-import type { User as FirebaseUser } from 'firebase/auth';
+import { motion } from "framer-motion";
+import {
+  Search,
+  Calendar,
+  MapPin,
+  Users,
+  ChevronRight,
+  ChevronLeft,
+  Info,
+  X,
+} from "lucide-react";
+import type { ReactNode } from "react";
+import type { User as FirebaseUser } from "firebase/auth";
 
 interface LeapClass {
   id: string;
@@ -23,8 +32,10 @@ interface ClassesPageProps {
   user: FirebaseUser | null;
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  sortBy: 'title-asc' | 'title-desc' | 'slots-desc' | 'slots-asc';
-  onSortChange: (sort: 'title-asc' | 'title-desc' | 'slots-desc' | 'slots-asc') => void;
+  sortBy: "title-asc" | "title-desc" | "slots-desc" | "slots-asc";
+  onSortChange: (
+    sort: "title-asc" | "title-desc" | "slots-desc" | "slots-asc",
+  ) => void;
   filteredAndSortedClasses: LeapClass[];
   uniqueDays: string[];
   selectedDay: string | null;
@@ -48,26 +59,34 @@ const PageWrapper = ({ children }: PageWrapperProps) => (
     transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
     style={{
       flexGrow: 1,
-      background: 'linear-gradient(180deg, #fffdf6 0%, #fff9eb 100%)',
-      width: '100%',
-      maxWidth: '100vw',
-      overflowX: 'hidden',
-      boxSizing: 'border-box',
+      background: "linear-gradient(180deg, #fffdf6 0%, #fff9eb 100%)",
+      width: "100%",
+      maxWidth: "100vw",
+      overflowX: "hidden",
+      boxSizing: "border-box",
     }}
   >
     {children}
   </motion.div>
 );
 
-const PageHero = ({ title, subtitle, accent }: { title: string; subtitle: string; accent: string }) => (
+const PageHero = ({
+  title,
+  subtitle,
+  accent,
+}: {
+  title: string;
+  subtitle: string;
+  accent: string;
+}) => (
   <div
     className="page-hero"
     style={{
-      paddingTop: 'clamp(6rem, 12vw, 10rem)',
-      paddingBottom: 'clamp(2rem, 4vw, 4rem)',
-      textAlign: 'center',
-      position: 'relative',
-      overflow: 'hidden',
+      paddingTop: "clamp(6rem, 12vw, 10rem)",
+      paddingBottom: "clamp(2rem, 4vw, 4rem)",
+      textAlign: "center",
+      position: "relative",
+      overflow: "hidden",
     }}
   >
     <div className="page-hero-glow" />
@@ -77,12 +96,12 @@ const PageHero = ({ title, subtitle, accent }: { title: string; subtitle: string
       transition={{ delay: 0.1 }}
       style={{
         fontFamily: "'DM Sans',sans-serif",
-        fontSize: '0.7rem',
+        fontSize: "0.7rem",
         fontWeight: 700,
-        letterSpacing: '0.3em',
-        textTransform: 'uppercase',
-        color: '#de9a49',
-        marginBottom: '1rem',
+        letterSpacing: "0.3em",
+        textTransform: "uppercase",
+        color: "#de9a49",
+        marginBottom: "1rem",
       }}
     >
       {accent}
@@ -110,8 +129,8 @@ const PageHero = ({ title, subtitle, accent }: { title: string; subtitle: string
       style={{
         width: 60,
         height: 2,
-        background: 'linear-gradient(90deg,transparent,#de9a49,transparent)',
-        margin: '2rem auto 0',
+        background: "linear-gradient(90deg,transparent,#de9a49,transparent)",
+        margin: "2rem auto 0",
       }}
     />
   </div>
@@ -135,7 +154,7 @@ export default function Classes({
   renderClassCard,
 }: ClassesPageProps) {
   const ITEMS_PER_PAGE = 6;
-  const dateFilteredClasses = selectedDay 
+  const dateFilteredClasses = selectedDay
     ? filteredAndSortedClasses.filter((c) => c.date === selectedDay)
     : filteredAndSortedClasses;
   const totalPages = Math.ceil(dateFilteredClasses.length / ITEMS_PER_PAGE);
@@ -146,7 +165,11 @@ export default function Classes({
   return (
     <PageWrapper>
       {/* ── HERO ── */}
-      <div style={{ background: 'linear-gradient(180deg, #fffdf6 0%, #fff9eb 100%)' }}>
+      <div
+        style={{
+          background: "linear-gradient(180deg, #fffdf6 0%, #fff9eb 100%)",
+        }}
+      >
         <PageHero
           title="All Classes"
           subtitle="Choose from 200+ workshops, talks, and experiences"
@@ -157,52 +180,70 @@ export default function Classes({
       {/* ── MAIN CONTENT ── */}
       <main
         style={{
-          width: '100%',
-          maxWidth: '100vw',
-          overflowX: 'hidden',
-          boxSizing: 'border-box',
-          padding: '0 clamp(0.75rem, 3vw, 1.5rem) 6rem',
-          background: 'transparent',
+          width: "100%",
+          maxWidth: "100vw",
+          overflowX: "hidden",
+          boxSizing: "border-box",
+          padding: "0 clamp(0.75rem, 3vw, 1.5rem) 6rem",
+          background: "transparent",
         }}
       >
-        <div style={{ maxWidth: '72rem', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-
+        <div
+          style={{
+            maxWidth: "72rem",
+            margin: "0 auto",
+            width: "100%",
+            boxSizing: "border-box",
+          }}
+        >
           {/* ── NOT SIGNED IN ── */}
           {!user ? (
             <div
               className="leap-info-card"
               style={{
-                padding: 'clamp(2rem, 5vw, 3rem)',
-                borderRadius: '1.5rem',
-                textAlign: 'center',
-                maxWidth: '36rem',
-                margin: '3rem auto',
+                padding: "clamp(2rem, 5vw, 3rem)",
+                borderRadius: "1.5rem",
+                textAlign: "center",
+                maxWidth: "36rem",
+                margin: "3rem auto",
               }}
             >
               <div
                 className="leap-detail-icon-wrap"
-                style={{ width: 64, height: 64, margin: '0 auto 1.5rem' }}
+                style={{ width: 64, height: 64, margin: "0 auto 1.5rem" }}
               >
                 <Info size={32} />
               </div>
               <h3
                 style={{
                   fontFamily: "'Playfair Display', serif",
-                  fontSize: 'clamp(1.3rem, 3vw, 1.75rem)',
+                  fontSize: "clamp(1.3rem, 3vw, 1.75rem)",
                   fontWeight: 700,
-                  color: '#334b46',
-                  marginBottom: '0.75rem',
+                  color: "#334b46",
+                  marginBottom: "0.75rem",
                 }}
               >
                 Sign in to browse classes
               </h3>
-              <p style={{ color: '#7c6b4b', marginBottom: '2rem', fontSize: '1rem', lineHeight: 1.7 }}>
-                You must be signed in with your DLSU account to view and register for LEAP classes.
+              <p
+                style={{
+                  color: "#7c6b4b",
+                  marginBottom: "2rem",
+                  fontSize: "1rem",
+                  lineHeight: 1.7,
+                }}
+              >
+                You must be signed in with your DLSU account to view and
+                register for LEAP classes.
               </p>
               <button
                 onClick={onSignIn}
                 className="btn-leap-primary"
-                style={{ padding: '0.95rem 2.5rem', borderRadius: '1rem', fontSize: '1rem' }}
+                style={{
+                  padding: "0.95rem 2.5rem",
+                  borderRadius: "1rem",
+                  fontSize: "1rem",
+                }}
               >
                 Sign In Now
               </button>
@@ -214,28 +255,36 @@ export default function Classes({
                 id="classes-sticky-filters"
                 className="classes-sticky-filter"
                 style={{
-                  position: 'sticky',
-                  top: '5.35rem',
+                  position: "sticky",
+                  top: "5.35rem",
                   zIndex: 45,
-                  padding: 'clamp(0.9rem, 2.2vw, 1.25rem)',
-                  borderRadius: '1rem',
-                  background: 'linear-gradient(145deg, rgba(255,252,241,0.96), rgba(253,247,228,0.94))',
-                  border: '1px solid rgba(222,154,73,0.28)',
-                  boxShadow: '0 14px 34px rgba(51,75,70,0.08), inset 0 1px 0 rgba(255,255,255,0.84)',
-                  backdropFilter: 'blur(8px)',
-                  marginBottom: '2rem',
-                  width: '100%',
-                  boxSizing: 'border-box',
+                  padding: "clamp(0.9rem, 2.2vw, 1.25rem)",
+                  borderRadius: "1rem",
+                  background:
+                    "linear-gradient(145deg, rgba(255,252,241,0.96), rgba(253,247,228,0.94))",
+                  border: "1px solid rgba(222,154,73,0.28)",
+                  boxShadow:
+                    "0 14px 34px rgba(51,75,70,0.08), inset 0 1px 0 rgba(255,255,255,0.84)",
+                  backdropFilter: "blur(8px)",
+                  marginBottom: "2rem",
+                  width: "100%",
+                  boxSizing: "border-box",
                 }}
               >
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.75rem",
+                  }}
+                >
                   {/* Search row */}
                   <div
                     style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.75rem',
-                      width: '100%',
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.75rem",
+                      width: "100%",
                     }}
                   >
                     <style>{`
@@ -280,17 +329,28 @@ export default function Classes({
                     `}</style>
                     <div
                       className="classes-search-row"
-                      style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%' }}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0.75rem",
+                        width: "100%",
+                      }}
                     >
-                      <div style={{ position: 'relative', flexGrow: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          position: "relative",
+                          flexGrow: 1,
+                          minWidth: 0,
+                        }}
+                      >
                         <Search
                           style={{
-                            position: 'absolute',
-                            left: '1rem',
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            color: '#7c6b4b',
-                            pointerEvents: 'none',
+                            position: "absolute",
+                            left: "1rem",
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            color: "#7c6b4b",
+                            pointerEvents: "none",
                           }}
                           size={18}
                         />
@@ -298,7 +358,14 @@ export default function Classes({
                           type="text"
                           placeholder="Search classes, orgs, or topics…"
                           className="leap-search"
-                          style={{ width: '100%', paddingLeft: '3rem', paddingRight: '1rem', paddingTop: '0.875rem', paddingBottom: '0.875rem', boxSizing: 'border-box' }}
+                          style={{
+                            width: "100%",
+                            paddingLeft: "3rem",
+                            paddingRight: "1rem",
+                            paddingTop: "0.875rem",
+                            paddingBottom: "0.875rem",
+                            boxSizing: "border-box",
+                          }}
                           value={searchQuery}
                           onChange={(e) => onSearchChange(e.target.value)}
                         />
@@ -306,11 +373,21 @@ export default function Classes({
                       <select
                         value={sortBy}
                         onChange={(e) =>
-                          onSortChange(e.target.value as 'title-asc' | 'title-desc' | 'slots-desc' | 'slots-asc')
+                          onSortChange(
+                            e.target.value as
+                              | "title-asc"
+                              | "title-desc"
+                              | "slots-desc"
+                              | "slots-asc",
+                          )
                         }
                         aria-label="Sort classes"
                         className="leap-select classes-sort-select"
-                        style={{ padding: '0.875rem 1.25rem', flexShrink: 0, boxSizing: 'border-box' }}
+                        style={{
+                          padding: "0.875rem 1.25rem",
+                          flexShrink: 0,
+                          boxSizing: "border-box",
+                        }}
                       >
                         <option value="title-asc">Title (A–Z)</option>
                         <option value="title-desc">Title (Z–A)</option>
@@ -324,26 +401,29 @@ export default function Classes({
                   <div
                     className="classes-date-row"
                     style={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      gap: '0.5rem',
-                      width: '100%',
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: "0.5rem",
+                      width: "100%",
                     }}
                   >
                     <button
                       className="classes-date-pill"
                       onClick={() => onDaySelect(null)}
                       style={{
-                        padding: '0.4rem 1rem',
-                        borderRadius: '999px',
-                        fontSize: '0.8rem',
+                        padding: "0.4rem 1rem",
+                        borderRadius: "999px",
+                        fontSize: "0.8rem",
                         fontWeight: 600,
                         fontFamily: "'DM Sans', sans-serif",
-                        border: 'none',
-                        cursor: 'pointer',
-                        transition: 'all 0.18s',
-                        background: selectedDay === null ? '#de9a49' : 'rgba(249,236,182,0.5)',
-                        color: selectedDay === null ? '#1a1008' : '#7c6b4b',
+                        border: "none",
+                        cursor: "pointer",
+                        transition: "all 0.18s",
+                        background:
+                          selectedDay === null
+                            ? "#de9a49"
+                            : "rgba(249,236,182,0.5)",
+                        color: selectedDay === null ? "#1a1008" : "#7c6b4b",
                       }}
                     >
                       All Dates
@@ -354,16 +434,19 @@ export default function Classes({
                         className="classes-date-pill"
                         onClick={() => onDaySelect(day)}
                         style={{
-                          padding: '0.4rem 1rem',
-                          borderRadius: '999px',
-                          fontSize: '0.8rem',
+                          padding: "0.4rem 1rem",
+                          borderRadius: "999px",
+                          fontSize: "0.8rem",
                           fontWeight: 600,
                           fontFamily: "'DM Sans', sans-serif",
-                          border: 'none',
-                          cursor: 'pointer',
-                          transition: 'all 0.18s',
-                          background: selectedDay === day ? '#de9a49' : 'rgba(249,236,182,0.5)',
-                          color: selectedDay === day ? '#1a1008' : '#7c6b4b',
+                          border: "none",
+                          cursor: "pointer",
+                          transition: "all 0.18s",
+                          background:
+                            selectedDay === day
+                              ? "#de9a49"
+                              : "rgba(249,236,182,0.5)",
+                          color: selectedDay === day ? "#1a1008" : "#7c6b4b",
                         }}
                       >
                         {day}
@@ -374,23 +457,25 @@ export default function Classes({
               </section>
 
               {/* ── RESULTS COUNT ── */}
-              <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
+              <div style={{ marginBottom: "1.5rem", textAlign: "center" }}>
                 <p
                   style={{
                     fontFamily: "'DM Sans', sans-serif",
-                    fontSize: '0.85rem',
-                    color: '#7c6b4b',
+                    fontSize: "0.85rem",
+                    color: "#7c6b4b",
                     fontWeight: 500,
                   }}
                 >
-                  Showing {Math.min(startIdx + 1, dateFilteredClasses.length)}–{Math.min(endIdx, dateFilteredClasses.length)} of {dateFilteredClasses.length} classes
+                  Showing {Math.min(startIdx + 1, dateFilteredClasses.length)}–
+                  {Math.min(endIdx, dateFilteredClasses.length)} of{" "}
+                  {dateFilteredClasses.length} classes
                 </p>
               </div>
 
               {/* ── CLASSES GRID ── */}
               {dateFilteredClasses.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>
-                  <p style={{ color: '#7c6b4b', fontSize: '1.1rem' }}>
+                <div style={{ textAlign: "center", padding: "4rem 1rem" }}>
+                  <p style={{ color: "#7c6b4b", fontSize: "1.1rem" }}>
                     No classes match your filters. Try adjusting your search.
                   </p>
                 </div>
@@ -411,38 +496,55 @@ export default function Classes({
                       .classes-grid { grid-template-columns: repeat(3, 1fr); }
                     }
                   `}</style>
-                  <div className="classes-grid" style={{ marginBottom: '2rem' }}>
-                    {paginatedClasses.map((item, index) => renderClassCard(item, index))}
+                  <div
+                    className="classes-grid"
+                    style={{ marginBottom: "2rem" }}
+                  >
+                    {paginatedClasses.map((item, index) =>
+                      renderClassCard(item, index),
+                    )}
                   </div>
 
                   {/* ── PAGINATION ── */}
                   {totalPages > 1 && (
                     <div
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.75rem',
-                        padding: '2rem 0',
-                        flexWrap: 'wrap',
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "0.75rem",
+                        padding: "2rem 0",
+                        flexWrap: "wrap",
                       }}
                     >
                       <button
-                        onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+                        onClick={() =>
+                          onPageChange(Math.max(1, currentPage - 1))
+                        }
                         disabled={currentPage === 1}
                         className="leap-page-btn"
                         style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.4rem',
-                          padding: '0.6rem 1.1rem',
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.4rem",
+                          padding: "0.6rem 1.1rem",
                         }}
                       >
                         <ChevronLeft size={16} /> Prev
                       </button>
 
-                      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "0.4rem",
+                          flexWrap: "wrap",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {Array.from(
+                          { length: totalPages },
+                          (_, i) => i + 1,
+                        ).map((page) => (
                           <button
                             key={page}
                             onClick={() => onPageChange(page)}
@@ -451,11 +553,14 @@ export default function Classes({
                               width: 38,
                               height: 38,
                               padding: 0,
-                              borderRadius: '0.5rem',
+                              borderRadius: "0.5rem",
                               fontWeight: 700,
-                              background: currentPage === page ? '#de9a49' : undefined,
-                              color: currentPage === page ? '#1a1008' : undefined,
-                              borderColor: currentPage === page ? '#de9a49' : undefined,
+                              background:
+                                currentPage === page ? "#de9a49" : undefined,
+                              color:
+                                currentPage === page ? "#1a1008" : undefined,
+                              borderColor:
+                                currentPage === page ? "#de9a49" : undefined,
                             }}
                           >
                             {page}
@@ -464,14 +569,16 @@ export default function Classes({
                       </div>
 
                       <button
-                        onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+                        onClick={() =>
+                          onPageChange(Math.min(totalPages, currentPage + 1))
+                        }
                         disabled={currentPage === totalPages}
                         className="leap-page-btn"
                         style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.4rem',
-                          padding: '0.6rem 1.1rem',
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.4rem",
+                          padding: "0.6rem 1.1rem",
                         }}
                       >
                         Next <ChevronRight size={16} />
@@ -493,17 +600,17 @@ export default function Classes({
           exit={{ opacity: 0 }}
           onClick={() => onClassSelect(null)}
           style={{
-            position: 'fixed',
+            position: "fixed",
             inset: 0,
             zIndex: 1100,
-            height: '100dvh',
-            overflow: 'hidden',
-            background: 'rgba(8, 10, 8, 0.78)',
-            backdropFilter: 'blur(6px)',
-            WebkitBackdropFilter: 'blur(6px)',
-            padding: 'clamp(0.5rem, 2vw, 1.5rem)',
-            display: 'grid',
-            placeItems: 'center',
+            height: "100dvh",
+            overflow: "hidden",
+            background: "rgba(8, 10, 8, 0.78)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            padding: "clamp(0.5rem, 2vw, 1.5rem)",
+            display: "grid",
+            placeItems: "center",
           }}
         >
           <motion.div
@@ -512,39 +619,39 @@ export default function Classes({
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: '#fffdf6',
-              border: '1px solid rgba(224,183,136,0.34)',
+              background: "#fffdf6",
+              border: "1px solid rgba(224,183,136,0.34)",
               borderRadius: 18,
-              boxShadow: '0 24px 64px rgba(51,75,70,0.18)',
-              width: 'min(1040px, 96vw)',
-              maxHeight: 'calc(100dvh - 2rem)',
-              overflow: 'auto',
-              position: 'relative',
+              boxShadow: "0 24px 64px rgba(51,75,70,0.18)",
+              width: "min(1040px, 96vw)",
+              maxHeight: "calc(100dvh - 2rem)",
+              overflow: "auto",
+              position: "relative",
               margin: 0,
-              display: 'flex',
-              flexDirection: 'column',
+              display: "flex",
+              flexDirection: "column",
             }}
           >
             {/* Close button */}
             <button
               onClick={() => onClassSelect(null)}
               style={{
-                position: 'absolute',
+                position: "absolute",
                 top: 14,
                 right: 14,
                 zIndex: 10,
-                background: 'rgba(255,252,241,0.96)',
-                border: '1px solid rgba(224,183,136,0.3)',
-                borderRadius: '999px',
+                background: "rgba(255,252,241,0.96)",
+                border: "1px solid rgba(224,183,136,0.3)",
+                borderRadius: "999px",
                 width: 36,
                 height: 36,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: '#334b46',
-                boxShadow: '0 2px 8px rgba(51,75,70,0.12)',
-                transition: 'background 0.2s',
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                color: "#334b46",
+                boxShadow: "0 2px 8px rgba(51,75,70,0.12)",
+                transition: "background 0.2s",
               }}
               aria-label="Close"
             >
@@ -554,10 +661,10 @@ export default function Classes({
             {/* Modal inner: image + detail — stacks on mobile */}
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: 'min(340px, 38%) 1fr',
-                overflow: 'auto',
-                maxHeight: 'calc(100dvh - 2rem)',
+                display: "grid",
+                gridTemplateColumns: "min(340px, 38%) 1fr",
+                overflow: "auto",
+                maxHeight: "calc(100dvh - 2rem)",
               }}
             >
               <style>{`
@@ -569,40 +676,46 @@ export default function Classes({
               <div
                 className="modal-grid"
                 style={{
-                  display: 'contents',
+                  display: "contents",
                 }}
               >
                 {/* Image panel */}
                 <div
                   className="modal-image"
                   style={{
-                    position: 'relative',
+                    position: "relative",
                     minHeight: 260,
-                    overflow: 'hidden',
+                    overflow: "hidden",
                     flexShrink: 0,
                   }}
                 >
                   <img
                     src={viewingClass.image}
                     alt={viewingClass.title}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
                     referrerPolicy="no-referrer"
                   />
                   <div
                     style={{
-                      position: 'absolute',
+                      position: "absolute",
                       inset: 0,
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.42) 0%, transparent 55%)',
+                      background:
+                        "linear-gradient(to top, rgba(0,0,0,0.42) 0%, transparent 55%)",
                     }}
                   />
                   <div
                     style={{
-                      position: 'absolute',
-                      top: '1.25rem',
-                      left: '1.25rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
+                      position: "absolute",
+                      top: "1.25rem",
+                      left: "1.25rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
                     }}
                   >
                     {viewingClass.orgLogo && (
@@ -613,14 +726,16 @@ export default function Classes({
                           width: 32,
                           height: 32,
                           borderRadius: 6,
-                          objectFit: 'cover',
-                          border: '2px solid rgba(222,154,73,0.5)',
+                          objectFit: "cover",
+                          border: "2px solid rgba(222,154,73,0.5)",
                         }}
                         referrerPolicy="no-referrer"
                       />
                     )}
                     {viewingClass.subtheme && (
-                      <span className="leap-detail-badge">{viewingClass.subtheme}</span>
+                      <span className="leap-detail-badge">
+                        {viewingClass.subtheme}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -628,22 +743,22 @@ export default function Classes({
                 {/* Detail panel */}
                 <div
                   style={{
-                    padding: 'clamp(1.25rem, 3vw, 2rem)',
-                    overflowY: 'auto',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1rem',
+                    padding: "clamp(1.25rem, 3vw, 2rem)",
+                    overflowY: "auto",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "1rem",
                   }}
                 >
                   <div>
                     <h1
                       style={{
                         fontFamily: "'Playfair Display', serif",
-                        fontSize: 'clamp(1.4rem, 3vw, 2.1rem)',
+                        fontSize: "clamp(1.4rem, 3vw, 2.1rem)",
                         fontWeight: 800,
-                        color: '#334b46',
+                        color: "#334b46",
                         lineHeight: 1.1,
-                        marginBottom: '0.5rem',
+                        marginBottom: "0.5rem",
                       }}
                     >
                       {viewingClass.title}
@@ -651,11 +766,11 @@ export default function Classes({
                     <p
                       style={{
                         fontFamily: "'DM Sans', sans-serif",
-                        fontSize: '0.8rem',
+                        fontSize: "0.8rem",
                         fontWeight: 700,
-                        letterSpacing: '0.1em',
-                        textTransform: 'uppercase',
-                        color: '#b05a32',
+                        letterSpacing: "0.1em",
+                        textTransform: "uppercase",
+                        color: "#b05a32",
                       }}
                     >
                       Organized by {viewingClass.org}
@@ -665,36 +780,128 @@ export default function Classes({
                   {/* Metadata grid */}
                   <div
                     style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                      gap: '0.75rem',
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fit, minmax(180px, 1fr))",
+                      gap: "0.75rem",
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                      <div className="leap-detail-icon-wrap" style={{ flexShrink: 0 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: "0.75rem",
+                      }}
+                    >
+                      <div
+                        className="leap-detail-icon-wrap"
+                        style={{ flexShrink: 0 }}
+                      >
                         <Calendar size={18} />
                       </div>
                       <div>
-                        <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7c6b4b', marginBottom: 2 }}>Date & Time</p>
-                        <p style={{ fontFamily: "'DM Sans',sans-serif", fontWeight: 600, color: '#334b46', fontSize: '0.9rem' }}>{viewingClass.date} · {viewingClass.time}</p>
+                        <p
+                          style={{
+                            fontFamily: "'DM Sans',sans-serif",
+                            fontSize: "0.65rem",
+                            fontWeight: 700,
+                            letterSpacing: "0.12em",
+                            textTransform: "uppercase",
+                            color: "#7c6b4b",
+                            marginBottom: 2,
+                          }}
+                        >
+                          Date & Time
+                        </p>
+                        <p
+                          style={{
+                            fontFamily: "'DM Sans',sans-serif",
+                            fontWeight: 600,
+                            color: "#334b46",
+                            fontSize: "0.9rem",
+                          }}
+                        >
+                          {viewingClass.date}
+                          {viewingClass.time ? `${viewingClass.time}` : ""}
+                        </p>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                      <div className="leap-detail-icon-wrap" style={{ flexShrink: 0 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: "0.75rem",
+                      }}
+                    >
+                      <div
+                        className="leap-detail-icon-wrap"
+                        style={{ flexShrink: 0 }}
+                      >
                         <MapPin size={18} />
                       </div>
                       <div>
-                        <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7c6b4b', marginBottom: 2 }}>Location</p>
-                        <p style={{ fontFamily: "'DM Sans',sans-serif", fontWeight: 600, color: '#334b46', fontSize: '0.9rem' }}>{viewingClass.venue} ({viewingClass.modality})</p>
+                        <p
+                          style={{
+                            fontFamily: "'DM Sans',sans-serif",
+                            fontSize: "0.65rem",
+                            fontWeight: 700,
+                            letterSpacing: "0.12em",
+                            textTransform: "uppercase",
+                            color: "#7c6b4b",
+                            marginBottom: 2,
+                          }}
+                        >
+                          Location
+                        </p>
+                        <p
+                          style={{
+                            fontFamily: "'DM Sans',sans-serif",
+                            fontWeight: 600,
+                            color: "#334b46",
+                            fontSize: "0.9rem",
+                          }}
+                        >
+                          {viewingClass.venue} ({viewingClass.modality})
+                        </p>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
-                      <div className="leap-detail-icon-wrap" style={{ flexShrink: 0 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: "0.75rem",
+                      }}
+                    >
+                      <div
+                        className="leap-detail-icon-wrap"
+                        style={{ flexShrink: 0 }}
+                      >
                         <Users size={18} />
                       </div>
                       <div>
-                        <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7c6b4b', marginBottom: 2 }}>Slots</p>
-                        <p style={{ fontFamily: "'DM Sans',sans-serif", fontWeight: 600, color: '#334b46', fontSize: '0.9rem' }}>{viewingClass.slots} participants</p>
+                        <p
+                          style={{
+                            fontFamily: "'DM Sans',sans-serif",
+                            fontSize: "0.65rem",
+                            fontWeight: 700,
+                            letterSpacing: "0.12em",
+                            textTransform: "uppercase",
+                            color: "#7c6b4b",
+                            marginBottom: 2,
+                          }}
+                        >
+                          Slots
+                        </p>
+                        <p
+                          style={{
+                            fontFamily: "'DM Sans',sans-serif",
+                            fontWeight: 600,
+                            color: "#334b46",
+                            fontSize: "0.9rem",
+                          }}
+                        >
+                          {viewingClass.slots} participants
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -702,17 +909,17 @@ export default function Classes({
                   {/* Description */}
                   <div
                     style={{
-                      borderTop: '1px solid rgba(229,207,171,0.6)',
-                      paddingTop: '1rem',
+                      borderTop: "1px solid rgba(229,207,171,0.6)",
+                      paddingTop: "1rem",
                     }}
                   >
                     <h3
                       style={{
                         fontFamily: "'Playfair Display', serif",
-                        fontSize: '1.05rem',
+                        fontSize: "1.05rem",
                         fontWeight: 700,
-                        color: '#334b46',
-                        marginBottom: '0.6rem',
+                        color: "#334b46",
+                        marginBottom: "0.6rem",
                       }}
                     >
                       About this class
@@ -720,30 +927,32 @@ export default function Classes({
                     <p
                       style={{
                         fontFamily: "'DM Sans', sans-serif",
-                        fontSize: '0.95rem',
+                        fontSize: "0.95rem",
                         lineHeight: 1.8,
-                        color: 'rgba(51,75,70,0.8)',
+                        color: "rgba(51,75,70,0.8)",
                       }}
                     >
-                      {viewingClass.description || 'No description provided.'}
+                      {viewingClass.description || "No description provided."}
                     </p>
                   </div>
 
                   {/* CTA */}
-                  <div style={{ paddingTop: '0.5rem', paddingBottom: '0.5rem' }}>
+                  <div
+                    style={{ paddingTop: "0.5rem", paddingBottom: "0.5rem" }}
+                  >
                     <a
-                      href={viewingClass.googleFormUrl || '#'}
+                      href={viewingClass.googleFormUrl || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn-leap-primary"
                       style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        padding: '0.9rem 2rem',
-                        borderRadius: '0.75rem',
-                        fontSize: '0.9rem',
-                        textDecoration: 'none',
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        padding: "0.9rem 2rem",
+                        borderRadius: "0.75rem",
+                        fontSize: "0.9rem",
+                        textDecoration: "none",
                       }}
                     >
                       Register Now <ChevronRight size={16} />

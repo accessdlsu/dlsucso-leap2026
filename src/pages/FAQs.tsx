@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Mail } from 'lucide-react';
+import { type LeapFaq } from '../services/leapify';
 import { PageWrapper, PageHero } from '../components/PageCommon';
 
-export default function FAQs() {
+export default function FAQs({ faqs }: { faqs: LeapFaq[] }) {
   const [open, setOpen] = useState<number | null>(null);
-  const faqs = [
+
+  const displayFaqs = faqs.length > 0 ? faqs.map(f => ({ q: f.question, a: f.answer })) : [
     { q: "Who can participate in LEAP classes?", a: "All currently enrolled undergraduate students of De La Salle University are eligible and encouraged to participate in LEAP classes. Some specialized workshops may have additional requirements listed on their registration forms." },
     { q: "How many classes can I register for?", a: "Students can register for a maximum of 3 classes to ensure everyone gets a chance to participate. Please choose your classes carefully to avoid schedule conflicts — slots are given on a first-come, first-served basis." },
     { q: "Are LEAP classes graded?", a: "No, LEAP classes are completely non-credit and non-graded. They are designed purely for personal enrichment, skill development, and the joy of learning something new." },
@@ -15,12 +17,13 @@ export default function FAQs() {
     { q: "Where do I get help if I have registration issues?", a: "Reach out to the LEAP Operations Team at leap@dlsu.edu.ph or visit us at the SPS Building, Room 302. We're available Monday–Friday, 9AM–5PM throughout the registration period." },
   ];
 
+
   return (
     <PageWrapper>
       <PageHero title="Frequently Asked Questions" subtitle="Everything you need to know before you register" accent="LEAP 2026 · Help Center" />
       <main className="container mx-auto px-4 pb-24 max-w-3xl">
         <div className="faq-list">
-          {faqs.map((faq, i) => {
+          {displayFaqs.map((faq, i) => {
             const answerId = `faq-answer-${i}`;
             const buttonId = `faq-question-${i}`;
             return (

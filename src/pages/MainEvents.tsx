@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, MapPin, Users, ExternalLink } from 'lucide-react';
 import { PageWrapper, PageHero } from '../components/PageCommon';
-import { contentfulClient } from '../services/contentful';
+import { leapifyApi } from '../services/leapify';
 
 const ACCENT_COLORS = ['#de9a49', '#4ab09a', '#b05a32', '#5ca0a8', '#803e2f'];
 
@@ -29,62 +29,43 @@ export default function MainEvents() {
 
   useEffect(() => {
     const fetchEvents = async () => {
-      if (!contentfulClient) { setLoading(false); return; }
       try {
-        const response = await contentfulClient.getEntries({
-          content_type: 'mainEvents',
-          include: 2,
-          order: ['fields.mainEventStartDate'] as any,
-        });
+        const allEvents = await leapifyApi.getEvents();
+        const spotlightEvents = allEvents.filter(e => e.isSpotlight || e.status === 'published');
 
-        const mapped: MainEvent[] = response.items.map((item: any, i: number) => {
-          const pubMat = item.fields.mainEventPosterPublishingMaterial;
-          const mediaAsset = Array.isArray(pubMat) ? pubMat[0] : pubMat;
-          const img = mediaAsset?.fields?.file?.url
-            ? (mediaAsset.fields.file.url.startsWith('http')
-                ? mediaAsset.fields.file.url
-                : `https:${mediaAsset.fields.file.url}`)
-            : 'https://placehold.co/420x260?text=No+Image';
-
-          const orgLogoMat = item.fields.mainEventOrganizationInChargeLogo;
-          const orgLogoAsset = Array.isArray(orgLogoMat) ? orgLogoMat[0] : orgLogoMat;
-          const orgLogo = orgLogoAsset?.fields?.file?.url
-            ? `https:${orgLogoAsset.fields.file.url}`
-            : null;
+        const mapped: MainEvent[] = spotlightEvents.map((ev, i: number) => {
           let date = '', time = '';
-          if (item.fields.mainEventStartDate) {
-            const start = new Date(item.fields.mainEventStartDate);
+          if (ev.dateTime) {
+            const start = new Date(ev.dateTime);
             date = start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
             time = start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-            if (item.fields.mainEventEndDate) {
-              const end = new Date(item.fields.mainEventEndDate);
-              const endDateStr = end.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-              if (date !== endDateStr) date += ` – ${endDateStr}`;
-              time += ` – ${end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
-            }
+          } else if (ev.startTime) {
+            const start = new Date(ev.startTime);
+            date = start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            time = start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
           }
 
           return {
-            id: item.sys.id,
-            title: item.fields.mainEventTitle || 'Untitled Event',
-            tag: item.fields.mainEventSubtheme || 'Main Event',
+            id: ev.id,
+            title: ev.title || 'Untitled Event',
+            tag: ev.theme?.name || 'Main Event',
             date,
             time,
-            venue: item.fields.mainEventVenue || '',
-            modality: item.fields.mainEventClassModality || 'Face-to-Face',
-            desc: item.fields.mainEventDescription || '',
-            img,
+            venue: ev.venue || '',
+            modality: 'Face-to-Face',
+            desc: ev.description || '',
+            img: ev.backgroundImageUrl || 'https://placehold.co/420x260?text=No+Image',
             accent: ACCENT_COLORS[i % ACCENT_COLORS.length],
-            org: item.fields.mainEventOrganizationInCharge || '',
-            orgLogo,
-            slots: item.fields.mainEventNumberOfSlots || 0,
-            registrationLink: item.fields.mainEventRegistrationLink || '',
+            org: ev.organization?.name || '',
+            orgLogo: ev.organization?.logoUrl || null,
+            slots: ev.maxSlots || 0,
+            registrationLink: ev.gformsUrl || '',
           };
         });
 
         setEvents(mapped);
       } catch (err) {
-        console.error('Contentful Error (MainEvents page):', err);
+        console.error('Leapify API Error (MainEvents page):', err);
       } finally {
         setLoading(false);
       }
@@ -107,7 +88,7 @@ export default function MainEvents() {
           </p>
         ) : (
           <div className="events-list">
-            {events.map((ev, i) => (
+            {events.map((ev: MainEvent, i: number) => (
               <motion.div
                 key={ev.id}
                 initial={{ opacity: 0, y: 28 }}

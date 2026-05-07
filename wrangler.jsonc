@@ -1,0 +1,44 @@
+{
+  /**
+   * DLSU CSO LEAP 2026 — Cloudflare Workers / Pages config
+   * Docs: https://developers.cloudflare.com/workers/wrangler/configuration/
+   */
+  "name": "dlsucso-leap2026",
+  "compatibility_date": "2025-01-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  /**
+   * Assets configuration for Workers.
+   * This binds the `dist` directory to `env.ASSETS` and serves it.
+   */
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+  },
+
+  /**
+   * Main worker entry – used only when running `wrangler dev` in worker mode
+   * or when deploying a standalone Worker (not Pages).
+   * For Cloudflare Pages deployments the file is picked up automatically
+   * if placed at `<root>/_worker.js` (after build) or via `pages_build_output_dir`.
+   */
+  "main": "worker/index.ts",
+
+  /**
+   * Environment variable bindings — secrets must be set via:
+   *   wrangler secret put <NAME>
+   * or stored in `.dev.vars` for local development.
+   *
+   * Plain (non-secret) vars go here; they are NOT for secrets.
+   */
+  "vars": {
+    "ENVIRONMENT": "production",
+  },
+
+  /**
+   * Observability — enable Workers Logpush / tail workers in the dashboard.
+   */
+  "observability": {
+    "enabled": true,
+  },
+}
