@@ -769,12 +769,13 @@ export default function Home({
                     <AccentLine color={activeSubtheme.iconColor} />
                     <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.75rem' }}>
                       <div style={{ flex: 1 }}>
-                        <label style={{
+                        <label htmlFor="day-select"style={{
                           display: 'block', fontSize: '0.58rem', fontWeight: 800,
                           textTransform: 'uppercase', letterSpacing: '0.18em',
                           color: '#bf6e19', marginBottom: '0.45rem',
                         }}>Select Day</label>
                         <select
+                          id="day-select"
                           value={activeDay || ''}
                           onChange={e => {
                             const day = e.target.value;
@@ -844,7 +845,7 @@ export default function Home({
                 ) : displayedDays.length === 0 ? (
                   <div style={{ ...surface, padding: '3rem 2rem', textAlign: 'center' }}>
                     <AccentLine />
-                    <p style={{ color: '#7a6040', fontSize: '0.95rem' }}>No classes available.</p>
+                    <p style={{ color: '#7a6040', fontSize: '0.95rem', minHeight: '100vh' }}>No classes available.</p>
                   </div>
 
                 ) : isMobile ? (
