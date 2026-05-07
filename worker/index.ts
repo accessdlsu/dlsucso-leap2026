@@ -60,7 +60,7 @@ const SECURITY_HEADERS: Record<string, string> = {
     // Firebase, Contentful image CDN, Google Fonts, placehold.co
     "img-src 'self' data: https: blob:",
     // Firebase Firestore & Storage WebSocket
-    "connect-src 'self' http://localhost:8787 http://127.0.0.1:8787 https://*.googleapis.com https://*.firebaseio.com https://*.contentful.com https://cdn.contentful.com wss://*.firebaseio.com",
+    "connect-src 'self' http://localhost:8787 http://127.0.0.1:8787 https://*.googleapis.com https://*.firebaseio.com https://*.contentful.com https://cdn.contentful.com wss://*.firebaseio.com https://leapify-console.accessdlsu.workers.dev",
     // Google Fonts + self
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
@@ -76,7 +76,10 @@ const HTML_CACHE = "public, max-age=0, must-revalidate";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function applyHeaders(response: Response, extra?: Record<string, string>): Response {
+function applyHeaders(
+  response: Response,
+  extra?: Record<string, string>,
+): Response {
   const headers = new Headers(response.headers);
 
   for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
@@ -111,7 +114,7 @@ function jsonResponse(data: unknown, status = 200): Response {
 async function handleApiRequest(
   request: Request,
   env: Env,
-  pathname: string
+  pathname: string,
 ): Promise<Response | null> {
   // GET /api/health — uptime / smoke-test endpoint
   if (pathname === "/api/health" && request.method === "GET") {
@@ -139,7 +142,7 @@ async function handleApiRequest(
     if (!spaceId || !token) {
       return jsonResponse(
         { error: "Contentful credentials not configured on the edge." },
-        503
+        503,
       );
     }
 
@@ -179,7 +182,11 @@ async function handleApiRequest(
 // ── Main Fetch Handler ────────────────────────────────────────────────────────
 
 export default {
-  async fetch(request: Request, env: Env, _ctx: ExecutionContext): Promise<Response> {
+  async fetch(
+    request: Request,
+    env: Env,
+    _ctx: ExecutionContext,
+  ): Promise<Response> {
     const url = new URL(request.url);
     const { pathname } = url;
 
@@ -207,7 +214,7 @@ export default {
       try {
         const indexRequest = new Request(
           new URL("/index.html", request.url).toString(),
-          request
+          request,
         );
         const fallback = await env.ASSETS.fetch(indexRequest);
         return applyHeaders(fallback, { "Cache-Control": HTML_CACHE });
