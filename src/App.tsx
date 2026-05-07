@@ -132,7 +132,7 @@ const LazySection = ({ children, minHeight = 600 }: { children: ReactNode; minHe
   }, []);
 
   return (
-    <div ref={ref} style={{ minHeight: visible ? undefined : minHeight }}>
+    <div ref={ref} style={{ minHeight: minHeight }}>
       {visible ? children : null}
     </div>
   );
@@ -857,7 +857,7 @@ const AnimatedTagline = () => {
         margin: '0 auto',
         padding: '0 0.5rem',
         boxSizing: 'border-box',
-        minHeight: 'clamp(80px, 12vw, 120px)',
+        minHeight: 'clamp(140px, 18vw, 180px)',
       }}
     >
       <div className="leap-tagline-ornament" style={{
@@ -930,7 +930,7 @@ const AnimatedTagline = () => {
           }} />
         )}
       </span>
-
+      <div style={{ minHeight: 'clamp(14px, 3vw, 20px)', display: 'flex', alignItems: 'center' }}></div>
       {done && (
         <m.span
           initial={{ opacity: 0, y: 4 }}
@@ -1769,7 +1769,7 @@ const LeapApp = () => {
             modality: item.fields.classModality || 'Face-to-Face', date: formattedDate, time: formattedTime,
             venue: item.fields.venue || '', slots: item.fields.numberOfSlots || 0, subtheme: item.fields.subtheme || '',
             image: item.fields.posterPublishingMaterial?.fields?.file?.url
-            ? optimizeContentfulImage(`https:${item.fields.posterPublishingMaterial.fields.file.url}`, { width: 480 })
+            ? optimizeContentfulImage(`https:${item.fields.posterPublishingMaterial.fields.file.url}`, { width: 300 })
             : 'https://picsum.photos/seed/leap/400/250',
             orgLogo: item.fields.organizationInChargeLogo?.fields?.file?.url
             ? optimizeContentfulImage(`https:${item.fields.organizationInChargeLogo.fields.file.url}`, { width: 64 })
@@ -1923,16 +1923,17 @@ const LeapApp = () => {
     </div>
   );
 
-  if (loading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.loadingContent}>
-          <div className="leap-spinner" />
-          <p className={styles.loadingText}>Loading LEAP 2026…</p>
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className={styles.loadingContainer}>
+  //       <div className={styles.loadingContent}>
+  //         <div className="leap-spinner" />
+  //         <p className={styles.loadingText}>Loading LEAP 2026…</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+  // PAKIBALIK IF IT BUGS
 
   if (isAdminView && userProfile?.role === 'admin') {
     return <ErrorBoundary><AdminDashboard /></ErrorBoundary>;
@@ -2190,16 +2191,16 @@ const LeapApp = () => {
           initial={{ opacity: 0, scale: 0.88, y: 16 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-4 fade-up"
+          className="mb-4"
         >
-          <img src={leapLogo} alt="LEAP 2026 — Isang Nayon, Isang Layunin" width="280" height="158" className={styles.heroLogo} loading="eager" fetchPriority="high" />
+          <img src={leapLogo} alt="LEAP 2026 — Isang Nayon, Isang Layunin" width="280" height="158" className={styles.heroLogo} loading="eager" fetchPriority="high" style={{ aspectRatio: '280 / 158' }} />
         </m.div>
 
         <m.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-4 fade-up delay-1"
+          className="mb-4"
         >
           <AnimatedTagline />
 
@@ -2733,50 +2734,52 @@ const LeapApp = () => {
         )}
       </AnimatePresence>
       {loading ? (
-      <div className={styles.loadingContainer} style={{ flex: 1 }}>
+      <div className={styles.loadingContainer} style={{ flex: 1, minHeight: '100vh' }}>
         <div className={styles.loadingContent}>
           <div className="leap-spinner" />
           <p className={styles.loadingText}>Loading LEAP 2026…</p>
         </div>
       </div>
     ) : (
-      <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', padding: '6rem 0' }}><div className="leap-spinner" /></div>}>
-        {currentView === 'home' && (
-          <Home
-            user={user} classes={classes}
-            filteredAndSortedClasses={filteredAndSortedClasses} uniqueDays={uniqueDays}
-            selectedDay={selectedDay} onDaySelect={(d) => { setSelectedDay(d); setCurrentPage(1); }}
-            viewingClass={viewingClass} onClassSelect={(c) => { setViewingClass(c) }}
-            onSignIn={handleSignIn} onHeroScroll={() => navigateTo('classes')}
-            HeroSection={HeroSection} HeroExtras={HeroExtras} renderClassCard={renderClassCard}
-          />
-        )}
-        {currentView === 'about' && <About />}
-        {currentView === 'major-events' && <MainEvents />}
-        {currentView === 'classes' && (
-          <Classes
-            user={user} searchQuery={searchQuery} onSearchChange={(q) => { setSearchQuery(q); setCurrentPage(1); }}
-            sortBy={sortBy} onSortChange={(s) => setSortBy(s)}
-            filteredAndSortedClasses={filteredAndSortedClasses} uniqueDays={uniqueDays}
-            selectedDay={selectedDay} onDaySelect={(d) => { setSelectedDay(d); setCurrentPage(1); }}
-            currentPage={currentPage} onPageChange={(p) => { setCurrentPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            viewingClass={viewingClass} onClassSelect={(c) => { setViewingClass(c) }}
-            onSignIn={handleSignIn} renderClassCard={renderClassCard}
-          />
-        )}
-        {currentView === 'saved-classes' && (
-          <SavedClasses
-            filteredAndSortedClasses={filteredAndSortedClasses}
-            savedClassIds={savedClassIds}
-            renderClassCard={renderClassCard}
-          />
-        )}
-        {currentView === 'faq' && <FAQs />}
-        {currentView === 'contact' && <Contact />}
-      </Suspense>
-       )}
+      <>
+        <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', padding: '6rem 0', minHeight: '100vh' }}><div className="leap-spinner" /></div>}>
+          {currentView === 'home' && (
+            <Home
+              user={user} classes={classes}
+              filteredAndSortedClasses={filteredAndSortedClasses} uniqueDays={uniqueDays}
+              selectedDay={selectedDay} onDaySelect={(d) => { setSelectedDay(d); setCurrentPage(1); }}
+              viewingClass={viewingClass} onClassSelect={(c) => { setViewingClass(c) }}
+              onSignIn={handleSignIn} onHeroScroll={() => navigateTo('classes')}
+              HeroSection={HeroSection} HeroExtras={HeroExtras} renderClassCard={renderClassCard}
+            />
+          )}
+          {currentView === 'about' && <About />}
+          {currentView === 'major-events' && <MainEvents />}
+          {currentView === 'classes' && (
+            <Classes
+              user={user} searchQuery={searchQuery} onSearchChange={(q) => { setSearchQuery(q); setCurrentPage(1); }}
+              sortBy={sortBy} onSortChange={(s) => setSortBy(s)}
+              filteredAndSortedClasses={filteredAndSortedClasses} uniqueDays={uniqueDays}
+              selectedDay={selectedDay} onDaySelect={(d) => { setSelectedDay(d); setCurrentPage(1); }}
+              currentPage={currentPage} onPageChange={(p) => { setCurrentPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              viewingClass={viewingClass} onClassSelect={(c) => { setViewingClass(c) }}
+              onSignIn={handleSignIn} renderClassCard={renderClassCard}
+            />
+          )}
+          {currentView === 'saved-classes' && (
+            <SavedClasses
+              filteredAndSortedClasses={filteredAndSortedClasses}
+              savedClassIds={savedClassIds}
+              renderClassCard={renderClassCard}
+            />
+          )}
+          {currentView === 'faq' && <FAQs />}
+          {currentView === 'contact' && <Contact />}
+        </Suspense>
 
-      <Footer logoImg={leapLogo} onNavigate={navigateTo as (view: string) => void} />
+        <Footer logoImg={leapLogo} onNavigate={navigateTo as (view: string) => void} />
+      </>
+    )}
 
       <AnimatePresence>
         {showBackToTop && !viewingClass && (
