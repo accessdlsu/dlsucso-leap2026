@@ -369,9 +369,9 @@ export default function Classes({
         @media (max-width: 768px) {
           .classes-sticky-filter {
             top: 4.85rem !important;
-            margin-bottom: 1.25rem !important;
-            border-radius: 0.9rem !important;
-            padding: 0.72rem !important;
+            margin-bottom: 1rem !important;
+            border-radius: 1rem !important;
+            padding: 1rem !important;
           }
           .classes-date-row {
             flex-wrap: nowrap !important;
@@ -610,13 +610,13 @@ export default function Classes({
                   position: 'sticky',
                   top: '5.35rem',
                   zIndex: 45,
-                  padding: 'clamp(0.9rem, 2.2vw, 1.25rem)',
-                  borderRadius: '1rem',
+                  padding: '1.25rem',
+                  borderRadius: '1.25rem',
                   background: 'linear-gradient(145deg, rgba(255,252,241,0.96), rgba(253,247,228,0.94))',
                   border: `1px solid ${activeSubtheme.borderColor}`,
                   boxShadow: '0 14px 34px rgba(51,75,70,0.08), inset 0 1px 0 rgba(255,255,255,0.84)',
                   backdropFilter: 'blur(8px)',
-                  marginBottom: '2rem',
+                  marginBottom: '1.25rem',
                   width: '100%',
                   boxSizing: 'border-box',
                   transition: 'border-color 0.5s ease',
@@ -656,7 +656,8 @@ export default function Classes({
                           style={{
                             width: '100%',
                             paddingLeft: '3rem', paddingRight: '1rem',
-                            paddingTop: '0.875rem', paddingBottom: '0.875rem',
+                            paddingTop: '0.85rem', paddingBottom: '0.85rem',
+                            borderRadius: '0.85rem',
                             boxSizing: 'border-box',
                           }}
                           value={searchQuery}
@@ -670,7 +671,7 @@ export default function Classes({
                         }
                         aria-label="Sort classes"
                         className="leap-select classes-sort-select"
-                        style={{ padding: '0.875rem 1.25rem', flexShrink: 0, boxSizing: 'border-box' }}
+                        style={{ padding: '0.85rem 1.25rem', borderRadius: '0.85rem', flexShrink: 0, boxSizing: 'border-box' }}
                       >
                         <option value="title-asc">Title (A–Z)</option>
                         <option value="title-desc">Title (Z–A)</option>
@@ -763,17 +764,19 @@ export default function Classes({
                       </div>
                     )}
                   </div>
+
+                  {/* ── SUBTHEME FILTER PILLS ── */}
+                  <div style={{ margin: '0.25rem -0.25rem -0.25rem', paddingBottom: '0.25rem' }}>
+                    <SubthemeFilterPills
+                      selectedSubtheme={selectedSubtheme}
+                      isMobile={isMobile}
+                      onSubthemeSelect={(val) => setSelectedSubtheme(val)}
+                    />
+                  </div>
                 </div>
               </section>
 
-              {/* ── SUBTHEME FILTER PILLS ── */}
-              <SubthemeFilterPills
-                selectedSubtheme={selectedSubtheme}
-                isMobile={isMobile}
-                onSubthemeSelect={(val) => setSelectedSubtheme(val)}
-              />
-
-              <div style={{ height: '0.5rem' }} />
+              <div style={{ height: '1.5rem' }} />
 
               {/* ── RESULTS COUNT ── */}
               <div style={{ marginBottom: '2.5rem', marginTop: '1rem', textAlign: 'center' }}>
