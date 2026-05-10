@@ -1923,18 +1923,6 @@ const LeapApp = () => {
     </div>
   );
 
-  // if (loading) {
-  //   return (
-  //     <div className={styles.loadingContainer}>
-  //       <div className={styles.loadingContent}>
-  //         <div className="leap-spinner" />
-  //         <p className={styles.loadingText}>Loading LEAP 2026…</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-  // PAKIBALIK IF IT BUGS
-
   if (isAdminView && userProfile?.role === 'admin') {
     return <ErrorBoundary><AdminDashboard /></ErrorBoundary>;
   }

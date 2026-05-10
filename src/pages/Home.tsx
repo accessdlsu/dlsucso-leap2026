@@ -844,9 +844,9 @@ export default function Home({
                   </div>
 
                 ) : displayedDays.length === 0 ? (
-                  <div style={{ ...surface, padding: '3rem 2rem', textAlign: 'center' }}>
+                  <div style={{ ...surface, padding: '3rem 2rem', textAlign: 'center', minHeight: '100vh' }}>
                     <AccentLine />
-                    <p style={{ color: '#7a6040', fontSize: '0.95rem', minHeight: '100vh' }}>No classes available.</p>
+                    <p style={{ color: '#7a6040', fontSize: '0.95rem' }}>No classes available.</p>
                   </div>
 
                 ) : isMobile ? (

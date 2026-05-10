@@ -1,6 +1,6 @@
 
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 
 const TOOLTIPS: Record<string, { label: string; desc: string }> = {
@@ -33,12 +33,12 @@ useParallaxMouse();
   const [hovered, setHovered] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  const handleMouseEnter = (key: string, e: React.MouseEvent) => {
+  const handleMouseEnter = (key: string, e: ReactMouseEvent) => {
     setHovered(key);
     setMousePos({ x: e.clientX, y: e.clientY });
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = (e: ReactMouseEvent) => {
     setMousePos({ x: e.clientX, y: e.clientY });
   };
 

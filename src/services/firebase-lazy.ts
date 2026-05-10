@@ -1,6 +1,9 @@
+import type { Firestore } from 'firebase/firestore';
+import type { FirebaseStorage } from 'firebase/storage';
+
 // Lazy-loaded Firebase services — only imported after auth
-let _db: any = null;
-let _storage: any = null;
+let _db: Firestore | null = null;
+let _storage: FirebaseStorage | null = null;
 
 export async function getDb() {
   if (!_db) {
@@ -13,9 +16,9 @@ export async function getDb() {
 
 export async function getStorage() {
   if (!_storage) {
-    const { getStorage } = await import('firebase/storage');
+    const { getStorage: getFirebaseStorage } = await import('firebase/storage');
     const { app } = await import('./firebase');
-    _storage = getStorage(app);
+    _storage = getFirebaseStorage(app);
   }
   return _storage;
 }
