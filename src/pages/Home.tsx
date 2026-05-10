@@ -312,11 +312,10 @@ interface SubthemeMeta {
   label: string;
   sublabel: string;
   bgColor: string;
-  solidColor: string;         // pure color for gradient math
+  solidColor: string;
   iconColor: string;
   borderColor: string;
   textColor: string;
-  /* multi-layer bg for the catalog section */
   sectionBg: string;
   topBarGradient: string;
   radialGlow: string;
@@ -503,6 +502,9 @@ export default function Home({
 
   const daySectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  // Ref to suppress scroll when only the subtheme filter is changing
+  const isSubthemeChange = useRef(false);
+
   const displayedDays = useMemo(() => uniqueDays, [uniqueDays]);
 
   const classesByDay = useMemo(() => {
@@ -523,6 +525,8 @@ export default function Home({
       setActiveDay(displayedDays[0]);
       onDaySelect(displayedDays[0]);
     }
+    // Reset the subtheme-change flag after the effect settles
+    isSubthemeChange.current = false;
   }, [activeDay, displayedDays, onDaySelect]);
 
   useEffect(() => {
@@ -542,6 +546,8 @@ export default function Home({
   }, [user, displayedDays, onDaySelect]);
 
   const scrollToDay = useCallback((day: string) => {
+    // Don't scroll when the call originates from a subtheme filter change
+    if (isSubthemeChange.current) return;
     const el = daySectionRefs.current[day];
     if (!el) return;
     window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 88, behavior: 'smooth' });
@@ -606,17 +612,9 @@ export default function Home({
             padding: isMobile ? '1.5rem 0 5rem' : '3rem 0 7rem',
             position: 'relative',
             minHeight: '100vh',
-            // Base warm parchment underneath everything
             background: '#fdf8ed',
           }}
         >
-          {/*
-            ── Layered theme background ──
-            Rendered as absolutely-positioned divs so we can
-            CSS-transition opacity independently per layer,
-            giving a smooth crossfade when the subtheme changes.
-          */}
-
           {/* Layer 1: directional gradient */}
           <div
             key={`bg-grad-${activeSubtheme.key}`}
@@ -662,10 +660,13 @@ export default function Home({
           }}>
             <CatalogHeader accentColor={activeSubtheme.iconColor} />
 
-            {/* Subtheme filter pills */}
+            {/* Subtheme filter pills — set ref flag before updating state */}
             <SubthemeFilterPills
               selectedSubtheme={selectedSubtheme}
-              onSubthemeSelect={(val) => setSelectedSubtheme(val)}
+              onSubthemeSelect={(val) => {
+                isSubthemeChange.current = true;
+                setSelectedSubtheme(val);
+              }}
               isMobile={isMobile}
             />
 
@@ -769,12 +770,13 @@ export default function Home({
                     <AccentLine color={activeSubtheme.iconColor} />
                     <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.75rem' }}>
                       <div style={{ flex: 1 }}>
-                        <label style={{
+                        <label htmlFor="day-select" style={{
                           display: 'block', fontSize: '0.58rem', fontWeight: 800,
                           textTransform: 'uppercase', letterSpacing: '0.18em',
                           color: '#bf6e19', marginBottom: '0.45rem',
                         }}>Select Day</label>
                         <select
+                          id="day-select"
                           value={activeDay || ''}
                           onChange={e => {
                             const day = e.target.value;
@@ -842,7 +844,7 @@ export default function Home({
                   </div>
 
                 ) : displayedDays.length === 0 ? (
-                  <div style={{ ...surface, padding: '3rem 2rem', textAlign: 'center' }}>
+                  <div style={{ ...surface, padding: '3rem 2rem', textAlign: 'center', minHeight: '100vh' }}>
                     <AccentLine />
                     <p style={{ color: '#7a6040', fontSize: '0.95rem' }}>No classes available.</p>
                   </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { auth, onAuthStateChanged, signOut as firebaseSignOut, doc, db, getDocFromServer, setDoc } from '../services/firebase';
+import { auth, onAuthStateChanged, signOut as firebaseSignOut } from '../services/firebase';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { UserProfile } from '../types';
 
@@ -26,6 +26,9 @@ export function useAuth(): {
 
         if (authUser) {
           try {
+            const { doc, getDocFromServer, setDoc } = await import('firebase/firestore');
+            const { getDb } = await import('../services/firebase-lazy');
+            const db = await getDb();
             const profileDocRef = doc(db, 'users', authUser.uid);
             const profileSnapshot = await getDocFromServer(profileDocRef);
 

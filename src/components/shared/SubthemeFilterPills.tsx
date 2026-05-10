@@ -1,4 +1,5 @@
 
+
 export const SubthemeFilterPills = ({
   selectedSubtheme,
   onSubthemeSelect,
@@ -118,8 +119,8 @@ export const SubthemeFilterPills = ({
         position: 'relative',
         overflowX: isMobile ? 'auto' : 'hidden',
         overflowY: 'hidden',
-        scrollSnapType: isMobile ? 'x mandatory' : 'none',
         WebkitOverflowScrolling: 'touch',
+        scrollBehavior: 'smooth',
       }}>
         <style>{`
           .hide-scrollbar::-webkit-scrollbar {
@@ -159,8 +160,9 @@ export const SubthemeFilterPills = ({
         {/* ALL CLASSES pill */}
         <button
           onClick={() => onSubthemeSelect(null)}
+          onMouseDown={(e) => e.preventDefault()}
+          type="button"
           style={{
-            scrollSnapAlign: 'start',
             position: 'relative',
             padding: '0.6rem 1.4rem',
             borderRadius: 999,
@@ -224,9 +226,10 @@ export const SubthemeFilterPills = ({
             <button
               key={s.key}
               onClick={() => onSubthemeSelect(isActive ? null : s.key)}
+              onMouseDown={(e) => e.preventDefault()}
+              type="button"
               title={s.key}
               style={{
-                scrollSnapAlign: 'start',
                 position: 'relative',
                 padding: '0.55rem 1.1rem',
                 borderRadius: 999,

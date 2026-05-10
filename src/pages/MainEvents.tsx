@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Calendar, Clock, MapPin, Users, ExternalLink } from 'lucide-react';
 import { PageWrapper } from '../components/PageCommon';
 import { contentfulClient } from '../services/contentful';
+import { optimizeContentfulImage } from '../utils';
 
 const ACCENT_COLORS = ['#de9a49', '#4ab09a', '#b05a32', '#5ca0a8', '#803e2f'];
 
@@ -40,17 +41,20 @@ export default function MainEvents() {
         const mapped: MainEvent[] = response.items.map((item: any, i: number) => {
           const pubMat = item.fields.mainEventPosterPublishingMaterial;
           const mediaAsset = Array.isArray(pubMat) ? pubMat[0] : pubMat;
-          const img = mediaAsset?.fields?.file?.url
-            ? (mediaAsset.fields.file.url.startsWith('http')
-                ? mediaAsset.fields.file.url
-                : `https:${mediaAsset.fields.file.url}`)
-            : 'https://placehold.co/420x260?text=No+Image';
+          const rawImg = mediaAsset?.fields?.file?.url
+          ? (mediaAsset.fields.file.url.startsWith('http')
+              ? mediaAsset.fields.file.url
+              : `https:${mediaAsset.fields.file.url}`)
+          : null;
+        const img = rawImg
+          ? optimizeContentfulImage(rawImg, { width: 840 })
+          : 'https://placehold.co/420x260?text=No+Image';
 
           const orgLogoMat = item.fields.mainEventOrganizationInChargeLogo;
           const orgLogoAsset = Array.isArray(orgLogoMat) ? orgLogoMat[0] : orgLogoMat;
           const orgLogo = orgLogoAsset?.fields?.file?.url
-            ? `https:${orgLogoAsset.fields.file.url}`
-            : null;
+          ? optimizeContentfulImage(`https:${orgLogoAsset.fields.file.url}`, { width: 64 })
+          : null;
           let date = '', time = '';
           if (item.fields.mainEventStartDate) {
             const start = new Date(item.fields.mainEventStartDate);
