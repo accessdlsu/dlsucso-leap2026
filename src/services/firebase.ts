@@ -1,9 +1,10 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
-import type { User as FirebaseUser } from "firebase/auth";
+import type {
+  Auth,
+  GoogleAuthProvider as IGoogleAuthProvider,
+  User as FirebaseUser,
+} from 'firebase/auth';
 
-
-// 1. Load the configuration securely from your .env.local file
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -11,24 +12,36 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// 2. Initialize Firebase instances
-const app = initializeApp(firebaseConfig);
-export { app };
-export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
+export const app = initializeApp(firebaseConfig);
 
-// 3. Restrict logins exclusively to the DLSU domain
-googleProvider.setCustomParameters({
-  hd: 'dlsu.edu.ph'
-});
+// Lazy auth — only loads firebase/auth chunk when actually needed
+let authPromise: Promise<{
+  auth: Auth;
+  googleProvider: IGoogleAuthProvider;
+  signInWithPopup: typeof import('firebase/auth').signInWithPopup;
+  signOut: typeof import('firebase/auth').signOut;
+  onAuthStateChanged: typeof import('firebase/auth').onAuthStateChanged;
+}> | null = null;
 
-// 4. Export the specific functions so App.tsx can continue using them without breaking
-export { 
-  signInWithPopup, 
-  signOut, 
-  onAuthStateChanged, 
-};
+export function getAuthModule() {
+  if (!authPromise) {
+    authPromise = import('firebase/auth').then((mod) => {
+      const auth = mod.getAuth(app);
+      const googleProvider = new mod.GoogleAuthProvider();
+      googleProvider.setCustomParameters({ hd: 'dlsu.edu.ph' });
+      return {
+        auth,
+        googleProvider,
+        signInWithPopup: mod.signInWithPopup,
+        signOut: mod.signOut,
+        onAuthStateChanged: mod.onAuthStateChanged,
+      };
+    });
+  }
+  return authPromise;
+}
+
 export type { FirebaseUser };

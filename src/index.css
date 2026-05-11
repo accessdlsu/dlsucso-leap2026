@@ -4,10 +4,15 @@
    FONT IMPORTS
 ════════════════════════════════════════════ */
 @font-face {
-  font-family: 'Tropikal';
-  src: url('/fonts/Tropikal-Bold.otf') format('opentype');
+   font-family: 'Tropikal';
+  src: url('/fonts/Tropikal-Bold.woff2') format('woff2'),
+       url('/fonts/Tropikal-Bold.otf') format('opentype');
   font-weight: 700;
+  font-style: normal;
   font-display: swap;
+  size-adjust: 100%;
+  ascent-override: 90%;
+  descent-override: 22%;
 }
 
 /* ════════════════════════════════════════════

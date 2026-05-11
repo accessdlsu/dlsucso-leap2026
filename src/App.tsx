@@ -2,9 +2,8 @@
    * @license
    * SPDX-License-Identifier: Apache-2.0
    */
-import {
-  auth, googleProvider, signInWithPopup, signOut, onAuthStateChanged
-} from './services/firebase';
+import { getAuthModule } from './services/firebase';
+import type { User as FirebaseUser } from 'firebase/auth';
 import { useState, useEffect, useRef, useMemo, Suspense, lazy, type CSSProperties, type ErrorInfo, type ReactNode, Component } from 'react';
 import { m, AnimatePresence, LazyMotion, domAnimation } from 'framer-motion';
 import {
@@ -15,7 +14,7 @@ import {
 } from 'lucide-react';
 import { optimizeContentfulImage } from './utils';
 import { contentfulClient } from './services/contentful';
-import type { User as FirebaseUser } from "firebase/auth";
+
 
 const Home = lazy(() => import('./pages/Home'));
 const About = lazy(() => import('./pages/About'));
@@ -25,9 +24,13 @@ const Classes = lazy(() => import('./pages/Classes'));
 const SavedClasses = lazy(() => import('./pages/SavedClasses'));
 const NayonScene = lazy(() => import('./components/NayonScene'));
 
+
 import { ClassCard, Navbar, Footer } from './components';
 import { SubthemeLandscape } from './components/SubthemeLandscape';
 import leapLogo from './assets/leap.webp';
+import leapLogoSm from './assets/leap-sm.webp';
+import leapLogoMd from './assets/leap-md.webp';
+import leapLogoXs from './assets/leap-xs.webp';
 import styles from './App.module.css';
 
 interface ErrorBoundaryProps { children: ReactNode; }
@@ -59,6 +62,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     return this.props.children;
   }
 }
+
+
+
 
 /* ══════════════════════════════════════════════════════
   SCROLL PROGRESS BAR
@@ -815,8 +821,6 @@ const ScrollInvitation = ({ onClick }: { onClick: () => void }) => (
     </m.div>
   </m.button>
 );
-
-
 
 
 
@@ -1640,6 +1644,17 @@ const LeapApp = () => {
   const hasLoggedProfilePermissionIssue = useRef(false);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [showNayon, setShowNayon] = useState(false);
+
+
+useEffect(() => {
+  const ric = (window as any).requestIdleCallback;
+  if (ric) {
+    ric(() => setShowNayon(true), { timeout: 2000 });
+  } else {
+    setTimeout(() => setShowNayon(true), 300);
+  }
+}, []);
 
   useEffect(() => {
     if (authError) {
@@ -1685,10 +1700,21 @@ const LeapApp = () => {
   const isVerifiedDlsuUser = Boolean(user?.emailVerified && user.email?.toLowerCase().endsWith('@dlsu.edu.ph'));
   const hasAppAccess = isVerifiedDlsuUser;
 
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      void (async () => {
-        try {
+  let unsubscribe: (() => void) | null = null;
+  let cancelled = false;
+
+  // Defer firebase/auth load until browser is idle (after FCP/LCP)
+  const start = () => {
+    if (cancelled) return;
+    getAuthModule().then(({ auth, onAuthStateChanged, signOut }) => {
+      if (cancelled) return;
+      unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        void (async () => {
+          // ... your existing onAuthStateChanged body, but use
+          // getAuthModule() to access signOut where needed
+          try {
           setUser(currentUser);
           if (currentUser) {
             const currentEmail = currentUser.email?.toLowerCase();
@@ -1718,10 +1744,22 @@ const LeapApp = () => {
           } else { setUserProfile(null); setIsAdminView(false); setCurrentView('home'); }
         } catch (error: unknown) { console.error('Auth state handling failed:', error); setUserProfile(null); }
         finally { setLoading(false); }
-      })();
+        })();
+      });
     });
-    return () => unsubscribe();
-  }, []);
+  };
+
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(start, { timeout: 1500 });
+  } else {
+    setTimeout(start, 200);
+  }
+
+  return () => {
+    cancelled = true;
+    if (unsubscribe) unsubscribe();
+  };
+}, []);
 
   // Load saved classes when user profile changes
   useEffect(() => {
@@ -1817,26 +1855,27 @@ const LeapApp = () => {
   }, [viewingClass]);
 
   const handleSignIn = async () => {
-    setAuthError(null);
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const email = result.user.email?.toLowerCase();
-      if (!result.user.emailVerified || !email?.endsWith('@dlsu.edu.ph')) {
-        await signOut(auth);
-        setAuthError('Access Denied: Please use your verified official @dlsu.edu.ph email to sign in.');
-      }
-    } catch (error: any) {
-      if (error.code !== 'auth/popup-closed-by-user') {
-        setAuthError('An error occurred during sign in. Please try again.');
-        console.error("Sign In Error:", error);
-      }
+  setAuthError(null);
+  try {
+    const { auth, googleProvider, signInWithPopup, signOut } = await getAuthModule();
+    const result = await signInWithPopup(auth, googleProvider);
+    const email = result.user.email?.toLowerCase();
+    if (!result.user.emailVerified || !email?.endsWith('@dlsu.edu.ph')) {
+      await signOut(auth);
+      setAuthError('Access Denied: Please use your verified official @dlsu.edu.ph email to sign in.');
     }
-  };
+  } catch (error: any) {
+    if (error.code !== 'auth/popup-closed-by-user') {
+      setAuthError('An error occurred during sign in. Please try again.');
+    }
+  }
+};
 
-  const handleSignOut = async () => {
-    try { await signOut(auth); setIsMenuOpen(false); }
-    catch (error) { console.error("Sign Out Error:", error); }
-  };
+const handleSignOut = async () => {
+  const { auth, signOut } = await getAuthModule();
+  await signOut(auth);
+  setIsMenuOpen(false);
+};
 
   const toggleSaveClass = async (classId: string) => {
     if (!user || !userProfile) {
@@ -2170,7 +2209,7 @@ const LeapApp = () => {
       </div>
 
       <Suspense fallback={null}>
-        <NayonScene />
+        {showNayon && <NayonScene />}
       </Suspense>
       <Fireflies />
 
@@ -2181,7 +2220,19 @@ const LeapApp = () => {
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="mb-4"
         >
-          <img src={leapLogo} alt="LEAP 2026 — Isang Nayon, Isang Layunin" width="280" height="158" className={styles.heroLogo} loading="eager" fetchPriority="high" style={{ aspectRatio: '280 / 158' }} />
+          {/* <img src={leapLogo} alt="LEAP 2026 — Isang Nayon, Isang Layunin" width="280" height="158" className={styles.heroLogo} loading="eager" fetchPriority="high" style={{ aspectRatio: '280 / 158' }} /> */}
+          <img
+              src={leapLogoXs}
+              srcSet={`${leapLogoXs} 360w, ${leapLogoSm} 480w, ${leapLogoMd} 720w, ${leapLogo} 1040w`}
+              sizes="(max-width: 480px) 280px, (max-width: 768px) 320px, 480px"
+              alt="LEAP 2026 — Isang Nayon, Isang Layunin"
+              width="280"
+              height="158"
+              className={styles.heroLogo}
+              loading="eager"
+              fetchPriority="high"
+              style={{ aspectRatio: '280 / 158' }}
+            />
         </m.div>
 
         <m.div
