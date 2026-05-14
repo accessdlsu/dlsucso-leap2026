@@ -16,11 +16,23 @@ export function optimizeContentfulImage(
   url: string,
   { width, quality = 80, format = 'webp' }: { width?: number; quality?: number; format?: string } = {}
 ): string {
-  if (!url || !url.includes('ctfassets.net')) return url;
-  const separator = url.includes('?') ? '&' : '?';
-  let params = `fm=${format}&q=${quality}`;
-  if (width) params += `&w=${width}`;
-  return `${url}${separator}${params}`;
+  if (!url) return url;
+
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.toLowerCase();
+    const isContentfulHost = hostname === 'ctfassets.net' || hostname.endsWith('.ctfassets.net');
+
+    if (!isContentfulHost) return url;
+
+    parsed.searchParams.set('fm', format);
+    parsed.searchParams.set('q', String(quality));
+    if (width) parsed.searchParams.set('w', String(width));
+
+    return parsed.toString();
+  } catch {
+    return url;
+  }
 }
 
 /**
