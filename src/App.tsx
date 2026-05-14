@@ -1649,11 +1649,24 @@ const LeapApp = () => {
 
 useEffect(() => {
   const ric = (window as any).requestIdleCallback;
+  const cic = (window as any).cancelIdleCallback;
+  let idleHandle: any;
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+
   if (ric) {
-    ric(() => setShowNayon(true), { timeout: 2000 });
+    idleHandle = ric(() => setShowNayon(true), { timeout: 2000 });
   } else {
-    setTimeout(() => setShowNayon(true), 300);
+    timeoutHandle = setTimeout(() => setShowNayon(true), 300);
   }
+
+  return () => {
+    if (idleHandle !== undefined && cic) {
+      cic(idleHandle);
+    }
+    if (timeoutHandle !== undefined) {
+      clearTimeout(timeoutHandle);
+    }
+  };
 }, []);
 
   useEffect(() => {
