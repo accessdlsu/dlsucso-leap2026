@@ -14,21 +14,10 @@
   "pages_build_output_dir": "dist",
 
   /**
-   * Assets configuration for Workers.
-   * This binds the `dist` directory to `env.STATIC_ASSETS` and serves it.
+   * Main worker entry – automatically picked up from public/_worker.ts
+   * during Pages build and compiled to dist/_worker.js.
+   * See: https://developers.cloudflare.com/pages/functions/routing/
    */
-  "assets": {
-    "directory": "./dist",
-    "binding": "STATIC_ASSETS"
-  },
-
-  /**
-   * Main worker entry – used only when running `wrangler dev` in worker mode
-   * or when deploying a standalone Worker (not Pages).
-   * For Cloudflare Pages deployments the file is picked up automatically
-   * if placed at `<root>/_worker.js` (after build) or via `pages_build_output_dir`.
-   */
-  "main": "worker/index.ts",
 
   /**
    * Environment variable bindings — secrets must be set via:

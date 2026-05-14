@@ -27,12 +27,6 @@ export interface Env {
 
   /** Injected by wrangler.jsonc `vars` */
   ENVIRONMENT?: string;
-
-  /**
-   * Cloudflare Pages automatically binds this when
-   * `pages_build_output_dir` is set in wrangler.jsonc.
-   */
-  STATIC_ASSETS: Fetcher;
 }
 
 // ── Security & Cache Headers ──────────────────────────────────────────────────
@@ -198,29 +192,9 @@ export default {
       return jsonResponse({ error: "Not found" }, 404);
     }
 
-    // ── 2. Static assets (Vite build output via Pages STATIC_ASSETS binding) ──────
-    try {
-      const assetResponse = await env.STATIC_ASSETS.fetch(request);
-
-      // Determine cache lifetime by content type
-      const contentType = assetResponse.headers.get("Content-Type") ?? "";
-      const isHtml = contentType.includes("text/html");
-
-      return applyHeaders(assetResponse, {
-        "Cache-Control": isHtml ? HTML_CACHE : ASSET_CACHE,
-      });
-    } catch {
-      // Fallback: serve index.html for SPA client-side routing
-      try {
-        const indexRequest = new Request(
-          new URL("/index.html", request.url).toString(),
-          request,
-        );
-        const fallback = await env.STATIC_ASSETS.fetch(indexRequest);
-        return applyHeaders(fallback, { "Cache-Control": HTML_CACHE });
-      } catch {
-        return new Response("Service unavailable", { status: 503 });
-      }
-    }
+    // ── 2. All other routes handled by Pages (static files) ────────────────
+    // This should not be reached due to _routes.json routing, but we return
+    // 404 as a fallback for any unmatched paths.
+    return jsonResponse({ error: "Not found" }, 404);
   },
 } satisfies ExportedHandler<Env>;
