@@ -28,18 +28,23 @@ let authPromise: Promise<{
 
 export function getAuthModule() {
   if (!authPromise) {
-    authPromise = import('firebase/auth').then((mod) => {
-      const auth = mod.getAuth(app);
-      const googleProvider = new mod.GoogleAuthProvider();
-      googleProvider.setCustomParameters({ hd: 'dlsu.edu.ph' });
-      return {
-        auth,
-        googleProvider,
-        signInWithPopup: mod.signInWithPopup,
-        signOut: mod.signOut,
-        onAuthStateChanged: mod.onAuthStateChanged,
-      };
-    });
+    authPromise = import('firebase/auth')
+      .then((mod) => {
+        const auth = mod.getAuth(app);
+        const googleProvider = new mod.GoogleAuthProvider();
+        googleProvider.setCustomParameters({ hd: 'dlsu.edu.ph' });
+        return {
+          auth,
+          googleProvider,
+          signInWithPopup: mod.signInWithPopup,
+          signOut: mod.signOut,
+          onAuthStateChanged: mod.onAuthStateChanged,
+        };
+      })
+      .catch((error) => {
+        authPromise = null;
+        throw error;
+      });
   }
   return authPromise;
 }
