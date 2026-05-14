@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, MapPin, Users, ExternalLink } from 'lucide-react';
-import { PageWrapper } from '../components/PageCommon';
-import { contentfulClient } from '../services/contentful';
-import { optimizeContentfulImage } from '../utils';
+import { PageWrapper, PageHero } from '../components/PageCommon';
+import { leapifyApi } from '../services/leapify';
 
 const ACCENT_COLORS = ['#de9a49', '#4ab09a', '#b05a32', '#5ca0a8', '#803e2f'];
 
@@ -30,65 +29,43 @@ export default function MainEvents() {
 
   useEffect(() => {
     const fetchEvents = async () => {
-      if (!contentfulClient) { setLoading(false); return; }
       try {
-        const response = await contentfulClient.getEntries({
-          content_type: 'mainEvents',
-          include: 2,
-          order: ['fields.mainEventStartDate'] as any,
-        });
+        const allEvents = await leapifyApi.getEvents();
+        const spotlightEvents = allEvents.filter(e => e.isSpotlight || e.status === 'published');
 
-        const mapped: MainEvent[] = response.items.map((item: any, i: number) => {
-          const pubMat = item.fields.mainEventPosterPublishingMaterial;
-          const mediaAsset = Array.isArray(pubMat) ? pubMat[0] : pubMat;
-          const rawImg = mediaAsset?.fields?.file?.url
-          ? (mediaAsset.fields.file.url.startsWith('http')
-              ? mediaAsset.fields.file.url
-              : `https:${mediaAsset.fields.file.url}`)
-          : null;
-        const img = rawImg
-          ? optimizeContentfulImage(rawImg, { width: 840 })
-          : 'https://placehold.co/420x260?text=No+Image';
-
-          const orgLogoMat = item.fields.mainEventOrganizationInChargeLogo;
-          const orgLogoAsset = Array.isArray(orgLogoMat) ? orgLogoMat[0] : orgLogoMat;
-          const orgLogo = orgLogoAsset?.fields?.file?.url
-          ? optimizeContentfulImage(`https:${orgLogoAsset.fields.file.url}`, { width: 64 })
-          : null;
+        const mapped: MainEvent[] = spotlightEvents.map((ev, i: number) => {
           let date = '', time = '';
-          if (item.fields.mainEventStartDate) {
-            const start = new Date(item.fields.mainEventStartDate);
+          if (ev.dateTime) {
+            const start = new Date(ev.dateTime);
             date = start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
             time = start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-            if (item.fields.mainEventEndDate) {
-              const end = new Date(item.fields.mainEventEndDate);
-              const endDateStr = end.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-              if (date !== endDateStr) date += ` – ${endDateStr}`;
-              time += ` – ${end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
-            }
+          } else if (ev.startTime) {
+            const start = new Date(ev.startTime);
+            date = start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            time = start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
           }
 
           return {
-            id: item.sys.id,
-            title: item.fields.mainEventTitle || 'Untitled Event',
-            tag: item.fields.mainEventSubtheme || 'Main Event',
+            id: ev.id,
+            title: ev.title || 'Untitled Event',
+            tag: ev.theme?.name || 'Main Event',
             date,
             time,
-            venue: item.fields.mainEventVenue || '',
-            modality: item.fields.mainEventClassModality || 'Face-to-Face',
-            desc: item.fields.mainEventDescription || '',
-            img,
+            venue: ev.venue || '',
+            modality: 'Face-to-Face',
+            desc: ev.description || '',
+            img: ev.backgroundImageUrl || 'https://placehold.co/420x260?text=No+Image',
             accent: ACCENT_COLORS[i % ACCENT_COLORS.length],
-            org: item.fields.mainEventOrganizationInCharge || '',
-            orgLogo,
-            slots: item.fields.mainEventNumberOfSlots || 0,
-            registrationLink: item.fields.mainEventRegistrationLink || '',
+            org: ev.organization?.name || '',
+            orgLogo: ev.organization?.logoUrl || null,
+            slots: ev.maxSlots || 0,
+            registrationLink: ev.gformsUrl || '',
           };
         });
 
         setEvents(mapped);
       } catch (err) {
-        console.error('Contentful Error (MainEvents page):', err);
+        console.error('Leapify API Error (MainEvents page):', err);
       } finally {
         setLoading(false);
       }
@@ -99,14 +76,7 @@ export default function MainEvents() {
 
   return (
     <PageWrapper>
-      <div className="page-hero" style={{ paddingTop: 'clamp(6rem, 12vw, 10rem)', paddingBottom: 'clamp(2rem, 4vw, 4rem)', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div className="page-hero-fireflies"><span/><span/><span/><span/><span/><span/></div>
-        <div className="page-hero-glow" />
-        <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.3em', textTransform: 'uppercase', color: '#de9a49', marginBottom: '1rem', position: 'relative', zIndex: 2 }}>LEAP 2026 · Schedule</p>
-        <h1 className="page-hero-title" style={{ position: 'relative', zIndex: 2 }}>Major Events</h1>
-        <p className="page-hero-subtitle" style={{ position: 'relative', zIndex: 2 }}>Landmark moments that define the LEAP experience</p>
-        <div style={{ width: 60, height: 2, background: 'linear-gradient(90deg,transparent,#de9a49,transparent)', margin: '2rem auto 0', position: 'relative', zIndex: 2 }} />
-      </div>
+      <PageHero title="Major Events" subtitle="Landmark moments that define the LEAP experience" accent="LEAP 2026 · Schedule" />
       <main className="container mx-auto px-4 pb-24 max-w-5xl pt-8">
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '6rem 0' }}>
@@ -118,7 +88,7 @@ export default function MainEvents() {
           </p>
         ) : (
           <div className="events-list">
-            {events.map((ev, i) => (
+            {events.map((ev: MainEvent, i: number) => (
               <motion.div
                 key={ev.id}
                 initial={{ opacity: 0, y: 28 }}
