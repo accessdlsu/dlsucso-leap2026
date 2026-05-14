@@ -13,7 +13,7 @@
    */
   "assets": {
     "directory": "./dist",
-    "binding": "ASSETS",
+    "binding": "ASSETS"
   },
 
   /**
@@ -32,13 +32,13 @@
    * Plain (non-secret) vars go here; they are NOT for secrets.
    */
   "vars": {
-    "ENVIRONMENT": "production",
+    "ENVIRONMENT": "production"
   },
 
   /**
    * Observability — enable Workers Logpush / tail workers in the dashboard.
    */
   "observability": {
-    "enabled": true,
+    "enabled": true
   },
 }
