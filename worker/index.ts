@@ -32,7 +32,7 @@ export interface Env {
    * Cloudflare Pages automatically binds this when
    * `pages_build_output_dir` is set in wrangler.jsonc.
    */
-  ASSETS: Fetcher;
+  STATIC_ASSETS: Fetcher;
 }
 
 // ── Security & Cache Headers ──────────────────────────────────────────────────
@@ -198,9 +198,9 @@ export default {
       return jsonResponse({ error: "Not found" }, 404);
     }
 
-    // ── 2. Static assets (Vite build output via Pages ASSETS binding) ──────
+    // ── 2. Static assets (Vite build output via Pages STATIC_ASSETS binding) ──────
     try {
-      const assetResponse = await env.ASSETS.fetch(request);
+      const assetResponse = await env.STATIC_ASSETS.fetch(request);
 
       // Determine cache lifetime by content type
       const contentType = assetResponse.headers.get("Content-Type") ?? "";
@@ -216,7 +216,7 @@ export default {
           new URL("/index.html", request.url).toString(),
           request,
         );
-        const fallback = await env.ASSETS.fetch(indexRequest);
+        const fallback = await env.STATIC_ASSETS.fetch(indexRequest);
         return applyHeaders(fallback, { "Cache-Control": HTML_CACHE });
       } catch {
         return new Response("Service unavailable", { status: 503 });

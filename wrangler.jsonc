@@ -15,11 +15,11 @@
 
   /**
    * Assets configuration for Workers.
-   * This binds the `dist` directory to `env.ASSETS` and serves it.
+   * This binds the `dist` directory to `env.STATIC_ASSETS` and serves it.
    */
   "assets": {
     "directory": "./dist",
-    "binding": "ASSETS"
+    "binding": "STATIC_ASSETS"
   },
 
   /**
