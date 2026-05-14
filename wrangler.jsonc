@@ -8,6 +8,12 @@
   "compatibility_flags": ["nodejs_compat"],
 
   /**
+   * Pages build output directory — specifies where static files are located
+   * for Cloudflare Pages deployments.
+   */
+  "pages_build_output_dir": "dist",
+
+  /**
    * Assets configuration for Workers.
    * This binds the `dist` directory to `env.ASSETS` and serves it.
    */

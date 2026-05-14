@@ -90,6 +90,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          # Deploys the built `dist/` directory (which includes public/_routes.json)
-          # and the worker in `worker/index.ts` automatically via wrangler.jsonc.
           command: pages deploy dist --project-name=dlsucso-leap2026 --commit-dirty=true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
