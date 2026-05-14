@@ -2785,6 +2785,10 @@ const handleSignOut = async () => {
           {currentView === 'home' && (
             <Home
               user={user} classes={classes}
+              searchQuery={searchQuery}
+              onSearchChange={(q) => { setSearchQuery(q); setCurrentPage(1); }}
+              sortBy={sortBy}
+              onSortChange={(s) => setSortBy(s)}
               filteredAndSortedClasses={filteredAndSortedClasses} uniqueDays={uniqueDays}
               selectedDay={selectedDay} onDaySelect={(d) => { setSelectedDay(d); setCurrentPage(1); }}
               viewingClass={viewingClass} onClassSelect={(c) => { setViewingClass(c) }}
@@ -2812,7 +2816,7 @@ const handleSignOut = async () => {
               renderClassCard={renderClassCard}
             />
           )}
-          {currentView === 'faq' && <FAQs />}
+          {currentView === 'faq' && <FAQs faqs={[]} />}
           {currentView === 'contact' && <Contact />}
         </Suspense>
 
