@@ -1725,8 +1725,6 @@ useEffect(() => {
       if (cancelled) return;
       unsubscribe = onAuthStateChanged(auth, (currentUser) => {
         void (async () => {
-          // ... your existing onAuthStateChanged body, but use
-          // getAuthModule() to access signOut where needed
           try {
           setUser(currentUser);
           if (currentUser) {
