@@ -1,7 +1,9 @@
-import { motion } from 'framer-motion';
+import { memo } from 'react';
+import { m } from 'framer-motion';
 import { Calendar, MapPin, Bookmark, ExternalLink, ChevronRight } from 'lucide-react';
 import type { LeapClass } from '../types';
 import styles from '../App.module.css';
+import { LazyImage } from './shared';
 
 interface ClassCardProps {
   item: LeapClass;
@@ -12,7 +14,7 @@ interface ClassCardProps {
   onLearnMore: (item: LeapClass) => void;
 }
 
-export const ClassCard = ({
+export const ClassCard = memo(({
   item,
   index,
   isLoggedIn,
@@ -20,7 +22,7 @@ export const ClassCard = ({
   onToggleSave,
   onLearnMore,
 }: ClassCardProps) => (
-  <motion.div
+  <m.div
     key={item.id}
     initial={{ opacity: 0, y: 24 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -30,11 +32,10 @@ export const ClassCard = ({
   >
     {/* Image section */}
     <div className={styles.cardImageWrapper}>
-      <img
+      <LazyImage
         src={item.image}
         alt={item.title}
         className={styles.cardImage}
-        referrerPolicy="no-referrer"
       />
       <div className={styles.cardImageGradient} />
 
@@ -189,5 +190,12 @@ export const ClassCard = ({
         </button>
       </div>
     </div>
-  </motion.div>
-);
+  </m.div>
+), (prevProps, nextProps) => {
+  return (
+    prevProps.isSaved === nextProps.isSaved &&
+    prevProps.isLoggedIn === nextProps.isLoggedIn &&
+    prevProps.item.id === nextProps.item.id &&
+    prevProps.item.slots === nextProps.item.slots
+  );
+});

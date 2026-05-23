@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { useState, useEffect, type ReactNode } from 'react';
 
 interface SubthemeLandscapeProps {
@@ -34,7 +34,7 @@ export const SubthemeLandscape = ({ setActiveSubtheme, themeColors }: SubthemeLa
   const btn = (label: string, x: number, y: number, children: ReactNode) => {
     const c = themeColors[label];
     return (
-      <motion.button
+      <m.button
         key={label}
         onClick={() => setActiveSubtheme(label)}
         whileHover={{ scale: 1.12, filter: 'brightness(1.3)' }}
@@ -56,7 +56,7 @@ export const SubthemeLandscape = ({ setActiveSubtheme, themeColors }: SubthemeLa
           <div style={{ position: 'relative', zIndex: 2 }}>{children}</div>
         </div>
         <LandscapeLabel label={label} color={c.text} glow={c.glow} />
-      </motion.button>
+      </m.button>
     );
   };
 

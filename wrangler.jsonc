@@ -1,37 +1,45 @@
 {
   /**
-   * DLSU CSO LEAP 2026 — Cloudflare Workers / Pages config
+   * DLSU CSO LEAP 2026 — Cloudflare Workers Static Assets Configuration
    * Docs: https://developers.cloudflare.com/workers/wrangler/configuration/
    */
   "name": "dlsucso-leap2026",
-  "compatibility_date": "2025-01-01",
+
+  /**
+   * Main worker script entry point.
+   * Runs first for matches in `run_worker_first` to handle edge APIs/proxies.
+   */
+  "main": "./worker/index.ts",
+
+  /**
+   * Compatibility settings.
+   * `nodejs_compat` is enabled to allow Contentful SDK and Node APIs to work at the edge.
+   */
+  "compatibility_date": "2026-05-23",
   "compatibility_flags": ["nodejs_compat"],
 
   /**
-   * Pages build output directory — specifies where static files are located
-   * for Cloudflare Pages deployments.
-   */
-  "pages_build_output_dir": "dist",
-
-  /**
-   * Main worker entry – automatically picked up from public/_worker.ts
-   * during Pages build and compiled to dist/_worker.js.
-   * See: https://developers.cloudflare.com/pages/functions/routing/
-   */
-
-  /**
-   * Environment variable bindings — secrets must be set via:
-   *   wrangler secret put <NAME>
-   * or stored in `.dev.vars` for local development.
-   *
-   * Plain (non-secret) vars go here; they are NOT for secrets.
+   * Global plain environment variables (non-secrets).
+   * Secrets must be set via `wrangler secret put <NAME>` or in `.dev.vars` for local dev.
    */
   "vars": {
     "ENVIRONMENT": "production"
   },
 
   /**
-   * Observability — enable Workers Logpush / tail workers in the dashboard.
+   * Static Assets settings.
+   * Maps Vite-built assets from `./dist` and configures SPA/API routing.
+   */
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    // Intercept requests matching /api/* in the Worker first before matching static files.
+    "run_worker_first": ["/api/*"]
+  },
+
+  /**
+   * Observability configuration (enables Workers Logpush and tail stream).
    */
   "observability": {
     "enabled": true

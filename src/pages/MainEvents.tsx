@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Calendar, Clock, MapPin, Users, ExternalLink } from 'lucide-react';
 import { PageWrapper, PageHero } from '../components/PageCommon';
 import { leapifyApi } from '../services/leapify';
@@ -89,7 +89,7 @@ export default function MainEvents() {
         ) : (
           <div className="events-list">
             {events.map((ev: MainEvent, i: number) => (
-              <motion.div
+              <m.div
                 key={ev.id}
                 initial={{ opacity: 0, y: 28 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -145,7 +145,7 @@ export default function MainEvents() {
                     )}
                   </div>
                 </div>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         )}

@@ -1,12 +1,12 @@
 import { useRef } from 'react';
-import { useScrollVisibility } from '../../hooks';
+import { useOptimizedScrollVisibility } from '../../hooks';
 
 /**
  * TheAwakening - Cinematic dawn transition scene
  */
 export const TheAwakening = () => {
   const sectionRef = useRef<HTMLElement>(null!);
-  const progress = useScrollVisibility(sectionRef);
+  const progress = useOptimizedScrollVisibility(sectionRef);
 
   return (
     <section

@@ -11,7 +11,7 @@ function useIsMobile(breakpoint = 768) {
   }, [breakpoint]);
   return isMobile;
 }
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { Search, Menu, X, User, LogIn, LogOut, Bookmark, AlertCircle, ChevronRight, ShieldCheck } from 'lucide-react';
 import type { UserProfile } from '../types';
 import styles from '../App.module.css';
@@ -91,7 +91,7 @@ export const Navbar = ({
       {/* ── Auth error toast ── */}
       <AnimatePresence>
         {authError && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: -40, x: '-50%' }}
             animate={{ opacity: 1, y: 0, x: '-50%' }}
             exit={{ opacity: 0, y: -20, x: '-50%' }}
@@ -109,7 +109,7 @@ export const Navbar = ({
           >
             <AlertCircle size={18} style={{ flexShrink: 0 }} />
             <span>{authError}</span>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -173,7 +173,7 @@ export const Navbar = ({
                   }
                 </button>
                 {isProfileOpen && (
-                  <motion.div
+                  <m.div
                     initial={{ opacity: 0, y: -8, scale: 0.97 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -8, scale: 0.97 }}
@@ -203,7 +203,7 @@ export const Navbar = ({
                         {item.icon}{item.label}
                       </button>
                     ))}
-                  </motion.div>
+                  </m.div>
                 )}
               </div>
             ) : (
@@ -238,7 +238,7 @@ export const Navbar = ({
         {isMenuOpen && (
           <>
             {/* Backdrop */}
-            <motion.div
+            <m.div
               key="backdrop"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -254,7 +254,7 @@ export const Navbar = ({
             />
 
             {/* Drawer panel */}
-            <motion.div
+            <m.div
               key="drawer"
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
@@ -461,7 +461,7 @@ export const Navbar = ({
                   </button>
                 )}
               </div>
-            </motion.div>
+            </m.div>
           </>
         )}
       </AnimatePresence>

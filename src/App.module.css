@@ -1489,11 +1489,10 @@
   background: linear-gradient(180deg, #1d2e28 0%, #141f1b 100%);
   border-top: 1px solid rgba(222, 154, 73, 0.14);
   color: #f9ecb6;
-  padding: 4rem 1rem;
+  padding: 4rem 1rem 2rem;
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
-  min-height: 850px;
   contain: layout style;
 }
 
@@ -1548,7 +1547,7 @@
 }
 
 .footerBottom {
-  @apply container mx-auto mt-16 pt-8 border-t border-white/10 text-center text-leap-cream/40 text-xs tracking-wide;
+  @apply container mx-auto mt-8 pt-6 border-t border-white/10 text-center text-leap-cream/40 text-xs tracking-wide;
 }
 
 /* ═══════════════════════════════════════════════════════════

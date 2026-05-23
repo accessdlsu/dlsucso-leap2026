@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import {
   Search,
   Calendar,
@@ -53,7 +53,7 @@ interface PageWrapperProps {
 }
 
 const PageWrapper = ({ children }: PageWrapperProps) => (
-  <motion.div
+  <m.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -67,7 +67,7 @@ const PageWrapper = ({ children }: PageWrapperProps) => (
     }}
   >
     {children}
-  </motion.div>
+  </m.div>
 );
 
 const PageHero = ({
@@ -90,7 +90,7 @@ const PageHero = ({
     }}
   >
     <div className="page-hero-glow" />
-    <motion.p
+    <m.p
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
@@ -105,24 +105,24 @@ const PageHero = ({
       }}
     >
       {accent}
-    </motion.p>
-    <motion.h1
+    </m.p>
+    <m.h1
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.18 }}
       className="page-hero-title"
     >
       {title}
-    </motion.h1>
-    <motion.p
+    </m.h1>
+    <m.p
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.26 }}
       className="page-hero-subtitle"
     >
       {subtitle}
-    </motion.p>
-    <motion.div
+    </m.p>
+    <m.div
       initial={{ scaleX: 0 }}
       animate={{ scaleX: 1 }}
       transition={{ delay: 0.4, duration: 0.6 }}
@@ -594,7 +594,7 @@ export default function Classes({
 
       {/* ── CLASS DETAIL MODAL ── */}
       {user && viewingClass && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -613,7 +613,7 @@ export default function Classes({
             placeItems: "center",
           }}
         >
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 32, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
@@ -961,8 +961,8 @@ export default function Classes({
                 </div>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       )}
     </PageWrapper>
   );

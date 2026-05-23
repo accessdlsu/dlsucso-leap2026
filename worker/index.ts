@@ -27,6 +27,9 @@ export interface Env {
 
   /** Injected by wrangler.jsonc `vars` */
   ENVIRONMENT?: string;
+
+  /** Static Assets binding */
+  ASSETS?: Fetcher;
 }
 
 // ── Security & Cache Headers ──────────────────────────────────────────────────
@@ -192,9 +195,11 @@ export default {
       return jsonResponse({ error: "Not found" }, 404);
     }
 
-    // ── 2. All other routes handled by Pages (static files) ────────────────
-    // This should not be reached due to _routes.json routing, but we return
-    // 404 as a fallback for any unmatched paths.
+    // ── 2. All other routes handled by static assets ────────────────
+    if (env.ASSETS) {
+      return env.ASSETS.fetch(request);
+    }
+
     return jsonResponse({ error: "Not found" }, 404);
   },
 } satisfies ExportedHandler<Env>;

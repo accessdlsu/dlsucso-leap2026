@@ -7,7 +7,7 @@ interface FooterProps {
 }
 
 export const Footer = ({ logoImg, onNavigate }: FooterProps) => (
-  <footer className={styles.footer} style={{ contentVisibility: 'auto', containIntrinsicSize: '0 850px' }}>
+  <footer className={styles.footer}>
     <div className={styles.footerContainer}>
       <div className={styles.footerBrand}>
         <div className={styles.footerLogoWrapper}>

@@ -1,7 +1,6 @@
-
-
-import { useEffect, useState, type MouseEvent as ReactMouseEvent } from 'react';
+import { useEffect, useState, useCallback, type MouseEvent as ReactMouseEvent } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
+import { rafThrottle } from '../utils/performance';
 
 const TOOLTIPS: Record<string, { label: string; desc: string }> = {
   hut1: { label: 'Bahay-Kubo', desc: 'A humble home rooted in community and tradition.' },
@@ -17,30 +16,30 @@ const TOOLTIPS: Record<string, { label: string; desc: string }> = {
 ══════════════════════════════════════════════════════ */
 function useParallaxMouse() {
   useEffect(() => {
-    const onMove = (e: MouseEvent) => {
+    const onMove = rafThrottle((e: MouseEvent) => {
       const x = (e.clientX / window.innerWidth - 0.5) * 2;
       const y = (e.clientY / window.innerHeight - 0.5) * 2;
       document.documentElement.style.setProperty('--px', x.toString());
       document.documentElement.style.setProperty('--py', y.toString());
-    };
+    });
     window.addEventListener('mousemove', onMove, { passive: true });
     return () => window.removeEventListener('mousemove', onMove);
   }, []);
 }
 
 export default function NayonScene() {
-useParallaxMouse();
+  useParallaxMouse();
   const [hovered, setHovered] = useState<string | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  const handleMouseEnter = (key: string, e: ReactMouseEvent) => {
+  const handleMouseEnter = useCallback((key: string, e: ReactMouseEvent) => {
     setHovered(key);
     setMousePos({ x: e.clientX, y: e.clientY });
-  };
+  }, []);
 
-  const handleMouseMove = (e: ReactMouseEvent) => {
+  const handleMouseMove = useCallback((e: ReactMouseEvent) => {
     setMousePos({ x: e.clientX, y: e.clientY });
-  };
+  }, []);
 
   const TOOLTIP_W = 240;
   const TOOLTIP_H = 60;

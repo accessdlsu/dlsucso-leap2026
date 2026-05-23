@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { Bookmark } from 'lucide-react';
 import type { ReactNode } from 'react';
 import styles from '../App.module.css';
@@ -26,7 +26,7 @@ interface SavedClassesProps {
 }
 
 const PageWrapper = ({ children }: { children: ReactNode }) => (
-  <motion.div
+  <m.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -40,7 +40,7 @@ const PageWrapper = ({ children }: { children: ReactNode }) => (
     }}
   >
     {children}
-  </motion.div>
+  </m.div>
 );
 
 const PageHero = ({ title, subtitle, accent }: { title: string; subtitle: string; accent: string }) => (
@@ -58,7 +58,7 @@ const PageHero = ({ title, subtitle, accent }: { title: string; subtitle: string
       <span/><span/><span/><span/><span/><span/>
     </div>
     <div className="page-hero-glow" />
-    <motion.p 
+    <m.p 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
@@ -73,8 +73,8 @@ const PageHero = ({ title, subtitle, accent }: { title: string; subtitle: string
       }}
     >
       {accent}
-    </motion.p>
-    <motion.h1
+    </m.p>
+    <m.h1
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.18 }}
@@ -88,8 +88,8 @@ const PageHero = ({ title, subtitle, accent }: { title: string; subtitle: string
       }}
     >
       {title}
-    </motion.h1>
-    <motion.p
+    </m.h1>
+    <m.p
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.25 }}
@@ -103,7 +103,7 @@ const PageHero = ({ title, subtitle, accent }: { title: string; subtitle: string
       }}
     >
       {subtitle}
-    </motion.p>
+    </m.p>
   </div>
 );
 

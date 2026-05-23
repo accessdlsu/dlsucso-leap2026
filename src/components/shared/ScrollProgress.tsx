@@ -1,10 +1,10 @@
-import { useScrollProgress } from '../../hooks';
+import { useOptimizedScrollProgress } from '../../hooks';
 
 /**
  * Scroll progress bar shown at top of page
  */
 export const ScrollProgress = () => {
-  const progress = useScrollProgress();
+  const progress = useOptimizedScrollProgress();
 
   return (
     <div

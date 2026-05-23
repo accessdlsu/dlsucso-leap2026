@@ -13,6 +13,7 @@ import {
   BookOpen, Wrench, Handshake, HeartPulse, ArrowDown
 } from 'lucide-react';
 import { leapifyApi } from './services/leapify';
+import { useOptimizedScrollProgress, rafThrottle } from './hooks';
 
 
 const Home = lazy(() => import('./pages/Home'));
@@ -69,15 +70,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   SCROLL PROGRESS BAR
 ══════════════════════════════════════════════════════ */
 const ScrollProgress = () => {
-  const [pct, setPct] = useState(0);
-  useEffect(() => {
-    const upd = () => {
-      const el = document.documentElement;
-      setPct(el.scrollTop / (el.scrollHeight - el.clientHeight));
-    };
-    window.addEventListener('scroll', upd);
-    return () => window.removeEventListener('scroll', upd);
-  }, []);
+  const pct = useOptimizedScrollProgress();
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 3, zIndex: 9999, pointerEvents: 'none', background: 'rgba(222,154,73,0.12)' }}>
       <div style={{ height: '100%', width: `${pct * 100}%`, background: 'linear-gradient(90deg,#803e2f,#de9a49,#803e2f)', transition: 'width 0.1s linear', boxShadow: '0 0 8px rgba(222,154,73,0.8)' }} />
@@ -150,18 +143,35 @@ const TheAwakening = () => {
   const [progress, setProgress] = useState(0);
   const sectionRef = useRef<HTMLElement | null>(null);
 
+  const [isVisible, setIsVisible] = useState(false);
+
   useEffect(() => {
-    const handleScroll = () => {
+    const element = sectionRef.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsVisible(entry.isIntersecting);
+    }, { threshold: 0.05 });
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const handleScroll = rafThrottle(() => {
       if (!sectionRef.current) return;
       const rect = sectionRef.current.getBoundingClientRect();
       const vh = window.innerHeight;
       const p = Math.max(0, Math.min(1, 1 - (rect.top + rect.height / 2) / (vh + rect.height / 2)));
       setProgress(p);
-    };
+    });
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isVisible]);
 
   return (
     <section
@@ -553,18 +563,35 @@ const MabuhayGreeting = () => {
   const [progress, setProgress] = useState(0);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  const [isVisible, setIsVisible] = useState(false);
+
   useEffect(() => {
-    const handleScroll = () => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsVisible(entry.isIntersecting);
+    }, { threshold: 0.05 });
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const handleScroll = rafThrottle(() => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
       const vh = window.innerHeight;
       const p = Math.max(0, Math.min(1, 1 - (rect.top + rect.height * 0.6) / vh));
       setProgress(p);
-    };
+    });
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isVisible]);
 
   const fadeIn = Math.min(1, progress * 2);
   const mabuhayReveal = Math.max(0, Math.min(1, (progress - 0.15) * 2.2));
@@ -1809,10 +1836,10 @@ useEffect(() => {
   }, [user]);
 
   useEffect(() => {
-    const handleScroll = () => {
+    const handleScroll = rafThrottle(() => {
       setScrolled(window.scrollY > 20);
       setShowBackToTop(window.scrollY > 460);
-    };
+    });
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
