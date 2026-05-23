@@ -12,6 +12,29 @@ export function scrollToElement(elementId: string, offset = 104): void {
   window.scrollTo({ top: position, behavior: 'smooth' });
 }
 
+export function optimizeContentfulImage(
+  url: string,
+  { width, quality = 80, format = 'webp' }: { width?: number; quality?: number; format?: string } = {}
+): string {
+  if (!url) return url;
+
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.toLowerCase();
+    const isContentfulHost = hostname === 'ctfassets.net' || hostname.endsWith('.ctfassets.net');
+
+    if (!isContentfulHost) return url;
+
+    parsed.searchParams.set('fm', format);
+    parsed.searchParams.set('q', String(quality));
+    if (width) parsed.searchParams.set('w', String(width));
+
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
 /**
  * Scroll to top of page
  */

@@ -1,98 +1,126 @@
-declare global {
-  interface Window {
-    turnstile: {
-      render: (
-        container: string | HTMLElement,
-        opts: { sitekey: string; callback: (token: string) => void },
-      ) => void;
-    };
-  }
-}
+const API_URL = (import.meta.env.VITE_LEAPIFY_API_URL || "").replace(/\/$/, "");
 
-const TURNSTILE_VERIFY_PATH = "/.well-known/leapify/turnstile/verify";
-const API_URL = import.meta.env.VITE_LEAPIFY_API_URL?.replace(/\/$/, "") || "";
-const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
+let powSolved = false;
+let powPromise: Promise<void> | null = null;
 
-function loadTurnstileScript(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (typeof window.turnstile !== "undefined") {
-      resolve();
-      return;
-    }
-    const script = document.createElement("script");
-    script.src =
-      "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Failed to load Turnstile script"));
-    document.head.appendChild(script);
-  });
-}
+/**
+ * Solve the backend's Proof-of-Work challenge if one is active.
+ * Uses a singleton promise to ensure we only solve it once if multiple
+ * requests hit at the same time.
+ */
+async function solvePow(): Promise<void> {
+  if (powSolved) return;
+  if (powPromise) return powPromise;
 
-function executeTurnstile(siteKey: string): Promise<string> {
-  return new Promise((resolve) => {
-    const container = document.createElement("div");
-    container.id = "leapify-turnstile-container";
-    container.style.display = "none";
-    document.body.appendChild(container);
+  powPromise = (async () => {
+    if (!API_URL) return;
 
-    window.turnstile.render(`#${container.id}`, {
-      sitekey: siteKey,
-      callback: (token: string) => {
-        container.remove();
-        resolve(token);
-      },
-    });
-  });
-}
+    const initialUrl = `${API_URL}/api/classes`;
+    console.log("[leapify] PoW check request to:", initialUrl);
 
-export async function solveTurnstileChallenge(): Promise<boolean> {
-  if (!SITE_KEY) return false;
+    try {
+      const res = await fetch(initialUrl, { credentials: "include" });
+      const ct = res.headers.get("content-type") || "";
+      console.log(`[leapify] PoW check response: ${res.status} ${ct}`);
 
-  try {
-    await loadTurnstileScript();
-    const token = await executeTurnstile(SITE_KEY);
-
-    const res = await fetch(`${API_URL}${TURNSTILE_VERIFY_PATH}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-      credentials: "include",
-    });
-
-    return res.ok;
-  } catch (error) {
-    console.error("Turnstile verification error:", error);
-    return false;
-  }
-}
-
-async function fetchWithTurnstile(endpoint: string, options: RequestInit = {}): Promise<Response> {
-  const url = `${API_URL}${endpoint}`;
-  options.credentials = options.credentials || "include";
-
-  let response = await fetch(url, options);
-
-  if (response.status === 401) {
-    const data = await response.clone().json().catch(() => null);
-    if (data?.error?.code === "TURNSTILE_REQUIRED") {
-      console.log("Turnstile cookie missing/expired, solving challenge...");
-      const solved = await solveTurnstileChallenge();
-      if (solved) {
-        response = await fetch(url, options);
+      if (!ct.includes("text/html")) {
+        console.log("[leapify] No PoW challenge detected, proceeding.");
+        powSolved = true;
+        return;
       }
-    }
-  }
 
-  return response;
+      const html = await res.text();
+      const idMatch = html.match(/challengeId\s*=\s*"([^"]+)"/);
+      const diffMatch = html.match(/difficulty\s*=\s*(\d+)/);
+
+      if (!idMatch || !diffMatch) {
+        console.warn(
+          "[leapify] HTML received but no PoW challenge variables found.",
+        );
+        return;
+      }
+
+      const challengeId = idMatch[1];
+      const difficulty = Number(diffMatch[1]);
+      const prefix = "0".repeat(Math.ceil(difficulty / 4));
+      let nonce = 0;
+      const startTime = Date.now();
+
+      console.log(
+        `[leapify] Solving PoW: id=${challengeId}, difficulty=${difficulty}, prefix=${prefix}`,
+      );
+
+      while (true) {
+        const input = new TextEncoder().encode(`${challengeId}:${nonce}`);
+        const hash = await crypto.subtle.digest("SHA-256", input);
+        const hex = Array.from(new Uint8Array(hash))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+
+        if (hex.startsWith(prefix)) {
+          const elapsed = Date.now() - startTime;
+          console.log(
+            `[leapify] PoW Solved in ${elapsed}ms. nonce=${nonce}. Verifying...`,
+          );
+
+          const verifyRes = await fetch(
+            `${API_URL}/.well-known/leapify/pow/verify`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id: challengeId, nonce, elapsed }),
+              credentials: "include",
+            },
+          );
+
+          if (verifyRes.ok) {
+            console.log("[leapify] PoW Verification successful.");
+            powSolved = true;
+          } else {
+            console.error(
+              `[leapify] PoW Verification failed: ${verifyRes.status}`,
+            );
+          }
+          return;
+        }
+        nonce++;
+        if (nonce > 1000000) return;
+      }
+    } catch (err) {
+      console.error("[leapify] PoW check failed:", err);
+    } finally {
+      powPromise = null;
+    }
+  })();
+
+  return powPromise;
 }
 
-export interface LeapifyEvent {
+export type EventStatus =
+  | "draft"
+  | "queued"
+  | "published"
+  | "ended"
+  | "cancelled";
+export type UserRole = "student" | "admin" | "super_admin";
+
+export interface LeapEvent {
   id: string;
   slug: string;
   themeId: string | null;
+  theme: {
+    id: string;
+    name: string;
+    path: string;
+  } | null;
   organizationId: string | null;
+  organization: {
+    id: string;
+    name: string;
+    acronym: string;
+    logoUrl: string | null;
+    link: string | null;
+  } | null;
   title: string;
   description: string | null;
   venue: string | null;
@@ -107,45 +135,102 @@ export interface LeapifyEvent {
   registeredSlots: number;
   gformsUrl: string | null;
   gformsEditorUrl: string | null;
+  releaseAt: number | null;
+  registrationClosesAt: number | null;
   publishedAt: number | null;
-  theme?: {
-    id: string;
-    name: string;
-  } | null;
-  organization?: {
-    id: string;
-    name: string;
-    acronym: string;
-    logoUrl: string | null;
-  } | null;
+  status?: EventStatus;
+  createdAt?: number;
+}
+
+export interface UserProfile {
+  id: string;
+  firebaseUid: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  image: string | null;
+  createdAt: number;
+}
+
+export interface LeapFaq {
+  id: string;
+  question: string;
+  answer: string;
+  category: string | null;
+  sortOrder: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface SiteConfig {
+  comingSoonUntil: number | null;
+  siteEndsAt: number | null;
+  siteName: string | null;
+  registrationGloballyOpen: boolean;
+  maintenanceMode: boolean;
+  now: number;
+}
+
+let authToken: string | null = null;
+
+async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
+  await solvePow();
+
+  const makeRequest = async () => {
+    const headers = new Headers(options.headers || {});
+    if (authToken) {
+      headers.set("Authorization", `Bearer ${authToken}`);
+    }
+
+    const fullUrl = `${API_URL}${path}`;
+    console.log(`[leapify] Request: ${options.method || "GET"} ${fullUrl}`);
+
+    const res = await fetch(fullUrl, {
+      ...options,
+      headers,
+      credentials: "include",
+    });
+
+    const ct = res.headers.get("content-type") || "";
+    if (ct.includes("text/html")) {
+      return { html: await res.text() };
+    }
+
+    return { json: await res.json() };
+  };
+
+  let result = await makeRequest();
+
+  // If we got HTML, it might be a stale PoW session. Try solving again and retrying once.
+  if (result.html) {
+    console.warn(`[leapify] Received HTML from ${path}, retrying PoW...`);
+    powSolved = false;
+    await solvePow();
+    result = await makeRequest();
+  }
+
+  if (result.html) {
+    console.error(
+      `[leapify] Expected JSON but got HTML from ${path} after retry. This usually means the PoW challenge is blocking the request or the server returned an error page.`,
+    );
+    console.log("[leapify] HTML snippet:", result.html.slice(0, 500));
+    throw new Error("API returned HTML instead of JSON");
+  }
+
+  const json = result.json;
+  const data = json.data ?? json;
+  console.log(`[leapify] Response from ${path}:`, data);
+  return data;
 }
 
 export const leapifyApi = {
-  getEvents: async (): Promise<LeapifyEvent[]> => {
-    try {
-      const response = await fetchWithTurnstile("/api/classes");
-      if (!response.ok) {
-        throw new Error(`Failed to fetch events: ${response.statusText}`);
-      }
-      const json = await response.json();
-      return json.data || [];
-    } catch (error) {
-      console.error("Error fetching events from Leapify API:", error);
-      return [];
-    }
+  setToken: (token: string | null) => {
+    authToken = token;
   },
-  
-  getSlots: async (slug: string): Promise<{ available: number; total: number; registered: number; isFull: boolean } | null> => {
-    try {
-      const response = await fetchWithTurnstile(`/api/classes/${slug}/slots`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch slots: ${response.statusText}`);
-      }
-      const json = await response.json();
-      return json.data || null;
-    } catch (error) {
-      console.error(`Error fetching slots for ${slug}:`, error);
-      return null;
-    }
-  }
+  getEvents: () => api<LeapEvent[]>("/api/classes"),
+  getFaqs: () => api<LeapFaq[]>("/api/faqs"),
+  getConfig: () => api<SiteConfig>("/api/config"),
+  getHealth: () => api<{ status: string }>("/health"),
+  getMe: () => api<UserProfile | null>("/api/users/me").catch(() => null),
+  signOut: () => api("/api/auth/sign-out", { method: "POST" }),
 };

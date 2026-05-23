@@ -1355,6 +1355,7 @@
   width: 100%;
   box-sizing: border-box;
   margin-top: -1px;
+  contain: layout style paint;
 }
 
 .heroBackdropTop {
@@ -1492,6 +1493,8 @@
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
+  min-height: 850px;
+  contain: layout style;
 }
 
 .footerContainer {

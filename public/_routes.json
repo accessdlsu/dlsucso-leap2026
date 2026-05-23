@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "description": "Route /api/* through the Worker; everything else is served from static assets.",
+  "include": ["/api/*"],
+  "exclude": []
+}

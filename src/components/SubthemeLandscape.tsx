@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import type { ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 
 interface SubthemeLandscapeProps {
   setActiveSubtheme: (label: string) => void;
@@ -21,6 +21,16 @@ const GlowAura = ({ color }: { color: string }) => (
 );
 
 export const SubthemeLandscape = ({ setActiveSubtheme, themeColors }: SubthemeLandscapeProps) => {
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1024
+  );
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  const isMobile = windowWidth < 768;
+
   const btn = (label: string, x: number, y: number, children: ReactNode) => {
     const c = themeColors[label];
     return (
@@ -29,9 +39,19 @@ export const SubthemeLandscape = ({ setActiveSubtheme, themeColors }: SubthemeLa
         onClick={() => setActiveSubtheme(label)}
         whileHover={{ scale: 1.12, filter: 'brightness(1.3)' }}
         whileTap={{ scale: 0.96 }}
-        style={{ position: 'absolute', left: x, top: y, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10, padding: 0 }}
+        style={{ 
+          position: isMobile ? 'relative' : 'absolute', 
+          left: isMobile ? 'auto' : x, 
+          top: isMobile ? 'auto' : y, 
+          background: 'none', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 10, padding: 0,
+          width: isMobile ? '100%' : 'auto'
+        }}
       >
-        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div style={{ 
+          position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center',
+          transform: isMobile ? 'scale(0.85)' : 'none',
+          transformOrigin: 'center bottom'
+        }}>
           <GlowAura color={c.glow} />
           <div style={{ position: 'relative', zIndex: 2 }}>{children}</div>
         </div>
@@ -43,7 +63,7 @@ export const SubthemeLandscape = ({ setActiveSubtheme, themeColors }: SubthemeLa
   return (
     <div style={{ position: 'relative', zIndex: 1, width: '100%', overflow: 'visible' }}>
       {/* Background SVG - taller canvas, header sits inside the sky portion */}
-      <div style={{ position: 'relative', width: '100%', height: 900, overflow: 'visible' }}>
+      <div style={{ position: 'relative', width: '100%', height: isMobile ? 1200 : 900, overflow: 'visible' }}>
 
         {/* TOP BLEND - softens the very top edge into parent (only at the very top) */}
         <div style={{
@@ -96,7 +116,7 @@ export const SubthemeLandscape = ({ setActiveSubtheme, themeColors }: SubthemeLa
         <svg
           width="100%"
           height="100%"
-          viewBox="0 0 1440 900"
+          viewBox={isMobile ? "0 0 1440 1200" : "0 0 1440 900"}
           preserveAspectRatio="xMidYMid slice"
           style={{ position: 'absolute', inset: 0 }}
         >
@@ -141,7 +161,7 @@ export const SubthemeLandscape = ({ setActiveSubtheme, themeColors }: SubthemeLa
           </defs>
 
           {/* Sky background */}
-          <rect x="0" y="0" width="1440" height="900" fill="url(#lsSky)" />
+          <rect x="0" y="0" width="1440" height={isMobile ? 1200 : 900} fill="url(#lsSky)" />
 
           {/* Soft glow behind header text area */}
           <rect x="0" y="0" width="1440" height="500" fill="url(#lsHeaderGlow)" />
@@ -192,14 +212,14 @@ export const SubthemeLandscape = ({ setActiveSubtheme, themeColors }: SubthemeLa
           ))}
 
           {/* Atmospheric mist overlay */}
-          <rect x="-1500" y="0" width="4440" height="900" fill="url(#lsMist)" pointerEvents="none" />
+          <rect x="-1500" y="0" width="4440" height={isMobile ? 1200 : 900} fill="url(#lsMist)" pointerEvents="none" />
 
           {/* ════════════════════════════════════════
               FOREGROUND PALAY TUFTS (the "frontest" layer)
           ════════════════════════════════════════ */}
 
           {/* Foreground rolling hill - below all interactive elements */}
-          <path d="M-1500 830 Q300 805 600 822 Q900 840 1200 815 Q1360 805 2940 820 L2940 900 L-1500 900Z" fill="url(#lsGroundFront)" opacity="0.95" />
+          <path d={`M-1500 830 Q300 805 600 822 Q900 840 1200 815 Q1360 805 2940 820 L2940 ${isMobile ? 1200 : 900} L-1500 ${isMobile ? 1200 : 900}Z`} fill="url(#lsGroundFront)" opacity="0.95" />
 
           {/* Front field highlight stroke */}
           <path d="M-1500 830 Q300 805 600 822 Q900 840 1200 815 Q1360 805 2940 820"
@@ -336,9 +356,20 @@ export const SubthemeLandscape = ({ setActiveSubtheme, themeColors }: SubthemeLa
           justifyContent: 'center',
           pointerEvents: 'none',
           overflow: 'visible',
-          paddingTop: '380px'
+          paddingTop: isMobile ? '240px' : '380px'
         }}>
-          <div style={{ position: 'relative', width: 1440, height: 500, flexShrink: 0, pointerEvents: 'none' }}>
+          <div style={isMobile ? {
+            position: 'relative',
+            width: '100%',
+            maxWidth: '500px',
+            padding: '0 1rem',
+            boxSizing: 'border-box',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '1rem',
+            rowGap: '2rem',
+            pointerEvents: 'none',
+          } : { position: 'relative', width: 1440, height: 500, flexShrink: 0, pointerEvents: 'none' }}>
             {/* ── Palayan ng Karunungan ── */}
             <div style={{ pointerEvents: 'auto' }}>
               {btn('Palayan ng Karunungan', 80, 285,
