@@ -11,7 +11,7 @@ import {
   BookOpen, Wrench, Handshake, HeartPulse, ArrowDown
 } from 'lucide-react';
 
-import { contentfulClient } from './services/contentful';
+import { leapifyApi } from './services/leapify';
 import {
   auth, db, googleProvider, signInWithPopup, signOut,
   onAuthStateChanged, doc, getDocFromServer, setDoc
@@ -1781,51 +1781,27 @@ const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => v
 
   useEffect(() => {
     const fetchMainEvents = async () => {
-      if (!contentfulClient) return;
       try {
-        const response = await contentfulClient.getEntries({ content_type: 'mainEvents', include: 2, limit: 5 });
-        if (response.items.length > 0) {
-          const eventList = response.items.map((item: any) => {
-            const pubMat = item.fields.mainEventPosterPublishingMaterial;
-            const mediaAsset = Array.isArray(pubMat) ? pubMat[0] : pubMat;
-            let imgUrl = `https://placehold.co/812x510?text=No+Image+Found`;
-            if (mediaAsset?.fields?.file?.url) {
-              imgUrl = mediaAsset.fields.file.url.startsWith('http')
-                ? mediaAsset.fields.file.url
-                : `https:${mediaAsset.fields.file.url}`;
-            }
-            let formattedDate = '', formattedTime = '';
-            if (item.fields.mainEventStartDate) {
-              const startObj = new Date(item.fields.mainEventStartDate);
-              formattedDate = startObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-              formattedTime = startObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-              if (item.fields.mainEventEndDate) {
-                const endObj = new Date(item.fields.mainEventEndDate);
-                const endDateStr = endObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-                if (formattedDate === endDateStr) {
-                  formattedTime += ` - ${endObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
-                } else {
-                  formattedDate += ` to ${endDateStr}`;
-                  formattedTime += ` - ${endObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
-                }
-              }
-            }
-            const orgLogoMat = item.fields.mainEventOrganizationInChargeLogo;
-            const orgLogoAsset = Array.isArray(orgLogoMat) ? orgLogoMat[0] : orgLogoMat;
+        const response = await leapifyApi.getEvents();
+        const spotlightEvents = response.filter((item) => item.isSpotlight);
+
+        if (spotlightEvents.length > 0) {
+          const eventList = spotlightEvents.map((item) => {
+            const imgUrl = item.backgroundImageUrl || `https://placehold.co/812x510?text=No+Image+Found`;
             return {
-              id: item.sys.id,
-              label: item.fields.mainEventTitle || 'Untitled Event',
+              id: item.id,
+              label: item.title || 'Untitled Event',
               image: imgUrl,
-              org: item.fields.mainEventOrganizationInCharge || '',
-              modality: item.fields.mainEventClassModality || 'Face-to-Face',
-              date: formattedDate,
-              time: formattedTime,
-              venue: item.fields.mainEventVenue || '',
-              slots: item.fields.mainEventNumberOfSlots || 0,
-              subtheme: item.fields.mainEventSubtheme || '',
-              orgLogo: orgLogoAsset?.fields?.file?.url ? `https:${orgLogoAsset.fields.file.url}` : null,
-              googleFormUrl: item.fields.mainEventRegistrationLink || '',
-              description: item.fields.mainEventDescription || ''
+              org: item.organization?.name || '',
+              modality: item.venue?.toLowerCase().includes('online') || item.venue?.toLowerCase().includes('zoom') ? 'Online' : 'Face-to-Face',
+              date: item.dateTime || '',
+              time: item.startTime && item.endTime ? `${item.startTime} - ${item.endTime}` : item.startTime || '',
+              venue: item.venue || '',
+              slots: item.maxSlots || 0,
+              subtheme: item.theme?.name || '',
+              orgLogo: item.organization?.logoUrl || null,
+              googleFormUrl: item.gformsUrl || '',
+              description: item.description || ''
             };
           });
           if (eventList.length === 2) {
@@ -1836,7 +1812,7 @@ const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => v
           setActiveIndex(0);
         }
       } catch (error) {
-        console.error("Contentful Error (Main Events):", error);
+        console.error("Leapify API Error (Main Events):", error);
       }
     };
 
@@ -2197,39 +2173,35 @@ const LeapApp = () => {
       return () => document.removeEventListener('click', handleClickOutside);
     }
   }, [isProfileOpen]);
-
   useEffect(() => {
     if (!user) return;
     const fetchClasses = async () => {
-      if (!contentfulClient) { setLoading(false); return; }
       try {
-        const response = await contentfulClient.getEntries({ content_type: 'leapClass2026' });
-        const classList: LeapClass[] = response.items.map((item: any) => {
-          let formattedDate = '', formattedTime = '';
-          if (item.fields.startDate) {
-            const startObj = new Date(item.fields.startDate);
-            formattedDate = startObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-            formattedTime = startObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-            if (item.fields.endDate) {
-              const endObj = new Date(item.fields.endDate);
-              const endDateStr = endObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-              if (formattedDate === endDateStr) { formattedTime += ` - ${endObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`; }
-              else { formattedDate += ` to ${endDateStr}`; formattedTime += ` - ${endObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`; }
-            }
-          }
+        const response = await leapifyApi.getEvents();
+        const normalClasses = response.filter((item) => !item.isSpotlight);
+        const classList: LeapClass[] = normalClasses.map((item) => {
           return {
-            id: item.sys.id, title: item.fields.title || '', org: item.fields.organizationInCharge || '',
-            modality: item.fields.classModality || 'Face-to-Face', date: formattedDate, time: formattedTime,
-            venue: item.fields.venue || '', slots: item.fields.numberOfSlots || 0, subtheme: item.fields.subtheme || '',
-            image: item.fields.posterPublishingMaterial?.fields?.file?.url ? `https:${item.fields.posterPublishingMaterial.fields.file.url}` : 'https://picsum.photos/seed/leap/400/250',
-            orgLogo: item.fields.organizationInChargeLogo?.fields?.file?.url ? `https:${item.fields.organizationInChargeLogo.fields.file.url}` : null,
-            googleFormUrl: item.fields.registrationLink || '',
-            description: item.fields.description || 'No description provided for this class.'
+            id: item.id,
+            title: item.title || '',
+            org: item.organization?.name || '',
+            modality: item.venue?.toLowerCase().includes('online') || item.venue?.toLowerCase().includes('zoom') ? 'Online' : 'Face-to-Face',
+            date: item.dateTime || '',
+            time: item.startTime && item.endTime ? `${item.startTime} - ${item.endTime}` : item.startTime || '',
+            venue: item.venue || '',
+            slots: item.maxSlots || 0,
+            subtheme: item.theme?.name || '',
+            image: item.backgroundImageUrl || 'https://picsum.photos/seed/leap/400/250',
+            orgLogo: item.organization?.logoUrl || null,
+            googleFormUrl: item.gformsUrl || '',
+            description: item.description || 'No description provided for this class.'
           };
         });
         setClasses(classList);
-      } catch (error) { console.error("Contentful Error (Classes):", error); }
-      finally { setLoading(false); }
+      } catch (error) {
+        console.error("Leapify API Error (Classes):", error);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchClasses();
     let intervalId: ReturnType<typeof setInterval> | null = null;
@@ -2331,9 +2303,9 @@ const LeapApp = () => {
       </div>
       <div className={styles.adminCard}>
         <div className={styles.adminIconWrap} style={{ width: 80, height: 80 }}><Edit size={36} /></div>
-        <h3 className={styles.adminCardTitle} style={{ fontFamily: "'Playfair Display', serif" }}>Classes are managed in Contentful</h3>
-        <p className={styles.adminCardDesc}>To add, edit, or delete classes, please use the Contentful CMS dashboard.</p>
-        <a href="https://app.contentful.com" target="_blank" rel="noopener noreferrer" className={styles.adminCTABtn}>Open Contentful <ExternalLink size={20} /></a>
+        <h3 className={styles.adminCardTitle} style={{ fontFamily: "'Playfair Display', serif" }}>Classes are managed in Leapify Console</h3>
+        <p className={styles.adminCardDesc}>To add, edit, or delete classes, please use the Leapify Admin Console dashboard.</p>
+        <a href={import.meta.env.VITE_LEAPIFY_API_URL || 'https://leapify-console.accessdlsu.workers.dev'} target="_blank" rel="noopener noreferrer" className={styles.adminCTABtn}>Open Leapify Console <ExternalLink size={20} /></a>
       </div>
     </div>
   );

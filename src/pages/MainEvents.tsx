@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, MapPin, Users, ExternalLink } from 'lucide-react';
 import { PageWrapper } from '../components/PageCommon';
-import { contentfulClient } from '../services/contentful';
+import { leapifyApi } from '../services/leapify';
 
 const ACCENT_COLORS = ['#de9a49', '#4ab09a', '#b05a32', '#5ca0a8', '#803e2f'];
 
@@ -29,62 +29,34 @@ export default function MainEvents() {
 
   useEffect(() => {
     const fetchEvents = async () => {
-      if (!contentfulClient) { setLoading(false); return; }
       try {
-        const response = await contentfulClient.getEntries({
-          content_type: 'mainEvents',
-          include: 2,
-          order: ['fields.mainEventStartDate'] as any,
-        });
+        const response = await leapifyApi.getEvents();
+        const spotlightEvents = response.filter((item) => item.isSpotlight);
 
-        const mapped: MainEvent[] = response.items.map((item: any, i: number) => {
-          const pubMat = item.fields.mainEventPosterPublishingMaterial;
-          const mediaAsset = Array.isArray(pubMat) ? pubMat[0] : pubMat;
-          const img = mediaAsset?.fields?.file?.url
-            ? (mediaAsset.fields.file.url.startsWith('http')
-                ? mediaAsset.fields.file.url
-                : `https:${mediaAsset.fields.file.url}`)
-            : 'https://placehold.co/420x260?text=No+Image';
-
-          const orgLogoMat = item.fields.mainEventOrganizationInChargeLogo;
-          const orgLogoAsset = Array.isArray(orgLogoMat) ? orgLogoMat[0] : orgLogoMat;
-          const orgLogo = orgLogoAsset?.fields?.file?.url
-            ? `https:${orgLogoAsset.fields.file.url}`
-            : null;
-          let date = '', time = '';
-          if (item.fields.mainEventStartDate) {
-            const start = new Date(item.fields.mainEventStartDate);
-            date = start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-            time = start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-            if (item.fields.mainEventEndDate) {
-              const end = new Date(item.fields.mainEventEndDate);
-              const endDateStr = end.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-              if (date !== endDateStr) date += ` – ${endDateStr}`;
-              time += ` – ${end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
-            }
-          }
+        const mapped: MainEvent[] = spotlightEvents.map((item, i) => {
+          const img = item.backgroundImageUrl || 'https://placehold.co/420x260?text=No+Image';
 
           return {
-            id: item.sys.id,
-            title: item.fields.mainEventTitle || 'Untitled Event',
-            tag: item.fields.mainEventSubtheme || 'Main Event',
-            date,
-            time,
-            venue: item.fields.mainEventVenue || '',
-            modality: item.fields.mainEventClassModality || 'Face-to-Face',
-            desc: item.fields.mainEventDescription || '',
+            id: item.id,
+            title: item.title || 'Untitled Event',
+            tag: item.theme?.name || 'Main Event',
+            date: item.dateTime || '',
+            time: item.startTime && item.endTime ? `${item.startTime} – ${item.endTime}` : item.startTime || '',
+            venue: item.venue || '',
+            modality: item.venue?.toLowerCase().includes('online') || item.venue?.toLowerCase().includes('zoom') ? 'Online' : 'Face-to-Face',
+            desc: item.description || '',
             img,
             accent: ACCENT_COLORS[i % ACCENT_COLORS.length],
-            org: item.fields.mainEventOrganizationInCharge || '',
-            orgLogo,
-            slots: item.fields.mainEventNumberOfSlots || 0,
-            registrationLink: item.fields.mainEventRegistrationLink || '',
+            org: item.organization?.name || '',
+            orgLogo: item.organization?.logoUrl || null,
+            slots: item.maxSlots,
+            registrationLink: item.gformsUrl || '',
           };
         });
 
         setEvents(mapped);
       } catch (err) {
-        console.error('Contentful Error (MainEvents page):', err);
+        console.error('Error fetching spotlight events:', err);
       } finally {
         setLoading(false);
       }

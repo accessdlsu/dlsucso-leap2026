@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { contentfulClient } from '../services/contentful';
+import { leapifyApi } from '../services/leapify';
 import type { MainEvent, LeapClass } from '../types';
 
 /**
- * Hook to fetch main events from Contentful
+ * Hook to fetch main events from Leapify API
  */
 export function useMainEvents(): {
   events: MainEvent[];
@@ -16,40 +16,26 @@ export function useMainEvents(): {
 
   useEffect(() => {
     const fetchEvents = async () => {
-      if (!contentfulClient) {
-        setLoading(false);
-        return;
-      }
-
       try {
-        const response = await contentfulClient.getEntries({
-          content_type: 'mainEvents',
-          include: 2,
-          order: ['fields.mainEventStartDate'] as any,
-        });
-
+        const response = await leapifyApi.getEvents();
+        const spotlightEvents = response.filter((item) => item.isSpotlight);
+        
         const ACCENT_COLORS = ['#de9a49', '#4ab09a', '#b05a32', '#5ca0a8', '#803e2f'];
 
-        const mapped: MainEvent[] = response.items.map((item: any, i: number) => {
-          const pubMat = item.fields.mainEventPosterPublishingMaterial;
-          const mediaAsset = Array.isArray(pubMat) ? pubMat[0] : pubMat;
-          const img = mediaAsset?.fields?.file?.url
-            ? mediaAsset.fields.file.url.startsWith('http')
-              ? mediaAsset.fields.file.url
-              : `https:${mediaAsset.fields.file.url}`
-            : 'https://placehold.co/420x260?text=No+Image';
+        const mapped: MainEvent[] = spotlightEvents.map((item, i) => {
+          const img = item.backgroundImageUrl || 'https://placehold.co/420x260?text=No+Image';
 
           return {
-            id: item.sys.id,
-            title: item.fields.mainEventTitle || 'Untitled Event',
-            description: item.fields.mainEventDescription || '',
+            id: item.id,
+            title: item.title || 'Untitled Event',
+            description: item.description || '',
             img,
-            tag: item.fields.mainEventTag || 'LEAP 2026',
+            tag: item.theme?.name || 'LEAP 2026',
             accent: ACCENT_COLORS[i % ACCENT_COLORS.length],
-            date: item.fields.mainEventStartDate || '',
-            time: item.fields.mainEventStartTime || '',
-            venue: item.fields.mainEventVenue || '',
-            capacity: item.fields.mainEventCapacity || 0,
+            date: item.dateTime || '',
+            time: item.startTime && item.endTime ? `${item.startTime} – ${item.endTime}` : item.startTime || '',
+            venue: item.venue || '',
+            capacity: item.maxSlots || 0,
           };
         });
 

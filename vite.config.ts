@@ -37,10 +37,6 @@ export default defineConfig({
           if (id.includes('node_modules/firebase')) {
             return 'firebase';
           }
-          // Contentful
-          if (id.includes('node_modules/contentful')) {
-            return 'contentful';
-          }
         },
       },
     },
