@@ -18,22 +18,26 @@
  *   `npm run pages:dev`   — Pages + Worker with hot-reload
  *   `npm run worker:dev`  — standalone Worker dev server
  */
-
 export interface Env {
   /** Set via `wrangler secret put` or `.dev.vars` for local dev */
-  VITE_CONTENTFUL_SPACE_ID?: string;
-  VITE_CONTENTFUL_ACCESS_TOKEN?: string;
-  VITE_FIREBASE_API_KEY?: string;
-
+  CONTENTFUL_SPACE_ID?: string;
+  CONTENTFUL_ACCESS_TOKEN?: string;
   /** Injected by wrangler.jsonc `vars` */
-  ENVIRONMENT?: string;
-
+  VITE_FIREBASE_API_KEY?: string;
+  VITE_FIREBASE_AUTH_DOMAIN?: string;
+  VITE_FIREBASE_PROJECT_ID?: string;
+  VITE_FIREBASE_STORAGE_BUCKET?: string;
+  VITE_FIREBASE_MESSAGING_SENDER_ID?: string;
+  VITE_FIREBASE_APP_ID?: string;
+  VITE_FIREBASE_MEASUREMENT_ID?: string;
+  VITE_TURNSTILE_SITE_KEY?: string;
+  VITE_LEAPIFY_API_URL?: string;
+  VITE_ENVIRONMENT?: string;
   /** Static Assets binding */
   ASSETS?: Fetcher;
 }
 
 // ── Security & Cache Headers ──────────────────────────────────────────────────
-
 const SECURITY_HEADERS: Record<string, string> = {
   // Prevent MIME-type sniffing
   "X-Content-Type-Options": "nosniff",
@@ -52,11 +56,11 @@ const SECURITY_HEADERS: Record<string, string> = {
    */
   "Content-Security-Policy": [
     "default-src 'self'",
-    // Firebase SDK + Google Auth popup
+    // Firebase SDK + Google Auth popup + unsafe-inline
     "script-src 'self' 'unsafe-inline' https://apis.google.com https://www.gstatic.com",
-    // Firebase, Contentful image CDN, Google Fonts, placehold.co
+    // Firebase, Contentful image CDN, Google Fonts, placeholder.com
     "img-src 'self' data: https: blob:",
-    // Firebase Firestore & Storage WebSocket
+    // Firebase Firestore & Storage + Google APIs + Contentful CDN + WebSockets
     "connect-src 'self' http://localhost:8787 http://127.0.0.1:8787 https://*.googleapis.com https://*.firebaseio.com https://*.contentful.com https://cdn.contentful.com wss://*.firebaseio.com https://leapify-console.accessdlsu.workers.dev",
     // Google Fonts + self
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
@@ -118,7 +122,7 @@ async function handleApiRequest(
     return jsonResponse({
       status: "ok",
       project: "dlsucso-leap2026",
-      environment: env.ENVIRONMENT ?? "unknown",
+      environment: env.VITE_ENVIRONMENT ?? "unknown",
       timestamp: new Date().toISOString(),
     });
   }
@@ -129,12 +133,12 @@ async function handleApiRequest(
    * Keeps the Contentful access token out of the browser bundle.
    * Usage: GET /api/contentful?content_type=mainEvents&include=2&limit=5
    *
-   * Only active when VITE_CONTENTFUL_SPACE_ID and
-   * VITE_CONTENTFUL_ACCESS_TOKEN are bound as Worker secrets.
+   * Only active when CONTENTFUL_SPACE_ID and
+   * CONTENTFUL_ACCESS_TOKEN are bound as Worker secrets.
    */
   if (pathname === "/api/contentful" && request.method === "GET") {
-    const spaceId = env.VITE_CONTENTFUL_SPACE_ID;
-    const token = env.VITE_CONTENTFUL_ACCESS_TOKEN;
+    const spaceId = env.CONTENTFUL_SPACE_ID;
+    const token = env.CONTENTFUL_ACCESS_TOKEN;
 
     if (!spaceId || !token) {
       return jsonResponse(

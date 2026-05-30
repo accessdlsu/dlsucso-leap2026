@@ -3,26 +3,30 @@
     "target": "ES2022",
     "module": "ES2022",
     "moduleResolution": "bundler",
-    "lib": ["ES2022"],
-
+    "lib": [
+      "ES2022"
+    ],
     /**
      * Use @cloudflare/workers-types instead of DOM so the Worker
      * gets the correct global types (Request, Response, ExecutionContext …)
      * without conflicting with the browser DOM types in tsconfig.app.json.
      */
-    "types": ["@cloudflare/workers-types"],
-
+    "types": [
+      "@cloudflare/workers-types"
+    ],
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "verbatimModuleSyntax": true,
-
     /**
      * Wrangler compiles the worker itself; tsc is only used for type-checking.
      */
     "noEmit": true
   },
-  "include": ["worker"]
+  "include": [
+    "worker",
+    "worker-configuration.d.ts"
+  ]
 }

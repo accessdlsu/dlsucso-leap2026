@@ -11,12 +11,16 @@
     "nodejs_compat"
   ],
   "vars": {
-    "ENVIRONMENT": "production",
+    "VITE_ENVIRONMENT": "production",
+    "VITE_FIREBASE_API_KEY": "AIzaSyAkie-COma955xB94q9Xdk69uqEhCKcKYE",
     "VITE_FIREBASE_AUTH_DOMAIN": "dlsu-leap-2026.firebaseapp.com",
     "VITE_FIREBASE_PROJECT_ID": "dlsu-leap-2026",
     "VITE_FIREBASE_STORAGE_BUCKET": "dlsu-leap-2026.firebasestorage.app",
     "VITE_FIREBASE_MESSAGING_SENDER_ID": "315460522539",
     "VITE_FIREBASE_APP_ID": "1:315460522539:web:176e8182aef2597d93d06e",
+    "VITE_FIREBASE_MEASUREMENT_ID": "G-BV5Z3SXBB1",
+    "VITE_LEAPIFY_API_URL": "https://leapify-console.accessdlsu.workers.dev",
+    "VITE_TURNSTILE_SITE_KEY": "0x4AAAAAADVAw3hICRTapWIP"
   },
   "assets": {
     "directory": "./dist",
@@ -25,13 +29,13 @@
     // Intercept requests matching /api/* in the Worker first before matching static files.
     "run_worker_first": [
       "/api/*"
-    ],
+    ]
   },
   "observability": {
-    "enabled": true,
+    "enabled": true
   },
   "placement": {
-    "region": "aws:ap-southeast-1",
+    "region": "aws:ap-southeast-1"
   },
   "preview_urls": false,
   "upload_source_maps": true,
@@ -39,13 +43,17 @@
     "staging": {
       "name": "dlsucso-leap2026-dev",
       "vars": {
-        "ENVIRONMENT": "staging",
+        "VITE_ENVIRONMENT": "staging",
+        "VITE_FIREBASE_API_KEY": "AIzaSyAkie-COma955xB94q9Xdk69uqEhCKcKYE",
         "VITE_FIREBASE_AUTH_DOMAIN": "dlsu-leap-2026.firebaseapp.com",
         "VITE_FIREBASE_PROJECT_ID": "dlsu-leap-2026",
         "VITE_FIREBASE_STORAGE_BUCKET": "dlsu-leap-2026.firebasestorage.app",
         "VITE_FIREBASE_MESSAGING_SENDER_ID": "315460522539",
         "VITE_FIREBASE_APP_ID": "1:315460522539:web:176e8182aef2597d93d06e",
-      },
-    },
-  },
+        "VITE_FIREBASE_MEASUREMENT_ID": "G-BV5Z3SXBB1",
+        "VITE_LEAPIFY_API_URL": "https://leapify-console.accessdlsu.workers.dev",
+        "VITE_TURNSTILE_SITE_KEY": "0x4AAAAAADVAw3hICRTapWIP"
+      }
+    }
+  }
 }
