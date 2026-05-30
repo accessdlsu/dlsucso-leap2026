@@ -38,7 +38,6 @@
     "region": "aws:ap-southeast-1"
   },
   "preview_urls": false,
-  "upload_source_maps": true,
   "env": {
     "staging": {
       "name": "dlsucso-leap2026-dev",
@@ -53,7 +52,8 @@
         "VITE_FIREBASE_MEASUREMENT_ID": "G-BV5Z3SXBB1",
         "VITE_LEAPIFY_API_URL": "https://leapify-console.accessdlsu.workers.dev",
         "VITE_TURNSTILE_SITE_KEY": "0x4AAAAAADVAw3hICRTapWIP"
-      }
+      },
+      "upload_source_maps": true
     }
   }
 }
