@@ -1,47 +1,41 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
 {
-  /**
-   * DLSU CSO LEAP 2026 — Cloudflare Workers Static Assets Configuration
-   * Docs: https://developers.cloudflare.com/workers/wrangler/configuration/
-   */
+  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "dlsucso-leap2026",
-
-  /**
-   * Main worker script entry point.
-   * Runs first for matches in `run_worker_first` to handle edge APIs/proxies.
-   */
-  "main": "./worker/index.ts",
-
-  /**
-   * Compatibility settings.
-   * `nodejs_compat` is enabled to allow Contentful SDK and Node APIs to work at the edge.
-   */
-  "compatibility_date": "2026-05-23",
-  "compatibility_flags": ["nodejs_compat"],
-
-  /**
-   * Global plain environment variables (non-secrets).
-   * Secrets must be set via `wrangler secret put <NAME>` or in `.dev.vars` for local dev.
-   */
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-05-30",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "vars": {
-    "ENVIRONMENT": "production"
+    "ENVIRONMENT": "production",
   },
-
-  /**
-   * Static Assets settings.
-   * Maps Vite-built assets from `./dist` and configures SPA/API routing.
-   */
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
     // Intercept requests matching /api/* in the Worker first before matching static files.
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": [
+      "/api/*"
+    ],
   },
-
-  /**
-   * Observability configuration (enables Workers Logpush and tail stream).
-   */
   "observability": {
-    "enabled": true
-  }
+    "enabled": true,
+  },
+  "placement": {
+    "region": "aws:ap-southeast-1",
+  },
+  "preview_urls": false,
+  "upload_source_maps": true,
+  "env": {
+    "staging": {
+      "name": "dlsucso-leap2026-dev",
+      "vars": {
+        "ENVIRONMENT": "staging",
+      },
+    },
+  },
 }
