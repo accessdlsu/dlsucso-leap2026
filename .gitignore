@@ -197,6 +197,7 @@ vite.config.ts.timestamp-*
 # Wrangler / Cloudflare
 .wrangler/
 worker-configuration.d.ts
+tsconfig.worker.tsbuildinfo
 
 # Tests
 load-tests/

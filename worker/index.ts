@@ -70,35 +70,7 @@ const SECURITY_HEADERS: Record<string, string> = {
   ].join("; "),
 };
 
-/** Cache control for static assets (1 year, immutable) */
-const ASSET_CACHE = "public, max-age=31536000, immutable";
-/** Cache control for HTML documents (no-cache so updates propagate instantly) */
-const HTML_CACHE = "public, max-age=0, must-revalidate";
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function applyHeaders(
-  response: Response,
-  extra?: Record<string, string>,
-): Response {
-  const headers = new Headers(response.headers);
-
-  for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
-    headers.set(key, value);
-  }
-
-  if (extra) {
-    for (const [key, value] of Object.entries(extra)) {
-      headers.set(key, value);
-    }
-  }
-
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
-  });
-}
 
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
