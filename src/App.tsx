@@ -13,7 +13,8 @@ import {
   BookOpen, Wrench, Handshake, HeartPulse, ArrowDown
 } from 'lucide-react';
 import { leapifyApi } from './services/leapify';
-import { useOptimizedScrollProgress, rafThrottle } from './hooks';
+import { useOptimizedScrollProgress, rafThrottle, useClasses, useConfig } from './hooks';
+import type { LeapClass } from './types';
 
 
 const Home = lazy(() => import('./pages/Home'));
@@ -1613,11 +1614,6 @@ const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => v
 
 
 const LeapApp = () => {
-  interface LeapClass {
-    id: string; title: string; org: string; modality: string; date: string;
-    time: string; venue: string; slots: number; subtheme: string; image: string;
-    orgLogo: string | null; googleFormUrl: string; description: string;
-  }
   interface UserProfile {
     uid: string; email: string | null; displayName: string | null;
     photoURL: string | null; role: 'student' | 'admin'; registeredClasses: string[]; savedClasses: string[];
@@ -1625,8 +1621,8 @@ const LeapApp = () => {
 
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [classes, setClasses] = useState<LeapClass[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: classes, loading, refetch: refetchClasses } = useClasses();
+  const { data: _siteConfig } = useConfig(); // TODO: wire maintenance/coming-soon gating
   const [isAdminView, setIsAdminView] = useState(false);
   const [currentView, setCurrentView] = useState<'home' | 'about' | 'major-events' | 'classes' | 'faq' | 'contact' | 'saved-classes'>('home');
   const [scrolled, setScrolled] = useState(false);
@@ -1646,27 +1642,27 @@ const LeapApp = () => {
   const [showNayon, setShowNayon] = useState(false);
 
 
-useEffect(() => {
-  const ric = (window as any).requestIdleCallback;
-  const cic = (window as any).cancelIdleCallback;
-  let idleHandle: any;
-  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+  useEffect(() => {
+    const ric = (window as any).requestIdleCallback;
+    const cic = (window as any).cancelIdleCallback;
+    let idleHandle: any;
+    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
 
-  if (ric) {
-    idleHandle = ric(() => setShowNayon(true), { timeout: 2000 });
-  } else {
-    timeoutHandle = setTimeout(() => setShowNayon(true), 300);
-  }
+    if (ric) {
+      idleHandle = ric(() => setShowNayon(true), { timeout: 2000 });
+    } else {
+      timeoutHandle = setTimeout(() => setShowNayon(true), 300);
+    }
 
-  return () => {
-    if (idleHandle !== undefined && cic) {
-      cic(idleHandle);
-    }
-    if (timeoutHandle !== undefined) {
-      clearTimeout(timeoutHandle);
-    }
-  };
-}, []);
+    return () => {
+      if (idleHandle !== undefined && cic) {
+        cic(idleHandle);
+      }
+      if (timeoutHandle !== undefined) {
+        clearTimeout(timeoutHandle);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (authError) {
@@ -1714,62 +1710,61 @@ useEffect(() => {
 
 
   useEffect(() => {
-  let unsubscribe: (() => void) | null = null;
-  let cancelled = false;
+    let unsubscribe: (() => void) | null = null;
+    let cancelled = false;
 
-  // Defer firebase/auth load until browser is idle (after FCP/LCP)
-  const start = () => {
-    if (cancelled) return;
-    getAuthModule().then(({ auth, onAuthStateChanged, signOut }) => {
+    // Defer firebase/auth load until browser is idle (after FCP/LCP)
+    const start = () => {
       if (cancelled) return;
-      unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        void (async () => {
-          try {
-          setUser(currentUser);
-          if (currentUser) {
-            const currentEmail = currentUser.email?.toLowerCase();
-            if (!currentUser.emailVerified || !currentEmail?.endsWith('@dlsu.edu.ph')) {
-              setUserProfile(null); setIsAdminView(false); navigateTo('home');
-              await signOut(auth);
-              return;
-            }
+      getAuthModule().then(({ auth, onAuthStateChanged, signOut }) => {
+        if (cancelled) return;
+        unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+          void (async () => {
             try {
-              const { doc, getDocFromServer, setDoc } = await import('firebase/firestore');
-              const { getDb } = await import('./services/firebase-lazy');
-              const db = await getDb();
-              const userDoc = await getDocFromServer(doc(db, 'users', currentUser.uid));
-              if (userDoc.exists()) {
-                setUserProfile(userDoc.data() as UserProfile);
-              } else {
-                const newProfile: UserProfile = { uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, photoURL: currentUser.photoURL, role: 'student', registeredClasses: [], savedClasses: [] };
-                await setDoc(doc(db, 'users', currentUser.uid), newProfile);
-                setUserProfile(newProfile);
-              }
-            } catch (error: unknown) {
-              const isPermissionDenied = typeof error === 'object' && error !== null && 'code' in error && (error as { code?: string }).code === 'permission-denied';
-              if (isPermissionDenied) { if (!hasLoggedProfilePermissionIssue.current) { console.warn('Firestore profile access denied.'); hasLoggedProfilePermissionIssue.current = true; } }
-              else { console.error('Firestore profile bootstrap failed:', error); }
-              setUserProfile({ uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, photoURL: currentUser.photoURL, role: 'student', registeredClasses: [], savedClasses: [] });
-            }
-          } else { setUserProfile(null); setIsAdminView(false); setCurrentView('home'); }
-        } catch (error: unknown) { console.error('Auth state handling failed:', error); setUserProfile(null); }
-        finally { setLoading(false); }
-        })();
+              setUser(currentUser);
+              if (currentUser) {
+                const currentEmail = currentUser.email?.toLowerCase();
+                if (!currentUser.emailVerified || !currentEmail?.endsWith('@dlsu.edu.ph')) {
+                  setUserProfile(null); setIsAdminView(false); navigateTo('home');
+                  await signOut(auth);
+                  return;
+                }
+                try {
+                  const { doc, getDocFromServer, setDoc } = await import('firebase/firestore');
+                  const { getDb } = await import('./services/firebase-lazy');
+                  const db = await getDb();
+                  const userDoc = await getDocFromServer(doc(db, 'users', currentUser.uid));
+                  if (userDoc.exists()) {
+                    setUserProfile(userDoc.data() as UserProfile);
+                  } else {
+                    const newProfile: UserProfile = { uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, photoURL: currentUser.photoURL, role: 'student', registeredClasses: [], savedClasses: [] };
+                    await setDoc(doc(db, 'users', currentUser.uid), newProfile);
+                    setUserProfile(newProfile);
+                  }
+                } catch (error: unknown) {
+                  const isPermissionDenied = typeof error === 'object' && error !== null && 'code' in error && (error as { code?: string }).code === 'permission-denied';
+                  if (isPermissionDenied) { if (!hasLoggedProfilePermissionIssue.current) { console.warn('Firestore profile access denied.'); hasLoggedProfilePermissionIssue.current = true; } }
+                  else { console.error('Firestore profile bootstrap failed:', error); }
+                  setUserProfile({ uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, photoURL: currentUser.photoURL, role: 'student', registeredClasses: [], savedClasses: [] });
+                }
+              } else { setUserProfile(null); setIsAdminView(false); setCurrentView('home'); }
+            } catch (error: unknown) { console.error('Auth state handling failed:', error); setUserProfile(null); }
+          })();
+        });
       });
-    });
-  };
+    };
 
-  if ('requestIdleCallback' in window) {
-    (window as any).requestIdleCallback(start, { timeout: 1500 });
-  } else {
-    setTimeout(start, 200);
-  }
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(start, { timeout: 1500 });
+    } else {
+      setTimeout(start, 200);
+    }
 
-  return () => {
-    cancelled = true;
-    if (unsubscribe) unsubscribe();
-  };
-}, []);
+    return () => {
+      cancelled = true;
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
 
   // Load saved classes when user profile changes
   useEffect(() => {
@@ -1795,45 +1790,16 @@ useEffect(() => {
 
   useEffect(() => {
     if (!user) return;
-    const fetchClasses = async () => {
-      try {
-        const response = await leapifyApi.getEvents();
-        const normalClasses = response.filter((item) => !item.isSpotlight);
-        const classList: LeapClass[] = normalClasses.map((item) => {
-          return {
-            id: item.id,
-            title: item.title || '',
-            org: item.organization?.name || '',
-            modality: item.venue?.toLowerCase().includes('online') || item.venue?.toLowerCase().includes('zoom') ? 'Online' : 'Face-to-Face',
-            date: item.dateTime || '',
-            time: item.startTime && item.endTime ? `${item.startTime} - ${item.endTime}` : item.startTime || '',
-            venue: item.venue || '',
-            slots: item.maxSlots || 0,
-            subtheme: item.theme?.name || '',
-            image: item.backgroundImageUrl || 'https://picsum.photos/seed/leap/400/250',
-            orgLogo: item.organization?.logoUrl || null,
-            googleFormUrl: item.gformsUrl || '',
-            description: item.description || 'No description provided for this class.'
-          };
-        });
-        setClasses(classList);
-      } catch (error) {
-        console.error("Leapify API Error (Classes):", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchClasses();
     let intervalId: ReturnType<typeof setInterval> | null = null;
-    const startPolling = () => { if (!intervalId) intervalId = setInterval(fetchClasses, 60000); };
+    const startPolling = () => { if (!intervalId) intervalId = setInterval(refetchClasses, 60000); };
     const stopPolling = () => { if (intervalId) { clearInterval(intervalId); intervalId = null; } };
     startPolling();
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') { fetchClasses(); startPolling(); } else { stopPolling(); }
+      if (document.visibilityState === 'visible') { refetchClasses(); startPolling(); } else { stopPolling(); }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => { document.removeEventListener('visibilitychange', handleVisibilityChange); stopPolling(); };
-  }, [user]);
+  }, [user, refetchClasses]);
 
   useEffect(() => {
     const handleScroll = rafThrottle(() => {
@@ -1858,27 +1824,27 @@ useEffect(() => {
   }, [viewingClass]);
 
   const handleSignIn = async () => {
-  setAuthError(null);
-  try {
-    const { auth, googleProvider, signInWithPopup, signOut } = await getAuthModule();
-    const result = await signInWithPopup(auth, googleProvider);
-    const email = result.user.email?.toLowerCase();
-    if (!result.user.emailVerified || !email?.endsWith('@dlsu.edu.ph')) {
-      await signOut(auth);
-      setAuthError('Access Denied: Please use your verified official @dlsu.edu.ph email to sign in.');
+    setAuthError(null);
+    try {
+      const { auth, googleProvider, signInWithPopup, signOut } = await getAuthModule();
+      const result = await signInWithPopup(auth, googleProvider);
+      const email = result.user.email?.toLowerCase();
+      if (!result.user.emailVerified || !email?.endsWith('@dlsu.edu.ph')) {
+        await signOut(auth);
+        setAuthError('Access Denied: Please use your verified official @dlsu.edu.ph email to sign in.');
+      }
+    } catch (error: any) {
+      if (error.code !== 'auth/popup-closed-by-user') {
+        setAuthError('An error occurred during sign in. Please try again.');
+      }
     }
-  } catch (error: any) {
-    if (error.code !== 'auth/popup-closed-by-user') {
-      setAuthError('An error occurred during sign in. Please try again.');
-    }
-  }
-};
+  };
 
-const handleSignOut = async () => {
-  const { auth, signOut } = await getAuthModule();
-  await signOut(auth);
-  setIsMenuOpen(false);
-};
+  const handleSignOut = async () => {
+    const { auth, signOut } = await getAuthModule();
+    await signOut(auth);
+    setIsMenuOpen(false);
+  };
 
   const toggleSaveClass = async (classId: string) => {
     if (!user || !userProfile) {
@@ -2225,17 +2191,17 @@ const handleSignOut = async () => {
         >
           {/* <img src={leapLogo} alt="LEAP 2026 — Isang Nayon, Isang Layunin" width="280" height="158" className={styles.heroLogo} loading="eager" fetchPriority="high" style={{ aspectRatio: '280 / 158' }} /> */}
           <img
-              src={leapLogoXs}
-              srcSet={`${leapLogoXs} 360w, ${leapLogoSm} 480w, ${leapLogoMd} 720w, ${leapLogo} 1040w`}
-              sizes="(max-width: 480px) 280px, (max-width: 768px) 320px, 480px"
-              alt="LEAP 2026 — Isang Nayon, Isang Layunin"
-              width="280"
-              height="158"
-              className={styles.heroLogo}
-              loading="eager"
-              fetchPriority="high"
-              style={{ aspectRatio: '280 / 158' }}
-            />
+            src={leapLogoXs}
+            srcSet={`${leapLogoXs} 360w, ${leapLogoSm} 480w, ${leapLogoMd} 720w, ${leapLogo} 1040w`}
+            sizes="(max-width: 480px) 280px, (max-width: 768px) 320px, 480px"
+            alt="LEAP 2026 — Isang Nayon, Isang Layunin"
+            width="280"
+            height="158"
+            className={styles.heroLogo}
+            loading="eager"
+            fetchPriority="high"
+            style={{ aspectRatio: '280 / 158' }}
+          />
         </m.div>
 
         <m.div
@@ -2416,243 +2382,243 @@ const handleSignOut = async () => {
       </div>
 
       <LazySection minHeight={700}>
-      <TheAwakening />
+        <TheAwakening />
       </LazySection>
       <LazySection minHeight={500}>
-      {/* Main Events Section */}
-      <div style={{
-        position: 'relative',
-        background: 'linear-gradient(180deg, #c89848 0%, #d4a855 8%, #c8a060 18%, #b89058 30%, #2a3d28 58%, #1a2e1e 75%, #132018 100%)',
-        paddingTop: '0.25rem',
-        paddingBottom: '4rem',
-        overflow: 'hidden',
-      }}>
+        {/* Main Events Section */}
         <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: 80,
-          background: 'linear-gradient(180deg, #c89848 0%, rgba(200,152,72,0) 100%)',
-          pointerEvents: 'none', zIndex: 0,
-        }} />
-        <svg viewBox="0 0 1440 60" preserveAspectRatio="none"
-          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 60, pointerEvents: 'none', zIndex: 1, opacity: 0.5 }}>
-          <defs>
-            <linearGradient id="sandShimG" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(255,220,140,0)" />
-              <stop offset="50%" stopColor="rgba(255,220,140,0.35)" />
-              <stop offset="100%" stopColor="rgba(255,220,140,0)" />
-            </linearGradient>
-          </defs>
-          {[8, 18, 28, 40, 52].map((y, i) => (
-            <path key={i} d={`M0 ${y} Q360 ${y - 3} 720 ${y} T1440 ${y}`}
-              stroke="url(#sandShimG)" strokeWidth="0.8" fill="none" opacity={0.6 - i * 0.1} />
-          ))}
-        </svg>
+          position: 'relative',
+          background: 'linear-gradient(180deg, #c89848 0%, #d4a855 8%, #c8a060 18%, #b89058 30%, #2a3d28 58%, #1a2e1e 75%, #132018 100%)',
+          paddingTop: '0.25rem',
+          paddingBottom: '4rem',
+          overflow: 'hidden',
+        }}>
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: 80,
+            background: 'linear-gradient(180deg, #c89848 0%, rgba(200,152,72,0) 100%)',
+            pointerEvents: 'none', zIndex: 0,
+          }} />
+          <svg viewBox="0 0 1440 60" preserveAspectRatio="none"
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 60, pointerEvents: 'none', zIndex: 1, opacity: 0.5 }}>
+            <defs>
+              <linearGradient id="sandShimG" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="rgba(255,220,140,0)" />
+                <stop offset="50%" stopColor="rgba(255,220,140,0.35)" />
+                <stop offset="100%" stopColor="rgba(255,220,140,0)" />
+              </linearGradient>
+            </defs>
+            {[8, 18, 28, 40, 52].map((y, i) => (
+              <path key={i} d={`M0 ${y} Q360 ${y - 3} 720 ${y} T1440 ${y}`}
+                stroke="url(#sandShimG)" strokeWidth="0.8" fill="none" opacity={0.6 - i * 0.1} />
+            ))}
+          </svg>
 
-        {/* Banderitas */}
-        <svg viewBox="0 0 1440 80" preserveAspectRatio="none"
-          style={{ position: 'absolute', top: 30, left: 0, width: '100%', height: 80, pointerEvents: 'none', zIndex: 1, opacity: 0.85 }}>
-          <defs>
-            <linearGradient id="banderitaStringG" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(80,40,10,0)" />
-              <stop offset="20%" stopColor="rgba(120,70,30,0.6)" />
-              <stop offset="50%" stopColor="rgba(100,55,20,0.7)" />
-              <stop offset="80%" stopColor="rgba(120,70,30,0.6)" />
-              <stop offset="100%" stopColor="rgba(80,40,10,0)" />
-            </linearGradient>
-          </defs>
-          <path d="M-20 8 Q360 48 720 38 Q1080 28 1460 8"
-            stroke="url(#banderitaStringG)" strokeWidth="1.2" fill="none" />
-          {[
-            { x: 60, c: '#8a2818' }, { x: 130, c: '#c87830' }, { x: 200, c: '#d4a838' },
-            { x: 270, c: '#5a8030' }, { x: 340, c: '#3a5a90' }, { x: 410, c: '#8a2858' },
-            { x: 480, c: '#c87830' }, { x: 550, c: '#d4a838' }, { x: 620, c: '#5a8030' },
-            { x: 700, c: '#3a5a90' }, { x: 780, c: '#8a2818' }, { x: 860, c: '#c87830' },
-            { x: 930, c: '#d4a838' }, { x: 1000, c: '#5a8030' }, { x: 1070, c: '#3a5a90' },
-            { x: 1140, c: '#8a2858' }, { x: 1210, c: '#c87830' }, { x: 1280, c: '#d4a838' },
-            { x: 1350, c: '#5a8030' }, { x: 1420, c: '#3a5a90' },
-          ].map((p, i) => {
-            const t = p.x / 1440;
-            const yString = 8 + Math.sin(t * Math.PI) * 32;
-            return (
-              <g key={i} className="banderita-sway" style={{ animationDelay: `${i * 0.1}s`, transformOrigin: `${p.x}px ${yString}px` }}>
-                <path d={`M${p.x - 5} ${yString} L${p.x + 5} ${yString} L${p.x} ${yString + 14} Z`}
-                  fill={p.c} opacity="0.85" stroke="rgba(40,15,5,0.3)" strokeWidth="0.5" />
-              </g>
-            );
-          })}
-          <style>{`
+          {/* Banderitas */}
+          <svg viewBox="0 0 1440 80" preserveAspectRatio="none"
+            style={{ position: 'absolute', top: 30, left: 0, width: '100%', height: 80, pointerEvents: 'none', zIndex: 1, opacity: 0.85 }}>
+            <defs>
+              <linearGradient id="banderitaStringG" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="rgba(80,40,10,0)" />
+                <stop offset="20%" stopColor="rgba(120,70,30,0.6)" />
+                <stop offset="50%" stopColor="rgba(100,55,20,0.7)" />
+                <stop offset="80%" stopColor="rgba(120,70,30,0.6)" />
+                <stop offset="100%" stopColor="rgba(80,40,10,0)" />
+              </linearGradient>
+            </defs>
+            <path d="M-20 8 Q360 48 720 38 Q1080 28 1460 8"
+              stroke="url(#banderitaStringG)" strokeWidth="1.2" fill="none" />
+            {[
+              { x: 60, c: '#8a2818' }, { x: 130, c: '#c87830' }, { x: 200, c: '#d4a838' },
+              { x: 270, c: '#5a8030' }, { x: 340, c: '#3a5a90' }, { x: 410, c: '#8a2858' },
+              { x: 480, c: '#c87830' }, { x: 550, c: '#d4a838' }, { x: 620, c: '#5a8030' },
+              { x: 700, c: '#3a5a90' }, { x: 780, c: '#8a2818' }, { x: 860, c: '#c87830' },
+              { x: 930, c: '#d4a838' }, { x: 1000, c: '#5a8030' }, { x: 1070, c: '#3a5a90' },
+              { x: 1140, c: '#8a2858' }, { x: 1210, c: '#c87830' }, { x: 1280, c: '#d4a838' },
+              { x: 1350, c: '#5a8030' }, { x: 1420, c: '#3a5a90' },
+            ].map((p, i) => {
+              const t = p.x / 1440;
+              const yString = 8 + Math.sin(t * Math.PI) * 32;
+              return (
+                <g key={i} className="banderita-sway" style={{ animationDelay: `${i * 0.1}s`, transformOrigin: `${p.x}px ${yString}px` }}>
+                  <path d={`M${p.x - 5} ${yString} L${p.x + 5} ${yString} L${p.x} ${yString + 14} Z`}
+                    fill={p.c} opacity="0.85" stroke="rgba(40,15,5,0.3)" strokeWidth="0.5" />
+                </g>
+              );
+            })}
+            <style>{`
               @keyframes banderitaSway {
                 0%, 100% { transform: rotate(-3deg); }
                 50%      { transform: rotate(3deg); }
               }
               .banderita-sway { animation: banderitaSway 4s ease-in-out infinite; }
             `}</style>
-        </svg>
-
-        {/* Grand Editorial Header */}
-        <m.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          style={{ textAlign: 'center', marginTop: '4rem', marginBottom: '1.25rem', position: 'relative', zIndex: 3, padding: '0 1rem' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '0.85rem' }}>
-            <span style={{ flex: '0 1 80px', height: 1, background: 'linear-gradient(90deg, transparent, rgba(80,40,10,0.5))' }} />
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 'clamp(0.6rem, 0.78vw, 0.72rem)', fontWeight: 800, letterSpacing: '0.4em', textTransform: 'uppercase', color: 'rgba(60,30,5,0.85)', whiteSpace: 'nowrap' }}>
-              ✦ Featured This Year ✦
-            </span>
-            <span style={{ flex: '0 1 80px', height: 1, background: 'linear-gradient(90deg, rgba(80,40,10,0.5), transparent)' }} />
-          </div>
-          <h2 style={{ fontFamily: "'Tropikal', 'Playfair Display', serif", fontSize: 'clamp(2.2rem, 5vw, 4rem)', fontWeight: 700, color: '#1a0e04', lineHeight: 1, margin: 0, letterSpacing: '0.01em', textShadow: '0 2px 0 rgba(255,235,170,0.4), 0 4px 18px rgba(120,70,20,0.45), 0 0 36px rgba(222,154,73,0.25)', position: 'relative', display: 'inline-block' }}>
-            Main Events
-          </h2>
-          <svg viewBox="0 0 240 24" width="240" height="24" style={{ display: 'block', margin: '0.85rem auto 0', overflow: 'visible' }}>
-            <defs>
-              <linearGradient id="meHeaderUnderlineG" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="rgba(120,70,20,0)" />
-                <stop offset="20%" stopColor="rgba(140,85,30,0.85)" />
-                <stop offset="50%" stopColor="rgba(70,35,8,1)" />
-                <stop offset="80%" stopColor="rgba(140,85,30,0.85)" />
-                <stop offset="100%" stopColor="rgba(120,70,20,0)" />
-              </linearGradient>
-            </defs>
-            <g transform="translate(120,12)">
-              <path d="M0 -8 L1.5 -1.5 L8 0 L1.5 1.5 L0 8 L-1.5 1.5 L-8 0 L-1.5 -1.5 Z" fill="rgba(80,40,10,0.85)" />
-              <circle r="1.5" fill="rgba(40,20,5,0.95)" />
-            </g>
-            <path d="M10 12 Q40 12 70 12 Q90 12 100 12 Q108 12 112 12" stroke="url(#meHeaderUnderlineG)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-            <path d="M128 12 Q160 12 200 12 Q220 12 230 12" stroke="url(#meHeaderUnderlineG)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-            <circle cx="6" cy="12" r="1.2" fill="rgba(80,40,10,0.7)" />
-            <circle cx="234" cy="12" r="1.2" fill="rgba(80,40,10,0.7)" />
           </svg>
 
-        </m.div>
+          {/* Grand Editorial Header */}
+          <m.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            style={{ textAlign: 'center', marginTop: '4rem', marginBottom: '1.25rem', position: 'relative', zIndex: 3, padding: '0 1rem' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '0.85rem' }}>
+              <span style={{ flex: '0 1 80px', height: 1, background: 'linear-gradient(90deg, transparent, rgba(80,40,10,0.5))' }} />
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 'clamp(0.6rem, 0.78vw, 0.72rem)', fontWeight: 800, letterSpacing: '0.4em', textTransform: 'uppercase', color: 'rgba(60,30,5,0.85)', whiteSpace: 'nowrap' }}>
+                ✦ Featured This Year ✦
+              </span>
+              <span style={{ flex: '0 1 80px', height: 1, background: 'linear-gradient(90deg, rgba(80,40,10,0.5), transparent)' }} />
+            </div>
+            <h2 style={{ fontFamily: "'Tropikal', 'Playfair Display', serif", fontSize: 'clamp(2.2rem, 5vw, 4rem)', fontWeight: 700, color: '#1a0e04', lineHeight: 1, margin: 0, letterSpacing: '0.01em', textShadow: '0 2px 0 rgba(255,235,170,0.4), 0 4px 18px rgba(120,70,20,0.45), 0 0 36px rgba(222,154,73,0.25)', position: 'relative', display: 'inline-block' }}>
+              Main Events
+            </h2>
+            <svg viewBox="0 0 240 24" width="240" height="24" style={{ display: 'block', margin: '0.85rem auto 0', overflow: 'visible' }}>
+              <defs>
+                <linearGradient id="meHeaderUnderlineG" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="rgba(120,70,20,0)" />
+                  <stop offset="20%" stopColor="rgba(140,85,30,0.85)" />
+                  <stop offset="50%" stopColor="rgba(70,35,8,1)" />
+                  <stop offset="80%" stopColor="rgba(140,85,30,0.85)" />
+                  <stop offset="100%" stopColor="rgba(120,70,20,0)" />
+                </linearGradient>
+              </defs>
+              <g transform="translate(120,12)">
+                <path d="M0 -8 L1.5 -1.5 L8 0 L1.5 1.5 L0 8 L-1.5 1.5 L-8 0 L-1.5 -1.5 Z" fill="rgba(80,40,10,0.85)" />
+                <circle r="1.5" fill="rgba(40,20,5,0.95)" />
+              </g>
+              <path d="M10 12 Q40 12 70 12 Q90 12 100 12 Q108 12 112 12" stroke="url(#meHeaderUnderlineG)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+              <path d="M128 12 Q160 12 200 12 Q220 12 230 12" stroke="url(#meHeaderUnderlineG)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+              <circle cx="6" cy="12" r="1.2" fill="rgba(80,40,10,0.7)" />
+              <circle cx="234" cy="12" r="1.2" fill="rgba(80,40,10,0.7)" />
+            </svg>
 
-        <div style={{
-          position: 'absolute', left: '50%', top: '52%', transform: 'translate(-50%, -50%)',
-          width: 'min(900px, 80vw)', height: 'clamp(280px, 40vw, 480px)', borderRadius: '50%',
-          background: 'radial-gradient(ellipse at center, rgba(255,235,170,0.18) 0%, rgba(222,154,73,0.1) 35%, transparent 70%)',
-          filter: 'blur(40px)', pointerEvents: 'none', zIndex: 1,
-          animation: 'stageGlowPulse 5s ease-in-out infinite',
-        }} />
-        <style>{`
+          </m.div>
+
+          <div style={{
+            position: 'absolute', left: '50%', top: '52%', transform: 'translate(-50%, -50%)',
+            width: 'min(900px, 80vw)', height: 'clamp(280px, 40vw, 480px)', borderRadius: '50%',
+            background: 'radial-gradient(ellipse at center, rgba(255,235,170,0.18) 0%, rgba(222,154,73,0.1) 35%, transparent 70%)',
+            filter: 'blur(40px)', pointerEvents: 'none', zIndex: 1,
+            animation: 'stageGlowPulse 5s ease-in-out infinite',
+          }} />
+          <style>{`
             @keyframes stageGlowPulse {
               0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
               50%      { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
             }
           `}</style>
 
-        <div style={{ position: 'relative', zIndex: 2 }}>
-          <MainEventsSection onEventSelect={(item) => setViewingClass(item)} />
+          <div style={{ position: 'relative', zIndex: 2 }}>
+            <MainEventsSection onEventSelect={(item) => setViewingClass(item)} />
+          </div>
         </div>
-      </div>
       </LazySection>
 
       <LazySection minHeight={400}>
-      <NayonBanner />
+        <NayonBanner />
       </LazySection>
       <LazySection minHeight={900}>
-      {/* Subthemes */}
-      <div style={{ background: 'linear-gradient(180deg, #1a3820 0%, #1a2e1e 100%)', position: 'relative' }}>
-        <div style={{ position: 'relative', lineHeight: 0, overflow: 'hidden', marginTop: '-3px' }}>
-          <svg viewBox="0 0 1440 90" preserveAspectRatio="xMidYMid slice"
-            style={{ width: '100%', height: 'clamp(60px, 10vw, 100px)', display: 'block', overflow: 'visible', background: 'transparent' }}>
-            <rect width="1440" height="90" fill="#1a3820" />
-            <defs>
-              <linearGradient id="topGoldLineG" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="rgba(222,154,73,0)" />
-                <stop offset="15%" stopColor="rgba(222,154,73,0.5)" />
-                <stop offset="35%" stopColor="rgba(250,225,133,0.85)" />
-                <stop offset="50%" stopColor="rgba(255,235,170,1)" />
-                <stop offset="65%" stopColor="rgba(250,225,133,0.85)" />
-                <stop offset="85%" stopColor="rgba(222,154,73,0.5)" />
-                <stop offset="100%" stopColor="rgba(222,154,73,0)" />
-              </linearGradient>
-              <linearGradient id="topGoldLineSoftG" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="rgba(255,215,120,0)" />
-                <stop offset="50%" stopColor="rgba(255,215,120,0.4)" />
-                <stop offset="100%" stopColor="rgba(255,215,120,0)" />
-              </linearGradient>
-              <filter id="topGoldGlow" x="-10%" y="-50%" width="120%" height="200%">
-                <feGaussianBlur stdDeviation="1.5" result="b" />
-                <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-              </filter>
-              <linearGradient id="stemGradTop" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#3a6a22" />
-                <stop offset="100%" stopColor="#2a4a18" />
-              </linearGradient>
-            </defs>
-            <path d="M0,12 C200,5 400,20 600,10 C800,2 1000,18 1200,8 C1340,2 1410,14 1440,10"
-              stroke="url(#topGoldLineSoftG)" strokeWidth="6" fill="none" opacity="0.6" filter="url(#topGoldGlow)" />
-            <path d="M0,12 C200,5 400,20 600,10 C800,2 1000,18 1200,8 C1340,2 1410,14 1440,10"
-              stroke="url(#topGoldLineG)" strokeWidth="1.5" fill="none" opacity="0.9" filter="url(#topGoldGlow)" />
-            <path d="M0,12 C200,5 400,20 600,10 C800,2 1000,18 1200,8 C1340,2 1410,14 1440,10"
-              stroke="url(#topGoldLineG)" strokeWidth="0.6" fill="none" opacity="1" />
-            {[180, 380, 600, 820, 1040, 1260].map((x, i) => {
-              const yWave = 8 + Math.sin(i * 1.2) * 5;
-              return <circle key={`gold-${i}`} cx={x} cy={yWave} r="1.2" fill="#fae185" opacity="0.85" filter="url(#topGoldGlow)" />;
-            })}
-            {[40, 110, 190, 270, 340, 420, 510, 590, 670, 760, 840, 920, 1010, 1090, 1180, 1260, 1340, 1410].map((x, i) => {
-              const h = 28 + (i % 4) * 6;
-              const lean = ((i % 3) - 1) * 4;
-              const grainY = [0, 5, 10, 15, 20];
-              return (
-                <g key={i} transform={`translate(${x}, ${55 - h})`} opacity="0.55">
-                  <path d={`M0,${h} Q${lean},${h / 2} ${lean * 0.6},0`} stroke="url(#stemGradTop)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                  {grainY.map((gy, gi) => (
-                    <ellipse key={gi} cx={lean * (gy / h) + (gi % 2 === 0 ? -3 : 3)} cy={gy} rx="2.8" ry="5"
-                      fill="#de9a49" opacity="0.7" transform={`rotate(${-18 + (gi % 2) * 36}, ${lean * (gy / h) + (gi % 2 === 0 ? -3 : 3)}, ${gy})`} />
-                  ))}
-                </g>
-              );
-            })}
-            {[120, 280, 450, 620, 790, 960, 1130, 1300].map((x, i) => (
-              <circle key={i} cx={x} cy={i % 2 === 0 ? 44 : 50} r="1.5" fill="#fae185" opacity="0.45" />
-            ))}
-          </svg>
+        {/* Subthemes */}
+        <div style={{ background: 'linear-gradient(180deg, #1a3820 0%, #1a2e1e 100%)', position: 'relative' }}>
+          <div style={{ position: 'relative', lineHeight: 0, overflow: 'hidden', marginTop: '-3px' }}>
+            <svg viewBox="0 0 1440 90" preserveAspectRatio="xMidYMid slice"
+              style={{ width: '100%', height: 'clamp(60px, 10vw, 100px)', display: 'block', overflow: 'visible', background: 'transparent' }}>
+              <rect width="1440" height="90" fill="#1a3820" />
+              <defs>
+                <linearGradient id="topGoldLineG" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="rgba(222,154,73,0)" />
+                  <stop offset="15%" stopColor="rgba(222,154,73,0.5)" />
+                  <stop offset="35%" stopColor="rgba(250,225,133,0.85)" />
+                  <stop offset="50%" stopColor="rgba(255,235,170,1)" />
+                  <stop offset="65%" stopColor="rgba(250,225,133,0.85)" />
+                  <stop offset="85%" stopColor="rgba(222,154,73,0.5)" />
+                  <stop offset="100%" stopColor="rgba(222,154,73,0)" />
+                </linearGradient>
+                <linearGradient id="topGoldLineSoftG" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="rgba(255,215,120,0)" />
+                  <stop offset="50%" stopColor="rgba(255,215,120,0.4)" />
+                  <stop offset="100%" stopColor="rgba(255,215,120,0)" />
+                </linearGradient>
+                <filter id="topGoldGlow" x="-10%" y="-50%" width="120%" height="200%">
+                  <feGaussianBlur stdDeviation="1.5" result="b" />
+                  <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+                </filter>
+                <linearGradient id="stemGradTop" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#3a6a22" />
+                  <stop offset="100%" stopColor="#2a4a18" />
+                </linearGradient>
+              </defs>
+              <path d="M0,12 C200,5 400,20 600,10 C800,2 1000,18 1200,8 C1340,2 1410,14 1440,10"
+                stroke="url(#topGoldLineSoftG)" strokeWidth="6" fill="none" opacity="0.6" filter="url(#topGoldGlow)" />
+              <path d="M0,12 C200,5 400,20 600,10 C800,2 1000,18 1200,8 C1340,2 1410,14 1440,10"
+                stroke="url(#topGoldLineG)" strokeWidth="1.5" fill="none" opacity="0.9" filter="url(#topGoldGlow)" />
+              <path d="M0,12 C200,5 400,20 600,10 C800,2 1000,18 1200,8 C1340,2 1410,14 1440,10"
+                stroke="url(#topGoldLineG)" strokeWidth="0.6" fill="none" opacity="1" />
+              {[180, 380, 600, 820, 1040, 1260].map((x, i) => {
+                const yWave = 8 + Math.sin(i * 1.2) * 5;
+                return <circle key={`gold-${i}`} cx={x} cy={yWave} r="1.2" fill="#fae185" opacity="0.85" filter="url(#topGoldGlow)" />;
+              })}
+              {[40, 110, 190, 270, 340, 420, 510, 590, 670, 760, 840, 920, 1010, 1090, 1180, 1260, 1340, 1410].map((x, i) => {
+                const h = 28 + (i % 4) * 6;
+                const lean = ((i % 3) - 1) * 4;
+                const grainY = [0, 5, 10, 15, 20];
+                return (
+                  <g key={i} transform={`translate(${x}, ${55 - h})`} opacity="0.55">
+                    <path d={`M0,${h} Q${lean},${h / 2} ${lean * 0.6},0`} stroke="url(#stemGradTop)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                    {grainY.map((gy, gi) => (
+                      <ellipse key={gi} cx={lean * (gy / h) + (gi % 2 === 0 ? -3 : 3)} cy={gy} rx="2.8" ry="5"
+                        fill="#de9a49" opacity="0.7" transform={`rotate(${-18 + (gi % 2) * 36}, ${lean * (gy / h) + (gi % 2 === 0 ? -3 : 3)}, ${gy})`} />
+                    ))}
+                  </g>
+                );
+              })}
+              {[120, 280, 450, 620, 790, 960, 1130, 1300].map((x, i) => (
+                <circle key={i} cx={x} cy={i % 2 === 0 ? 44 : 50} r="1.5" fill="#fae185" opacity="0.45" />
+              ))}
+            </svg>
+          </div>
+
+          <SubthemeAboutSection onScrollToClasses={scrollToClassesSection} />
+
+
+          <div style={{ position: 'relative', lineHeight: 0, marginTop: '-2px', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', width: '60%', height: 80, background: 'radial-gradient(ellipse 80% 100% at 50% 100%, rgba(222,154,73,0.18) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 1 }} />
+            <svg viewBox="0 0 1440 90" preserveAspectRatio="xMidYMid slice"
+              style={{ width: '100%', height: 'clamp(60px, 10vw, 100px)', display: 'block', position: 'relative', zIndex: 2 }}>
+              <defs>
+                <linearGradient id="waveGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#1a2e1e" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#fffdf6" stopOpacity="1" />
+                </linearGradient>
+                <linearGradient id="stemGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#3a6a22" />
+                  <stop offset="100%" stopColor="#2a4a18" />
+                </linearGradient>
+              </defs>
+              <path d="M0,20 C180,50 360,10 540,30 C720,50 900,15 1080,35 C1260,55 1380,25 1440,38 L1440,90 L0,90 Z" fill="#132015" opacity="0.7" />
+              {[40, 110, 190, 270, 340, 420, 510, 590, 670, 760, 840, 920, 1010, 1090, 1180, 1260, 1340, 1410].map((x, i) => {
+                const h = 28 + (i % 4) * 6;
+                const lean = ((i % 3) - 1) * 4;
+                const grainY = [0, 5, 10, 15, 20];
+                return (
+                  <g key={i} transform={`translate(${x}, ${55 - h})`} opacity="0.55">
+                    <path d={`M0,${h} Q${lean},${h / 2} ${lean * 0.6},0`} stroke="url(#stemGrad)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                    {grainY.map((gy, gi) => (
+                      <ellipse key={gi} cx={lean * (gy / h) + (gi % 2 === 0 ? -3 : 3)} cy={gy} rx="2.8" ry="5"
+                        fill="#de9a49" opacity="0.7" transform={`rotate(${-18 + (gi % 2) * 36}, ${lean * (gy / h) + (gi % 2 === 0 ? -3 : 3)}, ${gy})`} />
+                    ))}
+                  </g>
+                );
+              })}
+              <path d="M0,35 C200,15 400,55 600,35 C800,15 1000,50 1200,30 C1320,18 1400,40 1440,45 L1440,90 L0,90 Z" fill="#1d2e1a" opacity="0.5" />
+              <path d="M0,48 C160,28 320,62 520,45 C720,28 880,58 1080,42 C1240,30 1360,52 1440,56 L1440,90 L0,90 Z" fill="url(#waveGrad1)" />
+              <path d="M0,48 C160,28 320,62 520,45 C720,28 880,58 1080,42 C1240,30 1360,52 1440,56" stroke="rgba(222,154,73,0.28)" strokeWidth="1" fill="none" />
+              {[120, 280, 450, 620, 790, 960, 1130, 1300].map((x, i) => (
+                <circle key={i} cx={x} cy={i % 2 === 0 ? 44 : 50} r="1.5" fill="#fae185" opacity="0.45" />
+              ))}
+            </svg>
+          </div>
         </div>
-
-        <SubthemeAboutSection onScrollToClasses={scrollToClassesSection} />
-
-
-        <div style={{ position: 'relative', lineHeight: 0, marginTop: '-2px', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', width: '60%', height: 80, background: 'radial-gradient(ellipse 80% 100% at 50% 100%, rgba(222,154,73,0.18) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 1 }} />
-          <svg viewBox="0 0 1440 90" preserveAspectRatio="xMidYMid slice"
-            style={{ width: '100%', height: 'clamp(60px, 10vw, 100px)', display: 'block', position: 'relative', zIndex: 2 }}>
-            <defs>
-              <linearGradient id="waveGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#1a2e1e" stopOpacity="1" />
-                <stop offset="100%" stopColor="#fffdf6" stopOpacity="1" />
-              </linearGradient>
-              <linearGradient id="stemGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#3a6a22" />
-                <stop offset="100%" stopColor="#2a4a18" />
-              </linearGradient>
-            </defs>
-            <path d="M0,20 C180,50 360,10 540,30 C720,50 900,15 1080,35 C1260,55 1380,25 1440,38 L1440,90 L0,90 Z" fill="#132015" opacity="0.7" />
-            {[40, 110, 190, 270, 340, 420, 510, 590, 670, 760, 840, 920, 1010, 1090, 1180, 1260, 1340, 1410].map((x, i) => {
-              const h = 28 + (i % 4) * 6;
-              const lean = ((i % 3) - 1) * 4;
-              const grainY = [0, 5, 10, 15, 20];
-              return (
-                <g key={i} transform={`translate(${x}, ${55 - h})`} opacity="0.55">
-                  <path d={`M0,${h} Q${lean},${h / 2} ${lean * 0.6},0`} stroke="url(#stemGrad)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                  {grainY.map((gy, gi) => (
-                    <ellipse key={gi} cx={lean * (gy / h) + (gi % 2 === 0 ? -3 : 3)} cy={gy} rx="2.8" ry="5"
-                      fill="#de9a49" opacity="0.7" transform={`rotate(${-18 + (gi % 2) * 36}, ${lean * (gy / h) + (gi % 2 === 0 ? -3 : 3)}, ${gy})`} />
-                  ))}
-                </g>
-              );
-            })}
-            <path d="M0,35 C200,15 400,55 600,35 C800,15 1000,50 1200,30 C1320,18 1400,40 1440,45 L1440,90 L0,90 Z" fill="#1d2e1a" opacity="0.5" />
-            <path d="M0,48 C160,28 320,62 520,45 C720,28 880,58 1080,42 C1240,30 1360,52 1440,56 L1440,90 L0,90 Z" fill="url(#waveGrad1)" />
-            <path d="M0,48 C160,28 320,62 520,45 C720,28 880,58 1080,42 C1240,30 1360,52 1440,56" stroke="rgba(222,154,73,0.28)" strokeWidth="1" fill="none" />
-            {[120, 280, 450, 620, 790, 960, 1130, 1300].map((x, i) => (
-              <circle key={i} cx={x} cy={i % 2 === 0 ? 44 : 50} r="1.5" fill="#fae185" opacity="0.45" />
-            ))}
-          </svg>
-        </div>
-      </div>
       </LazySection>
     </>
   ) : null;
@@ -2776,56 +2742,56 @@ const handleSignOut = async () => {
         )}
       </AnimatePresence>
       {loading ? (
-      <div className={styles.loadingContainer} style={{ flex: 1, minHeight: '100vh' }}>
-        <div className={styles.loadingContent}>
-          <div className="leap-spinner" />
-          <p className={styles.loadingText}>Loading LEAP 2026…</p>
+        <div className={styles.loadingContainer} style={{ flex: 1, minHeight: '100vh' }}>
+          <div className={styles.loadingContent}>
+            <div className="leap-spinner" />
+            <p className={styles.loadingText}>Loading LEAP 2026…</p>
+          </div>
         </div>
-      </div>
-    ) : (
-      <>
-        <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', padding: '6rem 0', minHeight: '100vh' }}><div className="leap-spinner" /></div>}>
-          {currentView === 'home' && (
-            <Home
-              user={user} classes={classes}
-              searchQuery={searchQuery}
-              onSearchChange={(q) => { setSearchQuery(q); setCurrentPage(1); }}
-              sortBy={sortBy}
-              onSortChange={(s) => setSortBy(s)}
-              filteredAndSortedClasses={filteredAndSortedClasses} uniqueDays={uniqueDays}
-              selectedDay={selectedDay} onDaySelect={(d) => { setSelectedDay(d); setCurrentPage(1); }}
-              viewingClass={viewingClass} onClassSelect={(c) => { setViewingClass(c) }}
-              onSignIn={handleSignIn} onHeroScroll={() => navigateTo('classes')}
-              HeroSection={HeroSection} HeroExtras={HeroExtras} renderClassCard={renderClassCard}
-            />
-          )}
-          {currentView === 'about' && <About />}
-          {currentView === 'major-events' && <MainEvents />}
-          {currentView === 'classes' && (
-            <Classes
-              user={user} searchQuery={searchQuery} onSearchChange={(q) => { setSearchQuery(q); setCurrentPage(1); }}
-              sortBy={sortBy} onSortChange={(s) => setSortBy(s)}
-              filteredAndSortedClasses={filteredAndSortedClasses} uniqueDays={uniqueDays}
-              selectedDay={selectedDay} onDaySelect={(d) => { setSelectedDay(d); setCurrentPage(1); }}
-              currentPage={currentPage} onPageChange={(p) => { setCurrentPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              viewingClass={viewingClass} onClassSelect={(c) => { setViewingClass(c) }}
-              onSignIn={handleSignIn} renderClassCard={renderClassCard}
-            />
-          )}
-          {currentView === 'saved-classes' && (
-            <SavedClasses
-              filteredAndSortedClasses={filteredAndSortedClasses}
-              savedClassIds={savedClassIds}
-              renderClassCard={renderClassCard}
-            />
-          )}
-          {currentView === 'faq' && <FAQs faqs={[]} />}
-          {currentView === 'contact' && <Contact />}
-        </Suspense>
+      ) : (
+        <>
+          <Suspense fallback={<div style={{ display: 'flex', justifyContent: 'center', padding: '6rem 0', minHeight: '100vh' }}><div className="leap-spinner" /></div>}>
+            {currentView === 'home' && (
+              <Home
+                user={user} classes={classes}
+                searchQuery={searchQuery}
+                onSearchChange={(q) => { setSearchQuery(q); setCurrentPage(1); }}
+                sortBy={sortBy}
+                onSortChange={(s) => setSortBy(s)}
+                filteredAndSortedClasses={filteredAndSortedClasses} uniqueDays={uniqueDays}
+                selectedDay={selectedDay} onDaySelect={(d) => { setSelectedDay(d); setCurrentPage(1); }}
+                viewingClass={viewingClass} onClassSelect={(c) => { setViewingClass(c) }}
+                onSignIn={handleSignIn} onHeroScroll={() => navigateTo('classes')}
+                HeroSection={HeroSection} HeroExtras={HeroExtras} renderClassCard={renderClassCard}
+              />
+            )}
+            {currentView === 'about' && <About />}
+            {currentView === 'major-events' && <MainEvents />}
+            {currentView === 'classes' && (
+              <Classes
+                user={user} searchQuery={searchQuery} onSearchChange={(q) => { setSearchQuery(q); setCurrentPage(1); }}
+                sortBy={sortBy} onSortChange={(s) => setSortBy(s)}
+                filteredAndSortedClasses={filteredAndSortedClasses} uniqueDays={uniqueDays}
+                selectedDay={selectedDay} onDaySelect={(d) => { setSelectedDay(d); setCurrentPage(1); }}
+                currentPage={currentPage} onPageChange={(p) => { setCurrentPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                viewingClass={viewingClass} onClassSelect={(c) => { setViewingClass(c) }}
+                onSignIn={handleSignIn} renderClassCard={renderClassCard}
+              />
+            )}
+            {currentView === 'saved-classes' && (
+              <SavedClasses
+                filteredAndSortedClasses={filteredAndSortedClasses}
+                savedClassIds={savedClassIds}
+                renderClassCard={renderClassCard}
+              />
+            )}
+            {currentView === 'faq' && <FAQs />}
+            {currentView === 'contact' && <Contact />}
+          </Suspense>
 
-        <Footer logoImg={leapLogo} onNavigate={navigateTo as (view: string) => void} />
-      </>
-    )}
+          <Footer logoImg={leapLogo} onNavigate={navigateTo as (view: string) => void} />
+        </>
+      )}
 
       <AnimatePresence>
         {showBackToTop && !viewingClass && (

@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { m } from 'framer-motion';
-import { Calendar, MapPin, Bookmark, ExternalLink, ChevronRight } from 'lucide-react';
+import { Calendar, MapPin, Bookmark, ExternalLink, ChevronRight, Users } from 'lucide-react';
 import type { LeapClass } from '../types';
 import styles from '../App.module.css';
 import { LazyImage } from './shared';
@@ -112,6 +112,14 @@ export const ClassCard = memo(({
               {item.venue} ({item.modality})
             </span>
           </div>
+          {item.slots > 0 && (
+          <div className={styles.metadataItem}>
+            <Users size={12} className={styles.metadataIcon} />
+            <span>
+              {item.slots} slots
+            </span>
+          </div>
+          )}
         </div>
         <div className={styles.cardActionsOverlay}>
           <a

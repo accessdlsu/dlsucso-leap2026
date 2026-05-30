@@ -11,23 +11,10 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import type { LeapClass } from '../types';
 import type { User as FirebaseUser } from "firebase/auth";
 
-interface LeapClass {
-  id: string;
-  title: string;
-  org: string;
-  modality: string;
-  date: string;
-  time: string;
-  venue: string;
-  slots: number;
-  subtheme: string;
-  image: string;
-  orgLogo: string | null;
-  googleFormUrl: string;
-  description: string;
-}
+
 interface HomeProps {
   user: FirebaseUser | null;
   classes: LeapClass[];

@@ -12,22 +12,9 @@ import {
 import type { ReactNode } from "react";
 import type { User as FirebaseUser } from "firebase/auth";
 
-interface LeapClass {
-  id: string;
-  title: string;
-  org: string;
-  modality: string;
-  date: string;
-  time: string;
-  venue: string;
-  slots: number;
-  subtheme: string;
-  image: string;
-  orgLogo: string | null;
-  googleFormUrl: string;
-  description: string;
-}
 
+
+import type { LeapClass } from '../types';
 interface ClassesPageProps {
   user: FirebaseUser | null;
   searchQuery: string;

@@ -1,23 +1,9 @@
-import { m } from 'framer-motion';
+﻿import { m } from 'framer-motion';
 import { Bookmark } from 'lucide-react';
 import type { ReactNode } from 'react';
+import type { LeapClass } from '../types';
 import styles from '../App.module.css';
 
-interface LeapClass {
-  id: string;
-  title: string;
-  org: string;
-  modality: string;
-  date: string;
-  time: string;
-  venue: string;
-  slots: number;
-  subtheme: string;
-  image: string;
-  orgLogo: string | null;
-  googleFormUrl: string;
-  description: string;
-}
 
 interface SavedClassesProps {
   filteredAndSortedClasses: LeapClass[];
@@ -55,10 +41,10 @@ const PageHero = ({ title, subtitle, accent }: { title: string; subtitle: string
     }}
   >
     <div className="page-hero-fireflies">
-      <span/><span/><span/><span/><span/><span/>
+      <span /><span /><span /><span /><span /><span />
     </div>
     <div className="page-hero-glow" />
-    <m.p 
+    <m.p
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}

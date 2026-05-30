@@ -74,3 +74,44 @@ public/_routes.json → routes /api/* through worker, rest is static
 - Strict TypeScript: `noUnusedLocals`, `noUnusedParameters`, `verbatimModuleSyntax`
 - ESLint with react-hooks and react-refresh plugins
 - Icons from `lucide-react`
+
+## Deferred: Firebase Auth to Better Auth Migration
+
+**Status:** Planned, not yet executed.
+
+The backend (`dlsu-leap-backend`) uses **Better Auth** with Google OAuth. This frontend still uses **Firebase Auth**. The two are completely disconnected -- `leapifyApi.setToken()` is never called, so all API requests go as unauthenticated guests. User endpoints (bookmarks, profile) are defined in `leapify.ts` but non-functional until migration.
+
+### What changes during migration
+
+| Area | Current (Firebase) | Target (Better Auth) |
+|------|-------------------|---------------------|
+| Auth service | `src/services/firebase.ts` | Use `createLeapifyAuthClient` + helpers from backend's `leapify/client` package |
+| Session | Firebase `onAuthStateChanged` + Firestore profile reads | Better Auth session cookie + `initializeSession()` + `api.getMe()` |
+| Sign-in | `signInWithPopup` (Firebase) | `signInWithGoogleRedirect` (Better Auth) |
+| Sign-out | Firebase `signOut(auth)` | Better Auth `signOut(authClient)` |
+| Token passing | Never happens (`setToken` unused) | `setToken()` wired to Better Auth session token |
+| UserProfile type (`leapify.ts`) | `{ id, firebaseUid, email, name, role, image, createdAt }` | `{ id, betterAuthId, email, name, role, createdAt, image? }` |
+| UserProfile type (`types/index.ts`) | `{ uid, email, displayName, photoURL, role, registeredClasses }` | Backend shape: `{ id, betterAuthId, email, name, role, createdAt, image? }` |
+| Dependencies | `firebase` package | `better-auth` + `@access-dlsu/leapify` (client subpath) |
+| User data source | Firestore (`getDocFromServer`) | Leapify backend (`GET /api/users/me`) |
+| Saved classes | Firestore `registeredClasses` field | Backend bookmarks (`GET /api/users/me/bookmarks`) |
+
+### What becomes functional after migration
+
+- `leapifyApi.setToken()` -- auth header sent with requests
+- `leapifyApi.getMe()` -- returns authenticated user profile
+- `leapifyApi.signOut()` -- invalidates Better Auth session
+- `leapifyApi.getBookmarks()` -- user's saved events
+- `leapifyApi.toggleBookmark(eventId)` -- bookmark/unbookmark
+- `leapifyApi.deleteBookmark(eventId)` -- remove bookmark
+- All user-scoped rate limits work correctly (UID-based instead of IP-only)
+
+### Files to change during migration
+
+- `src/services/firebase.ts` -- delete
+- `src/services/firebase-lazy.ts` -- delete
+- `src/services/leapify.ts` -- update `UserProfile` type, wire `setToken()` to session
+- `src/hooks/useAuth.ts` -- rewrite with Better Auth session
+- `src/types/index.ts` -- replace `UserProfile` with backend shape
+- `src/pages/SavedClasses.tsx` -- use bookmarks API instead of Firestore
+- `package.json` -- remove `firebase`, add `better-auth`

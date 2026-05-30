@@ -18,6 +18,7 @@ export interface LeapClass {
   orgLogo: string | null;
   googleFormUrl: string;
   description: string;
+  isSpotlight: boolean;
 }
 
 export interface UserProfile {
