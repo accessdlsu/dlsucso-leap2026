@@ -12,6 +12,11 @@
   ],
   "vars": {
     "ENVIRONMENT": "production",
+    "VITE_FIREBASE_AUTH_DOMAIN": "dlsu-leap-2026.firebaseapp.com",
+    "VITE_FIREBASE_PROJECT_ID": "dlsu-leap-2026",
+    "VITE_FIREBASE_STORAGE_BUCKET": "dlsu-leap-2026.firebasestorage.app",
+    "VITE_FIREBASE_MESSAGING_SENDER_ID": "315460522539",
+    "VITE_FIREBASE_APP_ID": "1:315460522539:web:176e8182aef2597d93d06e",
   },
   "assets": {
     "directory": "./dist",
@@ -35,6 +40,11 @@
       "name": "dlsucso-leap2026-dev",
       "vars": {
         "ENVIRONMENT": "staging",
+        "VITE_FIREBASE_AUTH_DOMAIN": "dlsu-leap-2026.firebaseapp.com",
+        "VITE_FIREBASE_PROJECT_ID": "dlsu-leap-2026",
+        "VITE_FIREBASE_STORAGE_BUCKET": "dlsu-leap-2026.firebasestorage.app",
+        "VITE_FIREBASE_MESSAGING_SENDER_ID": "315460522539",
+        "VITE_FIREBASE_APP_ID": "1:315460522539:web:176e8182aef2597d93d06e",
       },
     },
   },
