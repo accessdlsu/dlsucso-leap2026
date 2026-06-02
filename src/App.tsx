@@ -7,13 +7,14 @@ import type { User as FirebaseUser } from 'firebase/auth';
 import { useState, useEffect, useRef, useMemo, Suspense, lazy, type CSSProperties, type ErrorInfo, type ReactNode, Component } from 'react';
 import { m, AnimatePresence, LazyMotion, domAnimation } from 'framer-motion';
 import {
-  Calendar, MapPin, Users, ChevronRight, ChevronLeft,
+  Calendar, MapPin, ChevronRight, ChevronLeft,
   X, AlertCircle, LogIn,
-  Edit, ArrowLeft, ExternalLink, Palette, Mail, Clock, ChevronUp,
-  BookOpen, Wrench, Handshake, HeartPulse, ArrowDown
+  Edit, ArrowLeft, ExternalLink, Mail, Clock, ChevronUp,
+  ArrowDown
 } from 'lucide-react';
 import { leapifyApi } from './services/leapify';
-import { useOptimizedScrollProgress, rafThrottle, useClasses, useConfig } from './hooks';
+import { useOptimizedScrollProgress, rafThrottle, useClasses, useConfig, useThemes } from './hooks';
+import { THEME_ILLUSTRATIONS } from './components/shared/theme-illustrations';
 import type { LeapClass } from './types';
 
 
@@ -1020,9 +1021,9 @@ const AnimatedTagline = () => {
 };
 
 /* ══════════════════════════════════════════════════════
-  SUBTHEMES
+  SUBTHEMES (fallback descriptions for themes without API data)
 ══════════════════════════════════════════════════════ */
-const SUBTHEME_INFO: Record<string, { en: string; fil: string }> = {
+const SUBTHEME_INFO_FALLBACK: Record<string, { en: string; fil: string }> = {
   'Palayan ng Karunungan': { en: 'Expand your mind through academic and intellectual pursuits across sciences, humanities, and beyond.', fil: 'Palawakin ang kaalaman sa pamamagitan ng mga intelektwal na disiplina.' },
   'Pamilihan ng Kakayahan': { en: 'Sharpen practical skills and professional competencies — from technical know-how to workplace readiness.', fil: 'Palakasin ang kakayahan para sa propesyonal na mundo.' },
   'Plaza ng Malikhaing Diwa': { en: 'Unleash creativity through arts, design, performance, and free expression.', fil: 'Pahintulutan ang sariling lumikha sa sining at disenyo.' },
@@ -1031,20 +1032,23 @@ const SUBTHEME_INFO: Record<string, { en: string; fil: string }> = {
   'Bahay ng Bayanihan': { en: 'Experience community service, leadership, and collective action rooted in Filipino bayanihan spirit.', fil: 'Isabuhay ang diwa ng bayanihan at paglilingkod sa kapwa.' },
 };
 
-const SUBTHEMES: { label: string; icon: ReactNode }[] = [
-  { label: 'Palayan ng Karunungan', icon: <BookOpen size={32} strokeWidth={1.8} /> },
-  { label: 'Pamilihan ng Kakayahan', icon: <Wrench size={32} strokeWidth={1.8} /> },
-  { label: 'Plaza ng Malikhaing Diwa', icon: <Palette size={32} strokeWidth={1.8} /> },
-  { label: 'Dambana ng Pagkakaisa', icon: <Handshake size={32} strokeWidth={1.8} /> },
-  { label: 'Palaisdaan ng Kalusugan', icon: <HeartPulse size={32} strokeWidth={1.8} /> },
-  { label: 'Bahay ng Bayanihan', icon: <Users size={32} strokeWidth={1.8} /> },
-];
-
 /* ══════════════════════════════════════════════════════
   SUBTHEME ABOUT SECTION
 ══════════════════════════════════════════════════════ */
 const SubthemeAboutSection = ({ onScrollToClasses }: { onScrollToClasses: () => void }) => {
   const [activeSubtheme, setActiveSubtheme] = useState<string | null>(null);
+  const { data: apiThemes } = useThemes();
+
+  const themes = apiThemes.length > 0
+    ? apiThemes.map(t => ({ name: t.name, imageUrl: t.imageUrl, descriptionEn: t.descriptionEn, descriptionFil: t.descriptionFil }))
+    : [
+        { name: 'Palayan ng Karunungan', imageUrl: null, descriptionEn: null, descriptionFil: null },
+        { name: 'Pamilihan ng Kakayahan', imageUrl: null, descriptionEn: null, descriptionFil: null },
+        { name: 'Plaza ng Malikhaing Diwa', imageUrl: null, descriptionEn: null, descriptionFil: null },
+        { name: 'Dambana ng Pagkakaisa', imageUrl: null, descriptionEn: null, descriptionFil: null },
+        { name: 'Palaisdaan ng Kalusugan', imageUrl: null, descriptionEn: null, descriptionFil: null },
+        { name: 'Bahay ng Bayanihan', imageUrl: null, descriptionEn: null, descriptionFil: null },
+      ];
 
   const themeColors: Record<string, { iconBg: string; glow: string; border: string; text: string; accent: string }> = {
     'Palayan ng Karunungan': { iconBg: 'linear-gradient(135deg,#C9E0E4cc,#8ab8c0cc)', glow: 'rgba(201,224,228,0.4)', border: 'rgba(201,224,228,0.55)', text: '#C9E0E4', accent: '#a8d4dc' },
@@ -1055,11 +1059,14 @@ const SubthemeAboutSection = ({ onScrollToClasses }: { onScrollToClasses: () => 
     'Bahay ng Bayanihan': { iconBg: 'linear-gradient(135deg,#efe6adcc,#c8b060cc)', glow: 'rgba(239,230,173,0.35)', border: 'rgba(239,230,173,0.5)', text: '#efe6ad', accent: '#d4c070' },
   };
 
+  const activeTheme = themes.find(t => t.name === activeSubtheme);
+  const activeColors = activeSubtheme ? (themeColors[activeSubtheme] ?? { iconBg: 'linear-gradient(135deg,#fae185cc,#d4a838cc)', glow: 'rgba(250,225,133,0.4)', border: 'rgba(250,225,133,0.55)', text: '#fae185', accent: '#e8c84a' }) : null;
+
   return (
     <>
-      {/* ── Modal (UNCHANGED) ── */}
+      {/* ── Modal ── */}
       <AnimatePresence>
-        {activeSubtheme && (
+        {activeSubtheme && activeColors && (
           <m.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={() => setActiveSubtheme(null)}
@@ -1069,30 +1076,35 @@ const SubthemeAboutSection = ({ onScrollToClasses }: { onScrollToClasses: () => 
               initial={{ scale: 0.86, y: 28, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.92, y: 14, opacity: 0 }}
               transition={{ type: 'spring', damping: 26, stiffness: 300 }}
               onClick={e => e.stopPropagation()}
-              style={{ background: 'linear-gradient(160deg,#0a1a0c 0%,#122018 45%,#192c1e 100%)', border: `1.5px solid ${themeColors[activeSubtheme].border}`, borderRadius: 28, padding: 'clamp(2rem,5vw,3rem)', maxWidth: 500, width: '100%', position: 'relative', boxShadow: `0 0 80px ${themeColors[activeSubtheme].glow}, 0 32px 80px rgba(0,0,0,0.75)` }}
+              style={{ background: 'linear-gradient(160deg,#0a1a0c 0%,#122018 45%,#192c1e 100%)', border: `1.5px solid ${activeColors.border}`, borderRadius: 28, padding: 0, maxWidth: 500, width: '100%', position: 'relative', boxShadow: `0 0 80px ${activeColors.glow}, 0 32px 80px rgba(0,0,0,0.75)`, overflow: 'hidden' }}
             >
-              <button onClick={() => setActiveSubtheme(null)} style={{ position: 'absolute', top: 14, right: 14, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '50%', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(255,255,255,0.55)', transition: 'all 0.2s' }}>
+              <button onClick={() => setActiveSubtheme(null)} style={{ position: 'absolute', top: 14, right: 14, background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '50%', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(255,255,255,0.55)', transition: 'all 0.2s', zIndex: 10 }}>
                 <X size={15} />
               </button>
 
-              <div style={{ width: 68, height: 68, borderRadius: '50%', background: themeColors[activeSubtheme].iconBg, border: `2px solid ${themeColors[activeSubtheme].border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', boxShadow: `0 0 28px ${themeColors[activeSubtheme].glow}, inset 0 2px 6px rgba(255,255,255,0.22)`, color: '#1a1008', position: 'relative' }}>
-                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'radial-gradient(circle at 32% 28%, rgba(255,255,255,0.3) 0%, transparent 55%)', pointerEvents: 'none' }} />
-                <div style={{ position: 'relative', zIndex: 1, display: 'flex' }}>{SUBTHEMES.find(s => s.label === activeSubtheme)?.icon}</div>
+              {/* SVG Illustration Banner */}
+              <div style={{ width: '100%', height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(180deg, rgba(250,225,133,0.06) 0%, transparent 100%)', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(ellipse at center, ${activeColors.glow} 0%, transparent 70%)`, opacity: 0.3 }} />
+                <div style={{ position: 'relative', zIndex: 1, transform: 'scale(0.85)', transformOrigin: 'center center' }}>
+                  {activeSubtheme && THEME_ILLUSTRATIONS[activeSubtheme]}
+                </div>
               </div>
 
-              <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.32em', textTransform: 'uppercase', color: themeColors[activeSubtheme].text, marginBottom: '0.4rem', opacity: 0.75 }}>Subtheme</p>
-              <h2 style={{ fontFamily: "'Tropikal','Playfair Display',serif", fontSize: 'clamp(1.35rem,4vw,1.9rem)', fontWeight: 700, color: '#fff8e0', margin: '0 0 0.25rem', lineHeight: 1.15, textShadow: `0 0 32px ${themeColors[activeSubtheme].glow}` }}>
-                {activeSubtheme}
-              </h2>
+              <div style={{ padding: 'clamp(1.5rem,4vw,2rem) clamp(2rem,5vw,2.5rem)' }}>
+                <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.32em', textTransform: 'uppercase', color: activeColors.text, marginBottom: '0.4rem', opacity: 0.75 }}>Subtheme</p>
+                <h2 style={{ fontFamily: "'Tropikal','Playfair Display',serif", fontSize: 'clamp(1.35rem,4vw,1.9rem)', fontWeight: 700, color: '#fff8e0', margin: '0 0 0.25rem', lineHeight: 1.15, textShadow: `0 0 32px ${activeColors.glow}` }}>
+                  {activeSubtheme}
+                </h2>
 
-              <div style={{ height: 1, background: `linear-gradient(90deg,${themeColors[activeSubtheme].border},transparent)`, margin: '1.1rem 0' }} />
+                <div style={{ height: 1, background: `linear-gradient(90deg,${activeColors.border},transparent)`, margin: '1.1rem 0' }} />
 
-              <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 'clamp(0.88rem,1.9vw,1rem)', color: 'rgba(249,236,182,0.82)', lineHeight: 1.78, marginBottom: '0.85rem' }}>
-                {SUBTHEME_INFO[activeSubtheme]?.en}
-              </p>
-              <p style={{ fontFamily: "'Tropikal','Playfair Display',serif", fontSize: 'clamp(0.8rem,1.7vw,0.92rem)', fontStyle: 'italic', color: themeColors[activeSubtheme].text, lineHeight: 1.65, opacity: 0.78 }}>
-                "{SUBTHEME_INFO[activeSubtheme]?.fil}"
-              </p>
+                <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: 'clamp(0.88rem,1.9vw,1rem)', color: 'rgba(249,236,182,0.82)', lineHeight: 1.78, marginBottom: '0.85rem' }}>
+                  {activeTheme?.descriptionEn ?? SUBTHEME_INFO_FALLBACK[activeSubtheme]?.en}
+                </p>
+                <p style={{ fontFamily: "'Tropikal','Playfair Display',serif", fontSize: 'clamp(0.8rem,1.7vw,0.92rem)', fontStyle: 'italic', color: activeColors.text, lineHeight: 1.65, opacity: 0.78 }}>
+                  "{activeTheme?.descriptionFil ?? SUBTHEME_INFO_FALLBACK[activeSubtheme]?.fil}"
+                </p>
+              </div>
             </m.div>
           </m.div>
         )}
@@ -1120,26 +1132,8 @@ const SubthemeAboutSection = ({ onScrollToClasses }: { onScrollToClasses: () => 
           </svg>
         </div>
 
-        {/*
-          ═══════════════════════════════════════════════════════════
-          REMOVED: The bottom organic separator that was creating
-          the visible cream/white cut-off in your first screenshot.
-          The landscape's internal bottom-blend handles the transition
-          to whatever section comes next.
-          ═══════════════════════════════════════════════════════════
-        */}
-
-        {/*
-          ═══════════════════════════════════════════════════════════
-          REMOVED: The entire header block (✦ LEAP 2026 ✦ / Mga
-          Subtheme / I-click ang isang subtheme...). It is now baked
-          INTO SubthemeLandscape.tsx so the title and landscape are
-          a single seamless composition with no division between them.
-          ═══════════════════════════════════════════════════════════
-        */}
-
         {/* ── Subtheme Interactive Landscape (Full Bleed, contains header) ── */}
-        <SubthemeLandscape setActiveSubtheme={setActiveSubtheme} themeColors={themeColors} />
+        <SubthemeLandscape themes={themes} setActiveSubtheme={setActiveSubtheme} themeColors={themeColors} />
 
         {/* ── View Classes CTA (Centered Container) ── */}
         <div style={{ maxWidth: 1100, margin: '0 auto', textAlign: 'center', marginTop: 'clamp(1rem,3vw,2rem)', position: 'relative', zIndex: 1, padding: '0 1.5rem' }}>
@@ -1876,6 +1870,7 @@ const LeapApp = () => {
 
   const renderClassCard = (item: LeapClass, index: number) => (
     <ClassCard
+      key={item.id}
       item={item}
       index={index}
       isLoggedIn={!!user}

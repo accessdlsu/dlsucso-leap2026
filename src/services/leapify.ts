@@ -152,6 +152,10 @@ export interface Theme {
   id: string;
   name: string;
   path: string;
+  imageUrl: string | null;
+  descriptionEn: string | null;
+  descriptionFil: string | null;
+  sortOrder: number;
   createdAt: number;
   updatedAt: number;
 }
