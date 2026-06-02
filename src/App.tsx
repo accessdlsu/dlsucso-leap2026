@@ -1037,18 +1037,9 @@ const SUBTHEME_INFO_FALLBACK: Record<string, { en: string; fil: string }> = {
 ══════════════════════════════════════════════════════ */
 const SubthemeAboutSection = ({ onScrollToClasses }: { onScrollToClasses: () => void }) => {
   const [activeSubtheme, setActiveSubtheme] = useState<string | null>(null);
-  const { data: apiThemes } = useThemes();
+  const { data: apiThemes, loading } = useThemes();
 
-  const themes = apiThemes.length > 0
-    ? apiThemes.map(t => ({ name: t.name, imageUrl: t.imageUrl, descriptionEn: t.descriptionEn, descriptionFil: t.descriptionFil }))
-    : [
-        { name: 'Palayan ng Karunungan', imageUrl: null, descriptionEn: null, descriptionFil: null },
-        { name: 'Pamilihan ng Kakayahan', imageUrl: null, descriptionEn: null, descriptionFil: null },
-        { name: 'Plaza ng Malikhaing Diwa', imageUrl: null, descriptionEn: null, descriptionFil: null },
-        { name: 'Dambana ng Pagkakaisa', imageUrl: null, descriptionEn: null, descriptionFil: null },
-        { name: 'Palaisdaan ng Kalusugan', imageUrl: null, descriptionEn: null, descriptionFil: null },
-        { name: 'Bahay ng Bayanihan', imageUrl: null, descriptionEn: null, descriptionFil: null },
-      ];
+  const themes = apiThemes.map(t => ({ name: t.name, imageUrl: t.imageUrl, descriptionEn: t.descriptionEn, descriptionFil: t.descriptionFil }));
 
   const themeColors: Record<string, { iconBg: string; glow: string; border: string; text: string; accent: string }> = {
     'Palayan ng Karunungan': { iconBg: 'linear-gradient(135deg,#C9E0E4cc,#8ab8c0cc)', glow: 'rgba(201,224,228,0.4)', border: 'rgba(201,224,228,0.55)', text: '#C9E0E4', accent: '#a8d4dc' },
@@ -1061,6 +1052,22 @@ const SubthemeAboutSection = ({ onScrollToClasses }: { onScrollToClasses: () => 
 
   const activeTheme = themes.find(t => t.name === activeSubtheme);
   const activeColors = activeSubtheme ? (themeColors[activeSubtheme] ?? { iconBg: 'linear-gradient(135deg,#fae185cc,#d4a838cc)', glow: 'rgba(250,225,133,0.4)', border: 'rgba(250,225,133,0.55)', text: '#fae185', accent: '#e8c84a' }) : null;
+
+  if (loading) {
+    return (
+      <section style={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(180deg, #071810 0%, #0A140D 100%)' }}>
+        <div className="leap-spinner" />
+      </section>
+    );
+  }
+
+  if (themes.length === 0) {
+    return (
+      <section style={{ minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(180deg, #071810 0%, #0A140D 100%)' }}>
+        <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: '0.9rem', color: 'rgba(249,236,182,0.45)', fontStyle: 'italic' }}>No subthemes available yet.</p>
+      </section>
+    );
+  }
 
   return (
     <>
@@ -1342,6 +1349,7 @@ const NayonBanner = () => (
 ══════════════════════════════════════════════════════ */
 const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => void }) => {
   const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -1379,6 +1387,8 @@ const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => v
         }
       } catch (error) {
         console.error("Leapify API Error (Main Events):", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -1411,10 +1421,18 @@ const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => v
 
   const totalEvents = events.length;
 
-  if (totalEvents === 0) {
+  if (loading) {
     return (
       <section style={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="leap-spinner" />
+      </section>
+    );
+  }
+
+  if (totalEvents === 0) {
+    return (
+      <section style={{ minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: '0.9rem', color: 'rgba(249,236,182,0.45)', fontStyle: 'italic' }}>No spotlight events available yet.</p>
       </section>
     );
   }
