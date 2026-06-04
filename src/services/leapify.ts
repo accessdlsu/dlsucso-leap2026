@@ -303,8 +303,16 @@ class WsApiClient {
               const body = res.body as { data?: unknown };
               p.resolve(body?.data ?? res.body);
             } else {
-              const body = res.body as { error?: { code?: string; message?: string } };
-              const message = body?.error?.message ?? `API error ${res.status}`;
+              const body = res.body;
+              let message: string;
+              if (typeof body === "object" && body !== null && "error" in body) {
+                const errObj = (body as { error?: { code?: string; message?: string } }).error;
+                message = errObj?.message ?? `API error ${res.status}`;
+              } else if (typeof body === "string") {
+                message = body || `API error ${res.status}`;
+              } else {
+                message = `API error ${res.status}`;
+              }
               p.reject(new Error(message));
             }
           }

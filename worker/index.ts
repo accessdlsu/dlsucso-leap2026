@@ -114,17 +114,29 @@ async function verifyTurnstileToken(
   }
 }
 
+function safeWsSend(server: WebSocket, data: string): void {
+  try {
+    if (server.readyState === 1) {
+      server.send(data);
+    }
+  } catch {
+    // WebSocket already closed — nothing we can do.
+  }
+}
+
 async function handleWsMessage(
   server: WebSocket,
   request: Request,
   env: Env,
   event: MessageEvent,
 ): Promise<void> {
+  let reqId = "unknown";
   try {
     const req: WsApiRequest = JSON.parse(event.data as string);
+    reqId = req.id;
     const backendUrl = env.VITE_LEAPIFY_API_URL;
     if (!backendUrl) {
-      server.send(JSON.stringify({
+      safeWsSend(server, JSON.stringify({
         id: req.id,
         status: 500,
         body: { error: { code: "CONFIG_ERROR", message: "Backend URL not configured" } },
@@ -137,6 +149,9 @@ async function handleWsMessage(
     };
     if (req.token) {
       headers["Authorization"] = `Bearer ${req.token}`;
+    }
+    if (req.body && req.method !== "GET" && req.method !== "HEAD") {
+      headers["Content-Type"] = "application/json";
     }
 
     const fetchInit: RequestInit = {
@@ -156,18 +171,24 @@ async function handleWsMessage(
     if (contentType.includes("application/json")) {
       body = await upstream.json();
     } else {
-      body = await upstream.text();
+      const text = await upstream.text();
+      // Detect Cloudflare error pages (e.g. "error code: 1042") and wrap
+      // them in a structured JSON envelope so the client can display them.
+      if (text.startsWith("error code:") || text.includes("CF error")) {
+        body = { error: { code: "UPSTREAM_ERROR", message: text.trim() } };
+      } else {
+        body = text;
+      }
     }
 
-    server.send(JSON.stringify({
+    safeWsSend(server, JSON.stringify({
       id: req.id,
       status: upstream.status,
       body,
     } satisfies WsApiResponse));
   } catch (err) {
-    const id = (() => { try { return JSON.parse((event.data as string) || "{}").id; } catch { return "unknown"; } })();
-    server.send(JSON.stringify({
-      id,
+    safeWsSend(server, JSON.stringify({
+      id: reqId,
       status: 502,
       body: { error: { code: "PROXY_ERROR", message: err instanceof Error ? err.message : "Failed to proxy request" } },
     } satisfies WsApiResponse));
@@ -200,8 +221,11 @@ function handleWebSocketUpgrade(
       verifyTurnstileToken(env.TURNSTILE_SECRET_KEY, turnstileToken, ip).then((valid) => {
         if (!valid) {
           console.warn("[worker] Turnstile validation failed, closing WebSocket");
-          server.close(1008, "Turnstile verification failed");
+          try { server.close(1008, "Turnstile verification failed"); } catch { /* already closed */ }
         }
+      }).catch((err) => {
+        console.error("[worker] Turnstile verification error:", err);
+        try { server.close(1008, "Turnstile verification error"); } catch { /* already closed */ }
       }),
     );
   }
