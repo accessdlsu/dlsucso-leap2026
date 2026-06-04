@@ -12,7 +12,7 @@ import {
   Edit, ArrowLeft, ExternalLink, Mail, Clock, ChevronUp,
   ArrowDown
 } from 'lucide-react';
-import { leapifyApi } from './services/leapify';
+import { leapifyApi, onTurnstileError, signalTurnstileContainer } from './services/leapify';
 import { useOptimizedScrollProgress, rafThrottle, useClasses, useConfig, useThemes } from './hooks';
 import { THEME_ILLUSTRATIONS } from './components/shared/theme-illustrations';
 import type { LeapClass } from './types';
@@ -1673,6 +1673,10 @@ const LeapApp = () => {
     }
   }, [authError]);
 
+  useEffect(() => {
+    onTurnstileError((message) => setAuthError(message));
+  }, []);
+
   const navigateTo = (view: 'home' | 'about' | 'major-events' | 'classes' | 'saved-classes' | 'faq' | 'contact') => {
     setCurrentView(view); setIsMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2736,6 +2740,7 @@ const LeapApp = () => {
           <div className={styles.loadingContent}>
             <div className="leap-spinner" />
             <p className={styles.loadingText}>Loading LEAP 2026…</p>
+            <div id="leapify-turnstile-container" ref={(el) => { if (el) signalTurnstileContainer(el); }} />
           </div>
         </div>
       ) : (

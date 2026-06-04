@@ -2,6 +2,24 @@ const SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000
 let turnstileSolved = false;
 let turnstilePromise: Promise<boolean> | null = null;
 let turnstileToken: string | null = null;
+let turnstileErrorCallback: ((message: string) => void) | null = null;
+let turnstileContainerResolve: ((el: HTMLElement) => void) | null = null;
+const turnstileContainerReady = new Promise<HTMLElement>((resolve) => {
+  turnstileContainerResolve = resolve;
+});
+
+export function onTurnstileError(callback: (message: string) => void): void {
+  turnstileErrorCallback = callback;
+}
+
+/**
+ * Signal that the Turnstile container element is mounted in the DOM.
+ * Called by App.tsx when the loading screen renders.
+ */
+export function signalTurnstileContainer(el: HTMLElement): void {
+  console.log("[leapify] Turnstile container signaled:", el);
+  turnstileContainerResolve?.(el);
+}
 
 declare global {
   interface Window {
@@ -17,30 +35,34 @@ declare global {
 function loadTurnstileScript(): Promise<void> {
   return new Promise((resolve, reject) => {
     if (typeof window.turnstile !== "undefined") {
+      console.log("[leapify] Turnstile script already loaded");
       resolve();
       return;
     }
+    console.log("[leapify] Loading Turnstile script");
     const script = document.createElement("script");
     script.src =
       "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
     script.async = true;
     script.defer = true;
-    script.onload = () => resolve();
+    script.onload = () => {
+      console.log("[leapify] Turnstile script loaded");
+      resolve();
+    };
     script.onerror = () => reject(new Error("Failed to load Turnstile script"));
     document.head.appendChild(script);
   });
 }
 
-function executeTurnstile(siteKey: string): Promise<string> {
+async function executeTurnstile(siteKey: string): Promise<string> {
+  console.log("[leapify] Waiting for Turnstile container");
+  const container = await turnstileContainerReady;
+  console.log("[leapify] Rendering Turnstile into container");
   return new Promise((resolve) => {
-    const container = document.createElement("div");
-    container.id = "leapify-turnstile-container";
-    container.style.display = "none";
-    document.body.appendChild(container);
-    window.turnstile.render(`#${container.id}`, {
+    window.turnstile.render(container, {
       sitekey: siteKey,
       callback: (token: string) => {
-        container.remove();
+        console.log("[leapify] Turnstile challenge solved");
         resolve(token);
       },
     });
@@ -50,6 +72,7 @@ function executeTurnstile(siteKey: string): Promise<string> {
 export async function solveTurnstileChallenge(): Promise<boolean> {
   if (turnstileSolved) return true;
   if (turnstilePromise) return turnstilePromise;
+  console.log("[leapify] Starting Turnstile challenge");
   turnstilePromise = (async () => {
     if (!SITE_KEY) return false;
     try {
@@ -58,11 +81,12 @@ export async function solveTurnstileChallenge(): Promise<boolean> {
       if (token) {
         turnstileToken = token;
         turnstileSolved = true;
+        console.log("[leapify] Turnstile challenge complete");
         return true;
       }
       return false;
     } catch (error) {
-      console.error("Turnstile verification error:", error);
+      console.error("[leapify] Turnstile verification error:", error);
       return false;
     } finally {
       turnstilePromise = null;
@@ -227,6 +251,7 @@ class WsApiClient {
     if (this.ws?.readyState === WebSocket.OPEN) return;
     if (this.connecting) return this.connecting;
 
+    console.log("[leapify] Ensuring WebSocket connection");
     this.connecting = new Promise<void>(async (resolve, reject) => {
       this.connectResolve = resolve;
 
@@ -235,7 +260,12 @@ class WsApiClient {
       // connection — the Worker will skip validation when the secret is unset
       // or use the test secret key which always passes.
       if (!turnstileSolved && SITE_KEY) {
-        await solveTurnstileChallenge().catch(() => {});
+        console.log("[leapify] Turnstile not solved, solving now");
+        const solved = await solveTurnstileChallenge().catch(() => false);
+        if (!solved) {
+          console.warn("[leapify] Turnstile failed, proceeding without token");
+          turnstileErrorCallback?.("Security verification failed, attempting connection anyway");
+        }
       }
 
       const wsUrl = new URL("/api", window.location.origin);
@@ -243,10 +273,12 @@ class WsApiClient {
       if (turnstileToken) {
         wsUrl.searchParams.set("turnstile_token", turnstileToken);
       }
+      console.log("[leapify] Connecting to WebSocket API");
 
       try {
         this.ws = new WebSocket(wsUrl.toString());
       } catch (err) {
+        console.error("[leapify] WebSocket creation failed:", err);
         this.connecting = null;
         reject(err);
         return;

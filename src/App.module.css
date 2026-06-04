@@ -1565,6 +1565,10 @@
   @apply text-leap-olive text-sm font-medium tracking-wide uppercase;
 }
 
+#leapify-turnstile-container {
+  margin-top: 0.5rem;
+}
+
 /* ═══════════════════════════════════════════════════════════
    CARD MISC
 ═══════════════════════════════════════════════════════════ */
