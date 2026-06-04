@@ -27,6 +27,8 @@ export interface Env {
   VITE_TURNSTILE_SITE_KEY?: string;
   VITE_LEAPIFY_API_URL?: string;
   VITE_ENVIRONMENT?: string;
+  /** Service binding to backend Worker (leapify-console) */
+  BACKEND?: Fetcher;
   /** Static Assets binding */
   ASSETS?: Fetcher;
 }
@@ -135,7 +137,7 @@ async function handleWsMessage(
     const req: WsApiRequest = JSON.parse(event.data as string);
     reqId = req.id;
     const backendUrl = env.VITE_LEAPIFY_API_URL;
-    if (!backendUrl) {
+    if (!backendUrl && !env.BACKEND) {
       safeWsSend(server, JSON.stringify({
         id: req.id,
         status: 500,
@@ -163,8 +165,18 @@ async function handleWsMessage(
       fetchInit.body = req.body;
     }
 
+    const targetUrl = `${backendUrl}/api${req.path}`;
     console.log(`[worker] WS proxy: ${req.method} ${req.path}`);
-    const upstream = await fetch(`${backendUrl}/api${req.path}`, fetchInit);
+
+    // Use service binding for direct Worker-to-Worker communication when
+    // available. Regular fetch() to *.workers.dev URLs fails when both
+    // Workers are deployed on Cloudflare (works only in local dev).
+    let upstream: Response;
+    if (env.BACKEND) {
+      upstream = await env.BACKEND.fetch(new Request(targetUrl, fetchInit));
+    } else {
+      upstream = await fetch(targetUrl, fetchInit);
+    }
     const contentType = upstream.headers.get("content-type") || "";
 
     let body: unknown;
