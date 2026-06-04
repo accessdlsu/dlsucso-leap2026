@@ -248,10 +248,14 @@ function handleWebSocketUpgrade(
 
   server.addEventListener("close", (event) => {
     console.log("[worker] WebSocket closed:", event.code, event.reason);
+    // CF Workers require server.close() in the close handler — without it
+    // the runtime logs "The script will never generate a response" (error 1101).
+    try { server.close(); } catch { /* already closed */ }
   });
 
   server.addEventListener("error", (event) => {
     console.error("[worker] WebSocket error:", event);
+    try { server.close(); } catch { /* already closed */ }
   });
 
   return new Response(null, {
