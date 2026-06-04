@@ -26,8 +26,10 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    // Intercept requests matching /api/* in the Worker first before matching static files.
+    // Intercept requests matching /api in the Worker first before matching static files.
+    // Includes /api (WebSocket upgrade) and /api/* (health endpoint).
     "run_worker_first": [
+      "/api",
       "/api/*"
     ]
   },

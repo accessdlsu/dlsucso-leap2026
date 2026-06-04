@@ -4,24 +4,18 @@
  * This file runs at the edge (Cloudflare's global network) and:
  *  1. Injects security & performance HTTP headers on every response
  *  2. Serves the Vite-built static site via Cloudflare Pages assets
- *  3. Exposes a lightweight `/api/health` endpoint for uptime checks
- *  4. Optionally proxies Contentful requests to avoid exposing the
- *     access token in the browser bundle (opt-in via env var)
+ *  3. Exposes a WebSocket API proxy at `/api` for anti-scraping
+ *  4. Exposes a lightweight `/api/health` endpoint for uptime checks
  *
- * Deployment targets
- * ──────────────────
- *   Cloudflare Pages  →  `npm run deploy`        (preferred)
- *   Standalone Worker →  `npm run worker:deploy`  (advanced)
- *
- * Local development
- * ─────────────────
- *   `npm run pages:dev`   — Pages + Worker with hot-reload
- *   `npm run worker:dev`  — standalone Worker dev server
+ * Anti-scraping: Browser communicates with the backend exclusively via
+ * WebSocket. API endpoints are not visible in Chrome DevTools Network tab,
+ * making simple curl-based scraping ineffective.
  */
 export interface Env {
   /** Set via `wrangler secret put` or `.dev.vars` for local dev */
   CONTENTFUL_SPACE_ID?: string;
   CONTENTFUL_ACCESS_TOKEN?: string;
+  TURNSTILE_SECRET_KEY?: string;
   /** Injected by wrangler.jsonc `vars` */
   VITE_FIREBASE_API_KEY?: string;
   VITE_FIREBASE_AUTH_DOMAIN?: string;
@@ -38,20 +32,15 @@ export interface Env {
 }
 
 // ── Security & Cache Headers ──────────────────────────────────────────────────
+
 const SECURITY_HEADERS: Record<string, string> = {
-  // Prevent MIME-type sniffing
   "X-Content-Type-Options": "nosniff",
-  // Disallow iframing (clickjacking)
   "X-Frame-Options": "DENY",
-  // Force HTTPS for 1 year (including sub-domains)
-  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-  // Tight referrer policy
   "Referrer-Policy": "strict-origin-when-cross-origin",
-  // Basic permissions policy
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
   /**
-   * Content-Security-Policy
-   * Adjusted for Firebase Auth popup + Contentful CDN + Google Fonts.
+   * Content Security Policy — tuned for this SPA.
+   *
    * Tighten further before going to production if you add/remove origins.
    */
   "Content-Security-Policy": [
@@ -60,8 +49,8 @@ const SECURITY_HEADERS: Record<string, string> = {
     "script-src 'self' 'unsafe-inline' https://apis.google.com https://www.gstatic.com",
     // Firebase, Contentful image CDN, Google Fonts, placeholder.com
     "img-src 'self' data: https: blob:",
-    // Firebase Firestore & Storage + Google APIs + Contentful CDN + WebSockets
-    "connect-src 'self' http://localhost:8787 http://127.0.0.1:8787 https://*.googleapis.com https://*.firebaseio.com https://*.contentful.com https://cdn.contentful.com wss://*.firebaseio.com https://leapify-console.accessdlsu.workers.dev",
+    // Firebase Firestore & Storage + Google APIs + Contentful CDN
+    "connect-src 'self' http://localhost:8787 http://127.0.0.1:8787 https://*.googleapis.com https://*.firebaseio.com https://*.contentful.com https://cdn.contentful.com wss://*.firebaseio.com",
     // Google Fonts + self
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
@@ -82,6 +71,154 @@ function jsonResponse(data: unknown, status = 200): Response {
   });
 }
 
+// ── WebSocket API Proxy ───────────────────────────────────────────────────────
+
+interface WsApiRequest {
+  id: string;
+  method: string;
+  path: string;
+  token?: string;
+  body?: string;
+}
+
+interface WsApiResponse {
+  id: string;
+  status: number;
+  body: unknown;
+}
+
+const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+
+async function verifyTurnstileToken(
+  secret: string,
+  token: string,
+  ip: string | null,
+): Promise<boolean> {
+  const formData = new URLSearchParams();
+  formData.append("secret", secret);
+  formData.append("response", token);
+  if (ip) formData.append("remoteip", ip);
+
+  try {
+    const res = await fetch(TURNSTILE_VERIFY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData.toString(),
+    });
+    const outcome = (await res.json()) as { success: boolean };
+    return outcome.success;
+  } catch {
+    return false;
+  }
+}
+
+async function handleWebSocketUpgrade(
+  request: Request,
+  env: Env,
+): Promise<Response> {
+  const url = new URL(request.url);
+  const turnstileToken = url.searchParams.get("turnstile_token");
+
+  // Validate Turnstile if secret is configured
+  if (env.TURNSTILE_SECRET_KEY) {
+    if (!turnstileToken) {
+      return jsonResponse(
+        { error: { code: "TURNSTILE_REQUIRED", message: "Turnstile token required" } },
+        401,
+      );
+    }
+    const ip = request.headers.get("CF-Connecting-IP");
+    const valid = await verifyTurnstileToken(env.TURNSTILE_SECRET_KEY, turnstileToken, ip);
+    if (!valid) {
+      return jsonResponse(
+        { error: { code: "TURNSTILE_FAILED", message: "Turnstile verification failed" } },
+        403,
+      );
+    }
+  }
+
+  const pair = new WebSocketPair();
+  const [client, server] = Object.values(pair);
+
+  server.accept();
+
+  server.addEventListener("message", async (event) => {
+    try {
+      const req: WsApiRequest = JSON.parse(event.data as string);
+      const backendUrl = env.VITE_LEAPIFY_API_URL;
+      if (!backendUrl) {
+        const response: WsApiResponse = {
+          id: req.id,
+          status: 500,
+          body: { error: { code: "CONFIG_ERROR", message: "Backend URL not configured" } },
+        };
+        server.send(JSON.stringify(response));
+        return;
+      }
+
+      const headers: Record<string, string> = {
+        "X-Forwarded-For": request.headers.get("CF-Connecting-IP") || "",
+      };
+      if (req.token) {
+        headers["Authorization"] = `Bearer ${req.token}`;
+      }
+
+      const fetchInit: RequestInit = {
+        method: req.method,
+        headers,
+      };
+      if (req.body && req.method !== "GET" && req.method !== "HEAD") {
+        fetchInit.body = req.body;
+      }
+
+      const upstream = await fetch(`${backendUrl}/api${req.path}`, fetchInit);
+      const contentType = upstream.headers.get("content-type") || "";
+
+      let body: unknown;
+      if (contentType.includes("application/json")) {
+        body = await upstream.json();
+      } else {
+        body = await upstream.text();
+      }
+
+      const response: WsApiResponse = {
+        id: req.id,
+        status: upstream.status,
+        body,
+      };
+      server.send(JSON.stringify(response));
+    } catch (err) {
+      const errorResponse: WsApiResponse = {
+        id: "unknown",
+        status: 500,
+        body: { error: { code: "PROXY_ERROR", message: "Failed to proxy request" } },
+      };
+      try {
+        const parsed = JSON.parse((event.data as string) || "{}");
+        if (parsed.id) errorResponse.id = parsed.id;
+      } catch {
+        // id stays "unknown"
+      }
+      server.send(JSON.stringify(errorResponse));
+      console.error("[worker] WebSocket proxy error:", err);
+    }
+  });
+
+  server.addEventListener("close", (event) => {
+    console.log("[worker] WebSocket closed:", event.code, event.reason);
+  });
+
+  server.addEventListener("error", (event) => {
+    console.error("[worker] WebSocket error:", event);
+  });
+
+  return new Response(null, {
+    status: 101,
+    // @ts-expect-error — Cloudflare Workers specific response init
+    webSocket: client,
+  });
+}
+
 // ── API Routes ────────────────────────────────────────────────────────────────
 
 async function handleApiRequest(
@@ -99,53 +236,12 @@ async function handleApiRequest(
     });
   }
 
-  /**
-   * GET /api/contentful — server-side Contentful proxy
-   *
-   * Keeps the Contentful access token out of the browser bundle.
-   * Usage: GET /api/contentful?content_type=mainEvents&include=2&limit=5
-   *
-   * Only active when CONTENTFUL_SPACE_ID and
-   * CONTENTFUL_ACCESS_TOKEN are bound as Worker secrets.
-   */
-  if (pathname === "/api/contentful" && request.method === "GET") {
-    const spaceId = env.CONTENTFUL_SPACE_ID;
-    const token = env.CONTENTFUL_ACCESS_TOKEN;
-
-    if (!spaceId || !token) {
-      return jsonResponse(
-        { error: "Contentful credentials not configured on the edge." },
-        503,
-      );
-    }
-
-    const url = new URL(request.url);
-    const params = new URLSearchParams(url.searchParams);
-    params.set("access_token", token);
-
-    const contentfulUrl = `https://cdn.contentful.com/spaces/${spaceId}/entries?${params.toString()}`;
-
-    try {
-      const upstream = await fetch(contentfulUrl, {
-        headers: { Accept: "application/json" },
-      });
-
-      const body = await upstream.text();
-
-      return new Response(body, {
-        status: upstream.status,
-        headers: {
-          "Content-Type": "application/json;charset=UTF-8",
-          // Cache Contentful responses at the edge for 60 s
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
-          "Access-Control-Allow-Origin": "*",
-          ...SECURITY_HEADERS,
-        },
-      });
-    } catch (err) {
-      console.error("[worker] Contentful proxy error:", err);
-      return jsonResponse({ error: "Failed to reach Contentful CDN." }, 502);
-    }
+  // WebSocket upgrade at /api
+  if (
+    pathname === "/api" &&
+    request.headers.get("Upgrade")?.toLowerCase() === "websocket"
+  ) {
+    return handleWebSocketUpgrade(request, env);
   }
 
   // No matching API route
@@ -164,7 +260,7 @@ export default {
     const { pathname } = url;
 
     // ── 1. API routes ──────────────────────────────────────────────────────
-    if (pathname.startsWith("/api/")) {
+    if (pathname.startsWith("/api")) {
       const apiResponse = await handleApiRequest(request, env, pathname);
       if (apiResponse) return apiResponse;
 
