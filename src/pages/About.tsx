@@ -1,8 +1,13 @@
 import { m } from 'framer-motion';
 import { Sparkles, Users, Leaf, Heart } from 'lucide-react';
 import { PageWrapper } from '../components/PageCommon';
+import { useEvents, useOrganizations } from '../hooks';
 
 export default function About() {
+  const { data: events } = useEvents();
+  const { data: orgs } = useOrganizations();
+  const classCount = events.length;
+  const orgCount = orgs.length;
   const values = [
     { icon: Sparkles, title: 'Innovation', desc: 'Breaking boundaries of traditional learning with creative and unconventional approaches.' },
     { icon: Users, title: 'Community', desc: 'Fostering meaningful connections between students, orgs, and the greater DLSU family.' },
@@ -29,13 +34,13 @@ export default function About() {
           </m.div>
           <m.div initial={{ opacity: 0, x: 24 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1 }}
             className="about-stat-panel">
-            <div className="about-stat"><span className="about-stat-num">200+</span><span className="about-stat-lbl">Classes offered</span></div>
+            <div className="about-stat"><span className="about-stat-num">{classCount || '200+'}</span><span className="about-stat-lbl">Classes offered</span></div>
             <div className="about-stat-div" />
-            <div className="about-stat"><span className="about-stat-num">7</span><span className="about-stat-lbl">Days of learning</span></div>
+            <div className="about-stat"><span className="about-stat-num">6</span><span className="about-stat-lbl">Days of learning</span></div>
             <div className="about-stat-div" />
-            <div className="about-stat"><span className="about-stat-num">5,000+</span><span className="about-stat-lbl">Students engaged</span></div>
+            <div className="about-stat"><span className="about-stat-num">~30,000</span><span className="about-stat-lbl">Students engaged</span></div>
             <div className="about-stat-div" />
-            <div className="about-stat"><span className="about-stat-num">50+</span><span className="about-stat-lbl">Organizations</span></div>
+            <div className="about-stat"><span className="about-stat-num">{orgCount || '50+'}</span><span className="about-stat-lbl">Organizations</span></div>
           </m.div>
         </div>
         <div className="vm-grid">

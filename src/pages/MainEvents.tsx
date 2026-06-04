@@ -14,7 +14,6 @@ interface MainEvent {
   date: string;
   time: string;
   venue: string;
-  modality: string;
   desc: string;
   img: string;
   accent: string;
@@ -26,8 +25,8 @@ interface MainEvent {
 
 function mapEvent(ev: LeapEvent, i: number): MainEvent {
   let date = '', time = '';
-  if (ev.dateTime) {
-    date = ev.dateTime;
+  if (ev.date) {
+    date = ev.date;
   }
   if (ev.startTime && ev.endTime) {
     time = `${ev.startTime} – ${ev.endTime}`;
@@ -41,7 +40,6 @@ function mapEvent(ev: LeapEvent, i: number): MainEvent {
     date,
     time,
     venue: ev.venue || '',
-    modality: ev.venue?.toLowerCase().includes('online') || ev.venue?.toLowerCase().includes('zoom') ? 'Online' : 'Face-to-Face',
     desc: ev.description || '',
     img: ev.backgroundImageUrl || 'https://placehold.co/812x510?text=No+Image+Found',
     accent: ACCENT_COLORS[i % ACCENT_COLORS.length],
@@ -102,7 +100,7 @@ export default function MainEvents() {
                   <div className="event-meta">
                     <span className="event-meta-item"><Calendar size={13} />{ev.date}</span>
                     <span className="event-meta-item"><Clock size={13} />{ev.time}</span>
-                    <span className="event-meta-item"><MapPin size={13} />{ev.venue} ({ev.modality})</span>
+                    <span className="event-meta-item"><MapPin size={13} />{ev.venue}</span>
                     {ev.slots > 0 && (
                       <span className="event-meta-item"><Users size={13} />{ev.slots} slots</span>
                     )}

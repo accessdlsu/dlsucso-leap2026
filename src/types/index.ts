@@ -8,7 +8,6 @@ export interface LeapClass {
   id: string;
   title: string;
   org: string;
-  modality: string;
   date: string;
   time: string;
   venue: string;

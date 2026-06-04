@@ -317,10 +317,10 @@ export default function Home({
                 onChange={(e) =>
                   onSortChange(
                     e.target.value as
-                      | "title-asc"
-                      | "title-desc"
-                      | "slots-desc"
-                      | "slots-asc",
+                    | "title-asc"
+                    | "title-desc"
+                    | "slots-desc"
+                    | "slots-asc",
                   )
                 }
                 aria-label="Sort classes"
@@ -978,12 +978,12 @@ export default function Home({
                         {
                           icon: <Calendar size={18} />,
                           label: "Date & Time",
-                          value: `${viewingClass.date} ${viewingClass.time}`,
+                          value: `${viewingClass.date} · ${viewingClass.time}`,
                         },
                         {
                           icon: <MapPin size={18} />,
                           label: "Location",
-                          value: `${viewingClass.venue} (${viewingClass.modality})`,
+                          value: `${viewingClass.venue}`,
                         },
                         {
                           icon: <Users size={18} />,

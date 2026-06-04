@@ -109,16 +109,16 @@ export const ClassCard = memo(({
           <div className={styles.metadataItem}>
             <MapPin size={12} className={styles.metadataIcon} />
             <span>
-              {item.venue} ({item.modality})
+              {item.venue}
             </span>
           </div>
           {item.slots > 0 && (
-          <div className={styles.metadataItem}>
-            <Users size={12} className={styles.metadataIcon} />
-            <span>
-              {item.slots} slots
-            </span>
-          </div>
+            <div className={styles.metadataItem}>
+              <Users size={12} className={styles.metadataIcon} />
+              <span>
+                {item.slots} slots
+              </span>
+            </div>
           )}
         </div>
         <div className={styles.cardActionsOverlay}>
@@ -176,7 +176,7 @@ export const ClassCard = memo(({
         <div className={styles.metadataItem}>
           <MapPin size={12} className={styles.metadataIcon} />
           <span>
-            {item.venue} ({item.modality})
+            {item.venue}
           </span>
         </div>
       </div>

@@ -54,11 +54,6 @@ export default function EventDetail({ slug, onBack }: EventDetailProps) {
     event.startTime && event.endTime
       ? `${event.startTime} – ${event.endTime}`
       : event.startTime || '';
-  const modality =
-    event.venue?.toLowerCase().includes('online') ||
-    event.venue?.toLowerCase().includes('zoom')
-      ? 'Online'
-      : 'Face-to-Face';
 
   return (
     <PageWrapper>
@@ -170,10 +165,10 @@ export default function EventDetail({ slug, onBack }: EventDetailProps) {
               border: '1px solid rgba(222,154,73,0.15)',
             }}
           >
-            {event.dateTime && (
+            {event.date && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Calendar size={16} color="#de9a49" />
-                <span style={{ fontSize: '0.9rem', color: '#334b46' }}>{event.dateTime}</span>
+                <span style={{ fontSize: '0.9rem', color: '#334b46' }}>{event.date}</span>
               </div>
             )}
             {time && (
@@ -186,7 +181,7 @@ export default function EventDetail({ slug, onBack }: EventDetailProps) {
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <MapPin size={16} color="#de9a49" />
                 <span style={{ fontSize: '0.9rem', color: '#334b46' }}>
-                  {event.venue} ({modality})
+                  {event.venue}
                 </span>
               </div>
             )}

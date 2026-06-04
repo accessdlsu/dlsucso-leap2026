@@ -20,12 +20,6 @@ function formatTime(
   return startTime || "";
 }
 
-function isOnline(venue: string | null): string {
-  if (!venue) return "Face-to-Face";
-  const v = venue.toLowerCase();
-  return v.includes("online") || v.includes("zoom") ? "Online" : "Face-to-Face";
-}
-
 /**
  * Map a LeapEvent to a MainEvent display object (for spotlight/carousel).
  */
@@ -37,7 +31,7 @@ export function toMainEvent(event: LeapEvent, index: number): MainEvent {
     img: event.backgroundImageUrl || DEFAULT_EVENT_IMG,
     tag: event.theme?.name || "LEAP 2026",
     accent: ACCENT_COLORS[index % ACCENT_COLORS.length],
-    date: event.dateTime || "",
+    date: event.date || "",
     time: formatTime(event.startTime, event.endTime),
     venue: event.venue || "",
     capacity: event.maxSlots || 0,
@@ -52,8 +46,7 @@ export function toLeapClass(event: LeapEvent): LeapClass {
     id: event.id,
     title: event.title || "",
     org: event.organization?.name || "",
-    modality: isOnline(event.venue),
-    date: event.dateTime || "",
+    date: event.date || "",
     time: formatTime(event.startTime, event.endTime),
     venue: event.venue || "",
     slots: event.maxSlots || 0,

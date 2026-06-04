@@ -95,9 +95,7 @@ export function useClasses(): FetchState<LeapClass[]> & { refetch: () => void } 
     setState((s) => ({ ...s, loading: true, error: null }));
     try {
       const events = await leapifyApi.getEvents();
-      const classes = events
-        .filter((e) => !e.isSpotlight)
-        .map((e) => toLeapClass(e));
+      const classes = events.map((e) => toLeapClass(e));
       setState({ data: classes, loading: false, error: null });
     } catch (err) {
       setState((s) => ({

@@ -9,11 +9,11 @@ import { m, AnimatePresence, LazyMotion, domAnimation } from 'framer-motion';
 import {
   Calendar, MapPin, ChevronRight, ChevronLeft,
   X, AlertCircle, LogIn,
-  Edit, ArrowLeft, ExternalLink, Mail, Clock, ChevronUp,
-  ArrowDown
+  Edit, ArrowLeft, ExternalLink, Clock, ChevronUp,
+  ArrowDown, Shield
 } from 'lucide-react';
 import { leapifyApi, onTurnstileError, signalTurnstileContainer } from './services/leapify';
-import { useOptimizedScrollProgress, rafThrottle, useClasses, useConfig, useThemes } from './hooks';
+import { useOptimizedScrollProgress, rafThrottle, useClasses, useConfig, useThemes, useEvents } from './hooks';
 import { THEME_ILLUSTRATIONS } from './components/shared/theme-illustrations';
 import type { LeapClass } from './types';
 
@@ -1055,7 +1055,7 @@ const SubthemeAboutSection = ({ onScrollToClasses }: { onScrollToClasses: () => 
 
   if (loading) {
     return (
-      <section style={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(180deg, #071810 0%, #0A140D 100%)' }}>
+      <section style={{ minHeight: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(180deg, #1a2a1e 0%, #1f3225 100%)' }}>
         <div className="leap-spinner" />
       </section>
     );
@@ -1063,7 +1063,7 @@ const SubthemeAboutSection = ({ onScrollToClasses }: { onScrollToClasses: () => 
 
   if (themes.length === 0) {
     return (
-      <section style={{ minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(180deg, #071810 0%, #0A140D 100%)' }}>
+      <section style={{ minHeight: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(180deg, #1a2a1e 0%, #1f3225 100%)' }}>
         <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: '0.9rem', color: 'rgba(249,236,182,0.45)', fontStyle: 'italic' }}>No subthemes available yet.</p>
       </section>
     );
@@ -1190,160 +1190,166 @@ const GlowRing = () => (
   }} />
 );
 
-const NayonBanner = () => (
-  <div
-    style={{
-      position: 'relative',
-      background: 'linear-gradient(180deg, #132015 0%, #1a3520 40%, #1e4028 70%, #1a3820 100%)',
-      overflow: 'hidden',
-      padding: 'clamp(2.5rem, 5vw, 4rem) clamp(1rem, 4vw, 3rem)',
-    }}
-  >
-    {/* Ambient radial glows */}
-    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
-      <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: '70%', height: '140%', background: 'radial-gradient(ellipse at center, rgba(222,154,73,0.12) 0%, rgba(222,154,73,0.04) 40%, transparent 70%)', filter: 'blur(8px)' }} />
-      <div style={{ position: 'absolute', left: '15%', top: '40%', width: 240, height: 240, background: 'radial-gradient(circle, rgba(74,176,100,0.08) 0%, transparent 65%)', filter: 'blur(20px)' }} />
-      <div style={{ position: 'absolute', right: '12%', top: '35%', width: 200, height: 200, background: 'radial-gradient(circle, rgba(222,154,73,0.1) 0%, transparent 65%)', filter: 'blur(18px)' }} />
-    </div>
+const NayonBanner = () => {
+  const { data: events } = useEvents();
+  const { data: themes } = useThemes();
+  const classCount = events.length;
+  const subthemeCount = themes.length;
+  return (
+    <div
+      style={{
+        position: 'relative',
+        background: 'linear-gradient(180deg, #132015 0%, #1a3520 40%, #1e4028 70%, #1a3820 100%)',
+        overflow: 'hidden',
+        padding: 'clamp(2.5rem, 5vw, 4rem) clamp(1rem, 4vw, 3rem)',
+      }}
+    >
+      {/* Ambient radial glows */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+        <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', width: '70%', height: '140%', background: 'radial-gradient(ellipse at center, rgba(222,154,73,0.12) 0%, rgba(222,154,73,0.04) 40%, transparent 70%)', filter: 'blur(8px)' }} />
+        <div style={{ position: 'absolute', left: '15%', top: '40%', width: 240, height: 240, background: 'radial-gradient(circle, rgba(74,176,100,0.08) 0%, transparent 65%)', filter: 'blur(20px)' }} />
+        <div style={{ position: 'absolute', right: '12%', top: '35%', width: 200, height: 200, background: 'radial-gradient(circle, rgba(222,154,73,0.1) 0%, transparent 65%)', filter: 'blur(18px)' }} />
+      </div>
 
-    {/* Palay stalks — left */}
-    <svg viewBox="0 0 180 320" width="180" height="320"
-      style={{ position: 'absolute', left: 0, bottom: 0, opacity: 0.22, pointerEvents: 'none', zIndex: 1 }}
-      preserveAspectRatio="xMinYMax meet">
-      {[
-        { x: 20, lean: -8, h: 220 }, { x: 45, lean: 5, h: 260 }, { x: 70, lean: -4, h: 240 },
-        { x: 95, lean: 8, h: 280 }, { x: 118, lean: -6, h: 250 }, { x: 142, lean: 4, h: 230 },
-      ].map((s, i) => (
-        <g key={i}>
-          <path d={`M${s.x} 320 Q${s.x + s.lean * 0.5} ${320 - s.h * 0.5} ${s.x + s.lean} ${320 - s.h}`}
-            stroke="#4a8a28" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-          {[0, 0.22, 0.44, 0.66, 0.82, 1].map((t, gi) => {
-            const py = 320 - s.h * t;
-            const px = s.x + s.lean * t;
-            const side = gi % 2 === 0 ? -1 : 1;
-            return <ellipse key={gi} cx={px + side * 5} cy={py - 2} rx="4" ry="7" fill="#de9a49" opacity="0.8"
-              transform={`rotate(${side * -22 + s.lean * 0.5}, ${px + side * 5}, ${py - 2})`} />;
-          })}
-        </g>
-      ))}
-    </svg>
-
-    {/* Palay stalks — right (mirrored) */}
-    <svg viewBox="0 0 180 320" width="180" height="320"
-      style={{ position: 'absolute', right: 0, bottom: 0, opacity: 0.22, pointerEvents: 'none', zIndex: 1, transform: 'scaleX(-1)' }}
-      preserveAspectRatio="xMinYMax meet">
-      {[
-        { x: 20, lean: -8, h: 220 }, { x: 45, lean: 5, h: 260 }, { x: 70, lean: -4, h: 240 },
-        { x: 95, lean: 8, h: 280 }, { x: 118, lean: -6, h: 250 }, { x: 142, lean: 4, h: 230 },
-      ].map((s, i) => (
-        <g key={i}>
-          <path d={`M${s.x} 320 Q${s.x + s.lean * 0.5} ${320 - s.h * 0.5} ${s.x + s.lean} ${320 - s.h}`}
-            stroke="#4a8a28" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-          {[0, 0.22, 0.44, 0.66, 0.82, 1].map((t, gi) => {
-            const py = 320 - s.h * t;
-            const px = s.x + s.lean * t;
-            const side = gi % 2 === 0 ? -1 : 1;
-            return <ellipse key={gi} cx={px + side * 5} cy={py - 2} rx="4" ry="7" fill="#de9a49" opacity="0.8"
-              transform={`rotate(${side * -22 + s.lean * 0.5}, ${px + side * 5}, ${py - 2})`} />;
-          })}
-        </g>
-      ))}
-    </svg>
-
-    {/* Top gold divider line */}
-    <svg viewBox="0 0 1440 32" preserveAspectRatio="none"
-      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 32, pointerEvents: 'none', zIndex: 2 }}>
-      <defs>
-        <linearGradient id="nb-divG" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="rgba(222,154,73,0)" />
-          <stop offset="25%" stopColor="rgba(250,225,133,0.55)" />
-          <stop offset="50%" stopColor="rgba(255,235,150,0.85)" />
-          <stop offset="75%" stopColor="rgba(250,225,133,0.55)" />
-          <stop offset="100%" stopColor="rgba(222,154,73,0)" />
-        </linearGradient>
-      </defs>
-      <path d="M0 16 C200 8 400 22 720 14 C1040 6 1240 20 1440 12" stroke="url(#nb-divG)" strokeWidth="1.2" fill="none" />
-      <path d="M0 20 C200 13 400 26 720 18 C1040 10 1240 24 1440 16" stroke="url(#nb-divG)" strokeWidth="0.6" fill="none" opacity="0.5" />
-      {[144, 360, 576, 720, 864, 1080, 1296].map((x, i) => (
-        <circle key={i} cx={x} cy={14 + (i % 2) * 4} r="1.8" fill="rgba(250,225,133,0.7)" />
-      ))}
-    </svg>
-
-    {/* Main content */}
-    <div style={{ position: 'relative', zIndex: 5, textAlign: 'center', maxWidth: 820, margin: '0 auto' }}>
-
-      {/* Filipino sun */}
-      <svg viewBox="0 0 60 60" width="48" height="48" style={{ margin: '0 auto 1rem', display: 'block', opacity: 0.7 }}>
-        {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle, i) => {
-          const rad = (angle * Math.PI) / 180;
-          const inner = 14, outer = i % 3 === 0 ? 26 : 21;
-          return <line key={i} x1={30 + Math.cos(rad) * inner} y1={30 + Math.sin(rad) * inner}
-            x2={30 + Math.cos(rad) * outer} y2={30 + Math.sin(rad) * outer}
-            stroke="#fae185" strokeWidth={i % 3 === 0 ? 1.8 : 1.2} strokeLinecap="round" />;
-        })}
-        <circle cx="30" cy="30" r="11" fill="none" stroke="#fae185" strokeWidth="1.5" />
-        <circle cx="30" cy="30" r="5.5" fill="rgba(250,225,133,0.35)" />
+      {/* Palay stalks — left */}
+      <svg viewBox="0 0 180 320" width="180" height="320"
+        style={{ position: 'absolute', left: 0, bottom: 0, opacity: 0.22, pointerEvents: 'none', zIndex: 1 }}
+        preserveAspectRatio="xMinYMax meet">
+        {[
+          { x: 20, lean: -8, h: 220 }, { x: 45, lean: 5, h: 260 }, { x: 70, lean: -4, h: 240 },
+          { x: 95, lean: 8, h: 280 }, { x: 118, lean: -6, h: 250 }, { x: 142, lean: 4, h: 230 },
+        ].map((s, i) => (
+          <g key={i}>
+            <path d={`M${s.x} 320 Q${s.x + s.lean * 0.5} ${320 - s.h * 0.5} ${s.x + s.lean} ${320 - s.h}`}
+              stroke="#4a8a28" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+            {[0, 0.22, 0.44, 0.66, 0.82, 1].map((t, gi) => {
+              const py = 320 - s.h * t;
+              const px = s.x + s.lean * t;
+              const side = gi % 2 === 0 ? -1 : 1;
+              return <ellipse key={gi} cx={px + side * 5} cy={py - 2} rx="4" ry="7" fill="#de9a49" opacity="0.8"
+                transform={`rotate(${side * -22 + s.lean * 0.5}, ${px + side * 5}, ${py - 2})`} />;
+            })}
+          </g>
+        ))}
       </svg>
 
-      {/* Ornamental rule */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-        <span style={{ flex: '0 1 120px', height: 1, background: 'linear-gradient(90deg, transparent, rgba(250,225,133,0.6))' }} />
-        <svg viewBox="0 0 24 24" width="16" height="16" style={{ opacity: 0.7 }}>
-          <path d="M12 2 L14 9 L21 9 L15.5 13.5 L17.5 20.5 L12 16 L6.5 20.5 L8.5 13.5 L3 9 L10 9 Z" fill="#fae185" />
-        </svg>
-        <span style={{ flex: '0 1 120px', height: 1, background: 'linear-gradient(90deg, rgba(250,225,133,0.6), transparent)' }} />
-      </div>
-
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.35em', textTransform: 'uppercase', color: 'rgba(250,225,133,0.65)', marginBottom: '1rem' }}>
-        ✦ Mga Klase · LEAP 2026 ✦
-      </p>
-
-      <h2 style={{ fontFamily: "'Tropikal', 'Playfair Display', serif", fontSize: 'clamp(1.6rem, 4.5vw, 3.2rem)', fontWeight: 700, color: '#fff8e0', lineHeight: 1.15, margin: '0 0 1rem', letterSpacing: '0.01em', textShadow: '0 2px 0 rgba(60,30,5,0.5), 0 4px 28px rgba(0,0,0,0.6), 0 0 48px rgba(222,154,73,0.3)' }}>
-        Piliin ang iyong landas.<br />
-        <span style={{ fontFamily: "'Tropikal', 'Playfair Display', serif", fontSize: '0.9em', fontWeight: 700, color: '#fae185', textShadow: 'none' }}>
-          Palawakin ang iyong mundo.
-        </span>
-      </h2>
-
-      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 'clamp(0.82rem, 1.8vw, 1rem)', fontWeight: 400, color: 'rgba(249,236,182,0.7)', lineHeight: 1.7, maxWidth: 560, margin: '0 auto 1.75rem', fontStyle: 'italic' }}>
-        "Choose your path. Expand your world." — Browse the classes below and register for the ones that call to you.
-      </p>
-
-      {/* Stats row */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(1.5rem, 4vw, 3rem)', flexWrap: 'wrap' }}>
-        {[{ num: '200+', label: 'Classes' }, { num: '6', label: 'Subthemes' }, { num: '3', label: 'Days' }].map((stat, i) => (
-          <div key={i} style={{ textAlign: 'center', position: 'relative' }}>
-            {i > 0 && <div style={{ position: 'absolute', left: 'calc(-1.5rem - 0.5px)', top: '15%', bottom: '15%', width: 1, background: 'rgba(250,225,133,0.2)' }} />}
-            <p style={{ fontFamily: "'Tropikal', 'Playfair Display', serif", fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', fontWeight: 700, color: '#fae185', lineHeight: 1, textShadow: '0 0 24px rgba(250,225,133,0.4)', marginBottom: '0.25rem' }}>{stat.num}</p>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(249,236,182,0.55)' }}>{stat.label}</p>
-          </div>
+      {/* Palay stalks — right (mirrored) */}
+      <svg viewBox="0 0 180 320" width="180" height="320"
+        style={{ position: 'absolute', right: 0, bottom: 0, opacity: 0.22, pointerEvents: 'none', zIndex: 1, transform: 'scaleX(-1)' }}
+        preserveAspectRatio="xMinYMax meet">
+        {[
+          { x: 20, lean: -8, h: 220 }, { x: 45, lean: 5, h: 260 }, { x: 70, lean: -4, h: 240 },
+          { x: 95, lean: 8, h: 280 }, { x: 118, lean: -6, h: 250 }, { x: 142, lean: 4, h: 230 },
+        ].map((s, i) => (
+          <g key={i}>
+            <path d={`M${s.x} 320 Q${s.x + s.lean * 0.5} ${320 - s.h * 0.5} ${s.x + s.lean} ${320 - s.h}`}
+              stroke="#4a8a28" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+            {[0, 0.22, 0.44, 0.66, 0.82, 1].map((t, gi) => {
+              const py = 320 - s.h * t;
+              const px = s.x + s.lean * t;
+              const side = gi % 2 === 0 ? -1 : 1;
+              return <ellipse key={gi} cx={px + side * 5} cy={py - 2} rx="4" ry="7" fill="#de9a49" opacity="0.8"
+                transform={`rotate(${side * -22 + s.lean * 0.5}, ${px + side * 5}, ${py - 2})`} />;
+            })}
+          </g>
         ))}
-      </div>
+      </svg>
 
-      {/* Bottom ornamental rule */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginTop: '1.75rem' }}>
-        <span style={{ flex: '0 1 100px', height: 1, background: 'linear-gradient(90deg, transparent, rgba(250,225,133,0.4))' }} />
-        <svg viewBox="0 0 14 14" width="10" height="10" style={{ opacity: 0.5 }}>
-          <circle cx="7" cy="7" r="3" fill="rgba(250,225,133,0.8)" />
+      {/* Top gold divider line */}
+      <svg viewBox="0 0 1440 32" preserveAspectRatio="none"
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 32, pointerEvents: 'none', zIndex: 2 }}>
+        <defs>
+          <linearGradient id="nb-divG" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="rgba(222,154,73,0)" />
+            <stop offset="25%" stopColor="rgba(250,225,133,0.55)" />
+            <stop offset="50%" stopColor="rgba(255,235,150,0.85)" />
+            <stop offset="75%" stopColor="rgba(250,225,133,0.55)" />
+            <stop offset="100%" stopColor="rgba(222,154,73,0)" />
+          </linearGradient>
+        </defs>
+        <path d="M0 16 C200 8 400 22 720 14 C1040 6 1240 20 1440 12" stroke="url(#nb-divG)" strokeWidth="1.2" fill="none" />
+        <path d="M0 20 C200 13 400 26 720 18 C1040 10 1240 24 1440 16" stroke="url(#nb-divG)" strokeWidth="0.6" fill="none" opacity="0.5" />
+        {[144, 360, 576, 720, 864, 1080, 1296].map((x, i) => (
+          <circle key={i} cx={x} cy={14 + (i % 2) * 4} r="1.8" fill="rgba(250,225,133,0.7)" />
+        ))}
+      </svg>
+
+      {/* Main content */}
+      <div style={{ position: 'relative', zIndex: 5, textAlign: 'center', maxWidth: 820, margin: '0 auto' }}>
+
+        {/* Filipino sun */}
+        <svg viewBox="0 0 60 60" width="48" height="48" style={{ margin: '0 auto 1rem', display: 'block', opacity: 0.7 }}>
+          {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle, i) => {
+            const rad = (angle * Math.PI) / 180;
+            const inner = 14, outer = i % 3 === 0 ? 26 : 21;
+            return <line key={i} x1={30 + Math.cos(rad) * inner} y1={30 + Math.sin(rad) * inner}
+              x2={30 + Math.cos(rad) * outer} y2={30 + Math.sin(rad) * outer}
+              stroke="#fae185" strokeWidth={i % 3 === 0 ? 1.8 : 1.2} strokeLinecap="round" />;
+          })}
+          <circle cx="30" cy="30" r="11" fill="none" stroke="#fae185" strokeWidth="1.5" />
+          <circle cx="30" cy="30" r="5.5" fill="rgba(250,225,133,0.35)" />
         </svg>
-        <span style={{ flex: '0 1 100px', height: 1, background: 'linear-gradient(90deg, rgba(250,225,133,0.4), transparent)' }} />
-      </div>
-    </div>
 
-    {/* Floating lanterns */}
-    {[
-      { x: '8%', bottom: '20%', size: 18, dur: 14, delay: 0 },
-      { x: '22%', bottom: '10%', size: 14, dur: 16, delay: 3 },
-      { x: '78%', bottom: '15%', size: 16, dur: 15, delay: 1.5 },
-      { x: '92%', bottom: '22%', size: 13, dur: 17, delay: 4 },
-    ].map((p, i) => (
-      <div key={i} style={{ position: 'absolute', left: p.x, bottom: p.bottom, zIndex: 3, pointerEvents: 'none', animation: `parolRise ${p.dur}s linear infinite`, animationDelay: `${p.delay}s` }}>
-        <div style={{ width: p.size, height: p.size * 1.2, borderRadius: '40%', background: 'radial-gradient(circle at 50% 40%, #ffd980 0%, #de9a49 65%, #a05820 100%)', boxShadow: `0 0 ${p.size}px 4px rgba(255,200,100,0.5)` }} />
-        <div style={{ width: 2, height: p.size * 0.25, background: 'rgba(100,50,20,0.5)', margin: '0 auto' }} />
+        {/* Ornamental rule */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+          <span style={{ flex: '0 1 120px', height: 1, background: 'linear-gradient(90deg, transparent, rgba(250,225,133,0.6))' }} />
+          <svg viewBox="0 0 24 24" width="16" height="16" style={{ opacity: 0.7 }}>
+            <path d="M12 2 L14 9 L21 9 L15.5 13.5 L17.5 20.5 L12 16 L6.5 20.5 L8.5 13.5 L3 9 L10 9 Z" fill="#fae185" />
+          </svg>
+          <span style={{ flex: '0 1 120px', height: 1, background: 'linear-gradient(90deg, rgba(250,225,133,0.6), transparent)' }} />
+        </div>
+
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.35em', textTransform: 'uppercase', color: 'rgba(250,225,133,0.65)', marginBottom: '1rem' }}>
+          ✦ Mga Klase · LEAP 2026 ✦
+        </p>
+
+        <h2 style={{ fontFamily: "'Tropikal', 'Playfair Display', serif", fontSize: 'clamp(1.6rem, 4.5vw, 3.2rem)', fontWeight: 700, color: '#fff8e0', lineHeight: 1.15, margin: '0 0 1rem', letterSpacing: '0.01em', textShadow: '0 2px 0 rgba(60,30,5,0.5), 0 4px 28px rgba(0,0,0,0.6), 0 0 48px rgba(222,154,73,0.3)' }}>
+          Piliin ang iyong landas.<br />
+          <span style={{ fontFamily: "'Tropikal', 'Playfair Display', serif", fontSize: '0.9em', fontWeight: 700, color: '#fae185', textShadow: 'none' }}>
+            Palawakin ang iyong mundo.
+          </span>
+        </h2>
+
+        <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 'clamp(0.82rem, 1.8vw, 1rem)', fontWeight: 400, color: 'rgba(249,236,182,0.7)', lineHeight: 1.7, maxWidth: 560, margin: '0 auto 1.75rem', fontStyle: 'italic' }}>
+          "Choose your path. Expand your world." — Browse the classes below and register for the ones that call to you.
+        </p>
+
+        {/* Stats row */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 'clamp(1.5rem, 4vw, 3rem)', flexWrap: 'wrap' }}>
+          {[{ num: classCount || '200+', label: 'Classes' }, { num: subthemeCount || '6', label: 'Subthemes' }, { num: '6', label: 'Days' }].map((stat, i) => (
+            <div key={i} style={{ textAlign: 'center', position: 'relative' }}>
+              {i > 0 && <div style={{ position: 'absolute', left: 'calc(-1.5rem - 0.5px)', top: '15%', bottom: '15%', width: 1, background: 'rgba(250,225,133,0.2)' }} />}
+              <p style={{ fontFamily: "'Tropikal', 'Playfair Display', serif", fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)', fontWeight: 700, color: '#fae185', lineHeight: 1, textShadow: '0 0 24px rgba(250,225,133,0.4)', marginBottom: '0.25rem' }}>{stat.num}</p>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(249,236,182,0.55)' }}>{stat.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom ornamental rule */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginTop: '1.75rem' }}>
+          <span style={{ flex: '0 1 100px', height: 1, background: 'linear-gradient(90deg, transparent, rgba(250,225,133,0.4))' }} />
+          <svg viewBox="0 0 14 14" width="10" height="10" style={{ opacity: 0.5 }}>
+            <circle cx="7" cy="7" r="3" fill="rgba(250,225,133,0.8)" />
+          </svg>
+          <span style={{ flex: '0 1 100px', height: 1, background: 'linear-gradient(90deg, rgba(250,225,133,0.4), transparent)' }} />
+        </div>
       </div>
-    ))}
-  </div>
-);
+
+      {/* Floating lanterns */}
+      {[
+        { x: '8%', bottom: '20%', size: 18, dur: 14, delay: 0 },
+        { x: '22%', bottom: '10%', size: 14, dur: 16, delay: 3 },
+        { x: '78%', bottom: '15%', size: 16, dur: 15, delay: 1.5 },
+        { x: '92%', bottom: '22%', size: 13, dur: 17, delay: 4 },
+      ].map((p, i) => (
+        <div key={i} style={{ position: 'absolute', left: p.x, bottom: p.bottom, zIndex: 3, pointerEvents: 'none', animation: `parolRise ${p.dur}s linear infinite`, animationDelay: `${p.delay}s` }}>
+          <div style={{ width: p.size, height: p.size * 1.2, borderRadius: '40%', background: 'radial-gradient(circle at 50% 40%, #ffd980 0%, #de9a49 65%, #a05820 100%)', boxShadow: `0 0 ${p.size}px 4px rgba(255,200,100,0.5)` }} />
+          <div style={{ width: 2, height: p.size * 0.25, background: 'rgba(100,50,20,0.5)', margin: '0 auto' }} />
+        </div>
+      ))}
+    </div>
+  );
+};
 /* ══════════════════════════════════════════════════════
   MAIN EVENTS — carousel style
 ══════════════════════════════════════════════════════ */
@@ -1367,8 +1373,7 @@ const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => v
               label: item.title || 'Untitled Event',
               image: imgUrl,
               org: item.organization?.name || '',
-              modality: item.venue?.toLowerCase().includes('online') || item.venue?.toLowerCase().includes('zoom') ? 'Online' : 'Face-to-Face',
-              date: item.dateTime || '',
+              date: item.date || '',
               time: item.startTime && item.endTime ? `${item.startTime} - ${item.endTime}` : item.startTime || '',
               venue: item.venue || '',
               slots: item.maxSlots || 0,
@@ -1536,7 +1541,7 @@ const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => v
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'rgba(249,236,182,0.84)', fontSize: '0.68rem', fontFamily: "'DM Sans',sans-serif" }}>
                           <MapPin size={10} style={{ color: '#fae185', flexShrink: 0 }} />
-                          <span>{event.venue} ({event.modality})</span>
+                          <span>{event.venue}</span>
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
@@ -1904,10 +1909,10 @@ const LeapApp = () => {
           <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginBottom: '1.5rem' }}>
             <div style={{ background: '#fff', borderRadius: 20, padding: '1.1rem 1.2rem', border: '1px solid rgba(128,62,47,0.18)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                <Mail size={18} color="#803e2f" />
-                <h3 style={{ margin: 0, fontSize: '0.95rem', color: '#334b46' }}>Email</h3>
+                <ExternalLink size={18} color="#803e2f" />
+                <h3 style={{ margin: 0, fontSize: '0.95rem', color: '#334b46' }}>Facebook</h3>
               </div>
-              <p style={{ margin: 0, color: '#567069' }}>leap@dlsu.edu.ph</p>
+              <p style={{ margin: 0, color: '#567069' }}>fb.com/DLSULEAP</p>
             </div>
             <div style={{ background: '#fff', borderRadius: 20, padding: '1.1rem 1.2rem', border: '1px solid rgba(128,62,47,0.18)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
@@ -1917,9 +1922,23 @@ const LeapApp = () => {
               <p style={{ margin: 0, color: '#567069' }}>Within 1-2 business days</p>
             </div>
           </div>
-          <a href="mailto:leap@dlsu.edu.ph" className={styles.navRegisterBtn} style={{ display: 'inline-flex', textDecoration: 'none' }}>
-            <Mail size={16} /> Send Email
+          <a href="https://fb.com/DLSULEAP" target="_blank" rel="noopener noreferrer" className={styles.navRegisterBtn} style={{ display: 'inline-flex', textDecoration: 'none' }}>
+            <ExternalLink size={16} /> Message on Facebook
           </a>
+        </div>
+
+        {/* Privacy Policy */}
+        <div style={{ background: 'rgba(255,255,255,0.72)', borderRadius: 28, padding: '2rem', border: '1px solid rgba(128,62,47,0.22)', boxShadow: '0 16px 48px rgba(51,75,70,0.08)', marginTop: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+            <Shield size={20} color="#803e2f" />
+            <h3 style={{ margin: 0, fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.3rem, 3vw, 1.8rem)', color: '#334b46' }}>Privacy Policy</h3>
+          </div>
+          <p style={{ color: '#567069', fontSize: '0.95rem', lineHeight: 1.7 }}>
+            LEAP 2026 collects minimal personal information necessary for event registration and management. Your name, email address, and registration details are used solely for LEAP-related communications and class slot management. We do not sell, share, or disclose your personal data to third parties except as required by De La Salle University policies or Philippine law.
+          </p>
+          <p style={{ color: '#567069', fontSize: '0.95rem', lineHeight: 1.7, marginTop: '0.75rem' }}>
+            Data collected through Google Forms for class registration is processed in accordance with Google's privacy policies. For questions about your data, please contact the LEAP team through our Facebook page.
+          </p>
         </div>
       </div>
     </div>

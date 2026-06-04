@@ -362,10 +362,10 @@ export default function Classes({
                         onChange={(e) =>
                           onSortChange(
                             e.target.value as
-                              | "title-asc"
-                              | "title-desc"
-                              | "slots-desc"
-                              | "slots-asc",
+                            | "title-asc"
+                            | "title-desc"
+                            | "slots-desc"
+                            | "slots-asc",
                           )
                         }
                         aria-label="Sort classes"
@@ -809,7 +809,7 @@ export default function Classes({
                           }}
                         >
                           {viewingClass.date}
-                          {viewingClass.time ? `${viewingClass.time}` : ""}
+                          {viewingClass.time ? ` · ${viewingClass.time}` : ""}
                         </p>
                       </div>
                     </div>
@@ -848,7 +848,7 @@ export default function Classes({
                             fontSize: "0.9rem",
                           }}
                         >
-                          {viewingClass.venue} ({viewingClass.modality})
+                          {viewingClass.venue}
                         </p>
                       </div>
                     </div>

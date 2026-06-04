@@ -97,10 +97,8 @@ export const Footer = ({ logoImg, onNavigate }: FooterProps) => (
       </div>
     </div>
     <div className={styles.footerBottom}>
-      <p>
-        © 2026 LEAP Operations Team · De La Salle University · Council of
-        Student Organizations
-      </p>
+      <p>© LEAP Central Committee 2026 · Council of Student Organizations · De La Salle University</p>
+      <p style={{ fontSize: '0.7rem', opacity: 0.6, marginTop: '0.35rem' }}>Made by Association of Computer Engineering Students (ACCESS DLSU)</p>
     </div>
   </footer>
 );
