@@ -104,104 +104,110 @@ async function verifyTurnstileToken(
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: formData.toString(),
+      signal: AbortSignal.timeout(5000),
     });
     const outcome = (await res.json()) as { success: boolean };
     return outcome.success;
-  } catch {
+  } catch (err) {
+    console.error("[worker] Turnstile verification failed:", err);
     return false;
   }
 }
 
-async function handleWebSocketUpgrade(
+async function handleWsMessage(
+  server: WebSocket,
   request: Request,
   env: Env,
-): Promise<Response> {
-  const url = new URL(request.url);
-  const turnstileToken = url.searchParams.get("turnstile_token");
+  event: MessageEvent,
+): Promise<void> {
+  try {
+    const req: WsApiRequest = JSON.parse(event.data as string);
+    const backendUrl = env.VITE_LEAPIFY_API_URL;
+    if (!backendUrl) {
+      server.send(JSON.stringify({
+        id: req.id,
+        status: 500,
+        body: { error: { code: "CONFIG_ERROR", message: "Backend URL not configured" } },
+      } satisfies WsApiResponse));
+      return;
+    }
 
-  // Validate Turnstile if secret is configured
-  if (env.TURNSTILE_SECRET_KEY) {
-    if (!turnstileToken) {
-      return jsonResponse(
-        { error: { code: "TURNSTILE_REQUIRED", message: "Turnstile token required" } },
-        401,
-      );
+    const headers: Record<string, string> = {
+      "X-Forwarded-For": request.headers.get("CF-Connecting-IP") || "",
+    };
+    if (req.token) {
+      headers["Authorization"] = `Bearer ${req.token}`;
     }
-    const ip = request.headers.get("CF-Connecting-IP");
-    const valid = await verifyTurnstileToken(env.TURNSTILE_SECRET_KEY, turnstileToken, ip);
-    if (!valid) {
-      return jsonResponse(
-        { error: { code: "TURNSTILE_FAILED", message: "Turnstile verification failed" } },
-        403,
-      );
+
+    const fetchInit: RequestInit = {
+      method: req.method,
+      headers,
+      signal: AbortSignal.timeout(15_000),
+    };
+    if (req.body && req.method !== "GET" && req.method !== "HEAD") {
+      fetchInit.body = req.body;
     }
+
+    console.log(`[worker] WS proxy: ${req.method} ${req.path}`);
+    const upstream = await fetch(`${backendUrl}/api${req.path}`, fetchInit);
+    const contentType = upstream.headers.get("content-type") || "";
+
+    let body: unknown;
+    if (contentType.includes("application/json")) {
+      body = await upstream.json();
+    } else {
+      body = await upstream.text();
+    }
+
+    server.send(JSON.stringify({
+      id: req.id,
+      status: upstream.status,
+      body,
+    } satisfies WsApiResponse));
+  } catch (err) {
+    const id = (() => { try { return JSON.parse((event.data as string) || "{}").id; } catch { return "unknown"; } })();
+    server.send(JSON.stringify({
+      id,
+      status: 502,
+      body: { error: { code: "PROXY_ERROR", message: err instanceof Error ? err.message : "Failed to proxy request" } },
+    } satisfies WsApiResponse));
+    console.error("[worker] WebSocket proxy error:", err);
   }
+}
 
+function handleWebSocketUpgrade(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+): Response {
   const pair = new WebSocketPair();
   const [client, server] = Object.values(pair);
 
   server.accept();
 
-  server.addEventListener("message", async (event) => {
-    try {
-      const req: WsApiRequest = JSON.parse(event.data as string);
-      const backendUrl = env.VITE_LEAPIFY_API_URL;
-      if (!backendUrl) {
-        const response: WsApiResponse = {
-          id: req.id,
-          status: 500,
-          body: { error: { code: "CONFIG_ERROR", message: "Backend URL not configured" } },
-        };
-        server.send(JSON.stringify(response));
-        return;
-      }
-
-      const headers: Record<string, string> = {
-        "X-Forwarded-For": request.headers.get("CF-Connecting-IP") || "",
-      };
-      if (req.token) {
-        headers["Authorization"] = `Bearer ${req.token}`;
-      }
-
-      const fetchInit: RequestInit = {
-        method: req.method,
-        headers,
-      };
-      if (req.body && req.method !== "GET" && req.method !== "HEAD") {
-        fetchInit.body = req.body;
-      }
-
-      const upstream = await fetch(`${backendUrl}/api${req.path}`, fetchInit);
-      const contentType = upstream.headers.get("content-type") || "";
-
-      let body: unknown;
-      if (contentType.includes("application/json")) {
-        body = await upstream.json();
-      } else {
-        body = await upstream.text();
-      }
-
-      const response: WsApiResponse = {
-        id: req.id,
-        status: upstream.status,
-        body,
-      };
-      server.send(JSON.stringify(response));
-    } catch (err) {
-      const errorResponse: WsApiResponse = {
-        id: "unknown",
-        status: 500,
-        body: { error: { code: "PROXY_ERROR", message: "Failed to proxy request" } },
-      };
-      try {
-        const parsed = JSON.parse((event.data as string) || "{}");
-        if (parsed.id) errorResponse.id = parsed.id;
-      } catch {
-        // id stays "unknown"
-      }
-      server.send(JSON.stringify(errorResponse));
-      console.error("[worker] WebSocket proxy error:", err);
+  // Validate Turnstile asynchronously after accepting the WebSocket.
+  // If validation fails, close the socket. This keeps the upgrade handler
+  // synchronous so the fetch handler returns 101 immediately.
+  if (env.TURNSTILE_SECRET_KEY) {
+    const url = new URL(request.url);
+    const turnstileToken = url.searchParams.get("turnstile_token");
+    if (!turnstileToken) {
+      server.close(1008, "Turnstile token required");
+      return new Response(null, { status: 101, webSocket: client });
     }
+    const ip = request.headers.get("CF-Connecting-IP");
+    ctx.waitUntil(
+      verifyTurnstileToken(env.TURNSTILE_SECRET_KEY, turnstileToken, ip).then((valid) => {
+        if (!valid) {
+          console.warn("[worker] Turnstile validation failed, closing WebSocket");
+          server.close(1008, "Turnstile verification failed");
+        }
+      }),
+    );
+  }
+
+  server.addEventListener("message", (event) => {
+    ctx.waitUntil(handleWsMessage(server, request, env, event));
   });
 
   server.addEventListener("close", (event) => {
@@ -224,6 +230,7 @@ async function handleApiRequest(
   request: Request,
   env: Env,
   pathname: string,
+  ctx: ExecutionContext,
 ): Promise<Response | null> {
   // GET /api/health — uptime / smoke-test endpoint
   if (pathname === "/api/health" && request.method === "GET") {
@@ -240,7 +247,7 @@ async function handleApiRequest(
     pathname === "/api" &&
     request.headers.get("Upgrade")?.toLowerCase() === "websocket"
   ) {
-    return handleWebSocketUpgrade(request, env);
+    return handleWebSocketUpgrade(request, env, ctx);
   }
 
   // No matching API route
@@ -253,14 +260,14 @@ export default {
   async fetch(
     request: Request,
     env: Env,
-    _ctx: ExecutionContext,
+    ctx: ExecutionContext,
   ): Promise<Response> {
     const url = new URL(request.url);
     const { pathname } = url;
 
     // ── 1. API routes ──────────────────────────────────────────────────────
     if (pathname.startsWith("/api")) {
-      const apiResponse = await handleApiRequest(request, env, pathname);
+      const apiResponse = await handleApiRequest(request, env, pathname, ctx);
       if (apiResponse) return apiResponse;
 
       return jsonResponse({ error: "Not found" }, 404);
