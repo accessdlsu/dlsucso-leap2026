@@ -214,7 +214,6 @@ async function handleWebSocketUpgrade(
 
   return new Response(null, {
     status: 101,
-    // @ts-expect-error — Cloudflare Workers specific response init
     webSocket: client,
   });
 }

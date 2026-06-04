@@ -4,23 +4,24 @@ import { ChevronRight, Mail } from 'lucide-react';
 import { useFaqs } from '../hooks';
 import { PageWrapper, PageHero } from '../components/PageCommon';
 
-const FALLBACK_FAQS = [
-  { q: "Who can participate in LEAP classes?", a: "All currently enrolled undergraduate students of De La Salle University are eligible and encouraged to participate in LEAP classes. Some specialized workshops may have additional requirements listed on their registration forms." },
-  { q: "How many classes can I register for?", a: "Students can register for a maximum of 3 classes to ensure everyone gets a chance to participate. Please choose your classes carefully to avoid schedule conflicts — slots are given on a first-come, first-served basis." },
-  { q: "Are LEAP classes graded?", a: "No, LEAP classes are completely non-credit and non-graded. They are designed purely for personal enrichment, skill development, and the joy of learning something new." },
-  { q: "What happens if I miss a class I registered for?", a: "While there are no academic penalties, we highly encourage attendance as slots are limited. Repeated absences may affect your priority registration for future LEAP events and deprive another student of the opportunity." },
-  { q: "Can I change my registered classes?", a: "Yes, you can drop a class and register for a different one up until the registration deadline, provided there are still available slots in the new class." },
-  { q: "Are there classes suitable for all skill levels?", a: "Absolutely! LEAP classes are designed for everyone — beginners to advanced. Each class description includes the target skill level so you can find the perfect fit for where you are right now." },
-  { q: "Where do I get help if I have registration issues?", a: "Reach out to the LEAP Operations Team at leap@dlsu.edu.ph or visit us at the SPS Building, Room 302. We're available Monday–Friday, 9AM–5PM throughout the registration period." },
-];
-
 export default function FAQs() {
   const [open, setOpen] = useState<number | null>(null);
-  const { data: faqs } = useFaqs();
+  const { data: faqs, loading } = useFaqs();
 
-  const displayFaqs = faqs.length > 0
-    ? faqs.map(f => ({ q: f.question, a: f.answer }))
-    : FALLBACK_FAQS;
+  if (loading) {
+    return (
+      <PageWrapper>
+        <PageHero title="Frequently Asked Questions" subtitle="Everything you need to know before you register" accent="LEAP 2026 · Help Center" />
+        <main className="container mx-auto px-4 pb-24 max-w-3xl">
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '6rem 0' }}>
+            <div className="leap-spinner" />
+          </div>
+        </main>
+      </PageWrapper>
+    );
+  }
+
+  const displayFaqs = faqs.map(f => ({ q: f.question, a: f.answer }));
 
   return (
     <PageWrapper>

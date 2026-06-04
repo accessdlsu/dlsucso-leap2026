@@ -216,6 +216,8 @@ class WsApiClient {
   private connecting: Promise<void> | null = null;
   private connectResolve: (() => void) | null = null;
   private authToken: string | null = null;
+  private getCache = new Map<string, unknown>();
+  private static CACHED_GET_PATHS = new Set(["/faqs"]);
 
   setToken(token: string | null): void {
     this.authToken = token;
@@ -302,6 +304,11 @@ class WsApiClient {
   }
 
   async request<T>(method: string, path: string, body?: unknown): Promise<T> {
+    const cacheKey = `${method}:${path}`;
+    if (WsApiClient.CACHED_GET_PATHS.has(path) && this.getCache.has(cacheKey)) {
+      return this.getCache.get(cacheKey) as T;
+    }
+
     await this.ensureConnected();
 
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
@@ -317,7 +324,7 @@ class WsApiClient {
       body: body ? JSON.stringify(body) : undefined,
     };
 
-    return new Promise<T>((resolve, reject) => {
+    const result = await new Promise<T>((resolve, reject) => {
       const timeout = setTimeout(() => {
         this.pending.delete(id);
         reject(new Error(`Request timeout: ${method} ${path}`));
@@ -331,6 +338,12 @@ class WsApiClient {
 
       this.ws!.send(JSON.stringify(req));
     });
+
+    if (WsApiClient.CACHED_GET_PATHS.has(path)) {
+      this.getCache.set(cacheKey, result);
+    }
+
+    return result;
   }
 }
 

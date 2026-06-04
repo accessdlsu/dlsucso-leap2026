@@ -1393,16 +1393,6 @@ const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => v
     };
 
     fetchMainEvents();
-    let intervalId: ReturnType<typeof setInterval> | null = null;
-    const startPolling = () => { if (!intervalId) intervalId = setInterval(fetchMainEvents, 60000); };
-    const stopPolling = () => { if (intervalId) { clearInterval(intervalId); intervalId = null; } };
-    startPolling();
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') { fetchMainEvents(); startPolling(); }
-      else { stopPolling(); }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => { document.removeEventListener('visibilitychange', handleVisibilityChange); stopPolling(); };
   }, []);
 
   const goTo = (idx: number) => {
@@ -1633,7 +1623,7 @@ const LeapApp = () => {
 
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const { data: classes, loading, refetch: refetchClasses } = useClasses();
+  const { data: classes, loading } = useClasses();
   const { data: _siteConfig } = useConfig(); // TODO: wire maintenance/coming-soon gating
   const [isAdminView, setIsAdminView] = useState(false);
   const [currentView, setCurrentView] = useState<'home' | 'about' | 'major-events' | 'classes' | 'faq' | 'contact' | 'saved-classes'>('home');
@@ -1799,19 +1789,6 @@ const LeapApp = () => {
       return () => document.removeEventListener('click', handleClickOutside);
     }
   }, [isProfileOpen]);
-
-  useEffect(() => {
-    if (!user) return;
-    let intervalId: ReturnType<typeof setInterval> | null = null;
-    const startPolling = () => { if (!intervalId) intervalId = setInterval(refetchClasses, 60000); };
-    const stopPolling = () => { if (intervalId) { clearInterval(intervalId); intervalId = null; } };
-    startPolling();
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') { refetchClasses(); startPolling(); } else { stopPolling(); }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => { document.removeEventListener('visibilitychange', handleVisibilityChange); stopPolling(); };
-  }, [user, refetchClasses]);
 
   useEffect(() => {
     const handleScroll = rafThrottle(() => {
