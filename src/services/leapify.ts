@@ -134,10 +134,8 @@ export interface LeapEvent {
   maxSlots: number;
   registeredSlots: number;
   gformsUrl: string | null;
-  gformsEditorUrl: string | null;
   releaseAt: number | null;
   registrationClosesAt: number | null;
-  publishedAt: number | null;
   status: EventStatus;
   createdAt: number;
   updatedAt: number;
