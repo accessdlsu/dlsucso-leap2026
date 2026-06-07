@@ -290,6 +290,34 @@ async function handleApiRequest(
     return handleWebSocketUpgrade(request, env, ctx);
   }
 
+  // GET /data/* — proxy uploads from backend
+  if (pathname.startsWith("/data/") && request.method === "GET") {
+    const backendUrl = env.VITE_LEAPIFY_API_URL;
+    const backendPath = `/api/uploads/${pathname.slice("/data/".length)}`;
+    const targetUrl = `${backendUrl}${backendPath}`;
+
+    let upstream: Response;
+    if (env.BACKEND) {
+      upstream = await env.BACKEND.fetch(new Request(targetUrl, { method: "GET", signal: AbortSignal.timeout(15_000) }));
+    } else {
+      upstream = await fetch(targetUrl, { method: "GET", signal: AbortSignal.timeout(15_000) });
+    }
+
+    // Forward relevant headers
+    const respHeaders = new Headers();
+    const ct = upstream.headers.get("content-type");
+    if (ct) respHeaders.set("Content-Type", ct);
+    const cacheControl = upstream.headers.get("cache-control");
+    if (cacheControl) respHeaders.set("Cache-Control", cacheControl);
+    const etag = upstream.headers.get("etag");
+    if (etag) respHeaders.set("ETag", etag);
+
+    return new Response(upstream.body, {
+      status: upstream.status,
+      headers: respHeaders,
+    });
+  }
+
   // No matching API route
   return null;
 }
@@ -305,8 +333,8 @@ export default {
     const url = new URL(request.url);
     const { pathname } = url;
 
-    // ── 1. API routes ──────────────────────────────────────────────────────
-    if (pathname.startsWith("/api")) {
+    // ── 1. API & data routes ────────────────────────────────────────────────
+    if (pathname.startsWith("/api") || pathname.startsWith("/data")) {
       const apiResponse = await handleApiRequest(request, env, pathname, ctx);
       if (apiResponse) return apiResponse;
 

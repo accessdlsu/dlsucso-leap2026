@@ -30,7 +30,9 @@
     // Includes /api (WebSocket upgrade) and /api/* (health endpoint).
     "run_worker_first": [
       "/api",
-      "/api/*"
+      "/api/*",
+      "/data",
+      "/data/*"
     ]
   },
   "observability": {
