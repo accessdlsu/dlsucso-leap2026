@@ -43,7 +43,7 @@
   }
 
   html {
-    scroll-behavior: smooth;  
+    scroll-behavior: smooth;
   }
 
   body {
@@ -254,10 +254,6 @@ body::after {
   background: #803e2f !important;
 }
 
-.light-page-nav .leap-admin-link {
-  color: #803e2f !important;
-}
-
 .light-page-nav .nav-icon-btn {
   background: rgba(51, 75, 70, 0.08) !important;
   border-color: rgba(51, 75, 70, 0.18) !important;
@@ -279,23 +275,6 @@ body::after {
 .nav-logo-img:hover {
   filter: drop-shadow(0 3px 16px rgba(222, 154, 73, 0.85));
   transform: scale(1.04);
-}
-
-.leap-admin-link {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
-  font-size: 0.9rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #de9a49;
-  transition: color 0.2s;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.leap-admin-link:hover {
-  color: #fae185;
 }
 
 /* ════════════════════════════════════════════
@@ -2181,8 +2160,6 @@ h6,
 .value-title,
 .vm-label,
 .errorTitle,
-.adminTitle,
-.adminCardTitle,
 .cardTitle {
   font-family: var(--font-display) !important;
 }

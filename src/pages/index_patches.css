@@ -15,7 +15,6 @@
 .light-page-nav .nav-link:hover { color: #fae185 !important; }
 .light-page-nav .nav-link.active { color: #fae185 !important; font-weight: 600 !important; }
 .light-page-nav .nav-link::after { background: #de9a49 !important; }
-.light-page-nav .leap-admin-link { color: #de9a49 !important; }
 .light-page-nav .nav-icon-btn {
   background: rgba(255,255,255,0.08) !important;
   border-color: rgba(222,154,73,0.25) !important;

@@ -12,7 +12,7 @@ function useIsMobile(breakpoint = 768) {
   return isMobile;
 }
 import { m, AnimatePresence } from 'framer-motion';
-import { Search, Menu, X, User, LogIn, LogOut, Bookmark, AlertCircle, ChevronRight, ShieldCheck } from 'lucide-react';
+import { Search, Menu, X, User, LogIn, LogOut, Bookmark, AlertCircle, ChevronRight } from 'lucide-react';
 import type { UserProfile } from '../types';
 import styles from '../App.module.css';
 
@@ -29,7 +29,6 @@ interface NavbarProps {
   onNavigate: (view: string) => void;
   onSignIn: () => void;
   onSignOut: () => void;
-  onAdminClick: () => void;
   logoImg: string;
 }
 
@@ -44,7 +43,6 @@ const NAV_LINKS = [
 export const Navbar = ({
   isLoggedIn,
   user,
-  userProfile,
   currentView,
   scrolled,
   isMenuOpen,
@@ -54,7 +52,6 @@ export const Navbar = ({
   onNavigate,
   onSignIn,
   onSignOut,
-  onAdminClick,
   logoImg,
 }: NavbarProps) => {
   const isMobile = useIsMobile();
@@ -154,9 +151,6 @@ export const Navbar = ({
                 {link.label}
               </button>
             ))}
-            {userProfile?.role === 'admin' && (
-              <button onClick={onAdminClick} className="leap-admin-link">Admin</button>
-            )}
           </div>
 
           {/* Desktop right actions — only rendered on non-mobile */}
@@ -391,29 +385,6 @@ export const Navbar = ({
                       Saved Classes
                     </button>
                   </>
-                )}
-
-                {/* Admin link */}
-                {userProfile?.role === 'admin' && (
-                  <button
-                    onClick={() => { onAdminClick(); onMenuToggle(false); }}
-                    style={{
-                      width: '100%', padding: '0.8rem 0.9rem',
-                      border: '1px solid rgba(120,60,20,0.2)',
-                      borderRadius: 12,
-                      background: 'rgba(120,60,20,0.07)',
-                      color: '#7a3e18',
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: '0.88rem', fontWeight: 700,
-                      cursor: 'pointer', textAlign: 'left',
-                      display: 'flex', alignItems: 'center', gap: '0.6rem',
-                      transition: 'all 0.15s',
-                      WebkitTapHighlightColor: 'transparent',
-                    }}
-                  >
-                    <ShieldCheck size={16} style={{ flexShrink: 0 }} />
-                    Admin Dashboard
-                  </button>
                 )}
               </nav>
 

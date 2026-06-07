@@ -9,7 +9,7 @@ import { m, AnimatePresence, LazyMotion, domAnimation } from 'framer-motion';
 import {
   Calendar, MapPin, ChevronRight, ChevronLeft,
   X, AlertCircle, LogIn,
-  Edit, ArrowLeft, ExternalLink, Clock, ChevronUp,
+  ExternalLink, Clock, ChevronUp,
   ArrowDown, Shield
 } from 'lucide-react';
 import { leapifyApi, onTurnstileError, signalTurnstileContainer } from './services/leapify';
@@ -1623,14 +1623,13 @@ const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => v
 const LeapApp = () => {
   interface UserProfile {
     uid: string; email: string | null; displayName: string | null;
-    photoURL: string | null; role: 'student' | 'admin'; registeredClasses: string[]; savedClasses: string[];
+    photoURL: string | null; registeredClasses: string[]; savedClasses: string[];
   }
 
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const { data: classes, loading } = useClasses();
   const { data: _siteConfig } = useConfig(); // TODO: wire maintenance/coming-soon gating
-  const [isAdminView, setIsAdminView] = useState(false);
   const [currentView, setCurrentView] = useState<'home' | 'about' | 'major-events' | 'classes' | 'faq' | 'contact' | 'saved-classes'>('home');
   const [scrolled, setScrolled] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -1736,7 +1735,7 @@ const LeapApp = () => {
               if (currentUser) {
                 const currentEmail = currentUser.email?.toLowerCase();
                 if (!currentUser.emailVerified || !currentEmail?.endsWith('@dlsu.edu.ph')) {
-                  setUserProfile(null); setIsAdminView(false); navigateTo('home');
+                  setUserProfile(null); navigateTo('home');
                   await signOut(auth);
                   return;
                 }
@@ -1748,7 +1747,7 @@ const LeapApp = () => {
                   if (userDoc.exists()) {
                     setUserProfile(userDoc.data() as UserProfile);
                   } else {
-                    const newProfile: UserProfile = { uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, photoURL: currentUser.photoURL, role: 'student', registeredClasses: [], savedClasses: [] };
+                    const newProfile: UserProfile = { uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, photoURL: currentUser.photoURL, registeredClasses: [], savedClasses: [] };
                     await setDoc(doc(db, 'users', currentUser.uid), newProfile);
                     setUserProfile(newProfile);
                   }
@@ -1756,9 +1755,9 @@ const LeapApp = () => {
                   const isPermissionDenied = typeof error === 'object' && error !== null && 'code' in error && (error as { code?: string }).code === 'permission-denied';
                   if (isPermissionDenied) { if (!hasLoggedProfilePermissionIssue.current) { console.warn('Firestore profile access denied.'); hasLoggedProfilePermissionIssue.current = true; } }
                   else { console.error('Firestore profile bootstrap failed:', error); }
-                  setUserProfile({ uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, photoURL: currentUser.photoURL, role: 'student', registeredClasses: [], savedClasses: [] });
+                  setUserProfile({ uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, photoURL: currentUser.photoURL, registeredClasses: [], savedClasses: [] });
                 }
-              } else { setUserProfile(null); setIsAdminView(false); setCurrentView('home'); }
+              } else { setUserProfile(null); setCurrentView('home'); }
             } catch (error: unknown) { console.error('Auth state handling failed:', error); setUserProfile(null); }
           })();
         });
@@ -1884,21 +1883,6 @@ const LeapApp = () => {
     />
   );
 
-  const AdminDashboard = () => (
-    <div className={styles.adminWrapper}>
-      <div className={styles.adminHeader}>
-        <button onClick={() => setIsAdminView(false)} className={styles.adminBackBtn}><ArrowLeft size={24} /></button>
-        <h2 className={styles.adminTitle} style={{ fontFamily: "'Playfair Display', serif" }}>Admin Dashboard</h2>
-      </div>
-      <div className={styles.adminCard}>
-        <div className={styles.adminIconWrap} style={{ width: 80, height: 80 }}><Edit size={36} /></div>
-        <h3 className={styles.adminCardTitle} style={{ fontFamily: "'Playfair Display', serif" }}>Classes are managed in Leapify Console</h3>
-        <p className={styles.adminCardDesc}>To add, edit, or delete classes, please use the Leapify Admin Console dashboard.</p>
-        <a href={import.meta.env.VITE_LEAPIFY_API_URL || 'https://leapify-console.accessdlsu.workers.dev'} target="_blank" rel="noopener noreferrer" className={styles.adminCTABtn}>Open Leapify Console <ExternalLink size={20} /></a>
-      </div>
-    </div>
-  );
-
   const Contact = () => (
     <div style={{ padding: '9rem 1.5rem 4rem', background: 'linear-gradient(180deg, #fdf7e8 0%, #f0e5c8 100%)', minHeight: '70vh' }}>
       <div style={{ maxWidth: 880, margin: '0 auto' }}>
@@ -1943,10 +1927,6 @@ const LeapApp = () => {
       </div>
     </div>
   );
-
-  if (isAdminView && userProfile?.role === 'admin') {
-    return <ErrorBoundary><AdminDashboard /></ErrorBoundary>;
-  }
 
 
 
@@ -2686,7 +2666,6 @@ const LeapApp = () => {
         onNavigate={navigateTo as (view: string) => void}
         onSignIn={handleSignIn}
         onSignOut={handleSignOut}
-        onAdminClick={() => setIsAdminView(true)}
         logoImg={leapLogo}
       />
 

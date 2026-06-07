@@ -49,7 +49,6 @@ export function useAuth(): {
                       email: authUser.email,
                       displayName: authUser.displayName,
                       photoURL: authUser.photoURL,
-                      role: 'student',
                       registeredClasses: [],
                     };
                     await setDoc(profileDocRef, newProfile);

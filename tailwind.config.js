@@ -83,21 +83,6 @@ export default {
           'filter': 'drop-shadow(0 0 48px rgba(222, 154, 73, 0.65)) drop-shadow(0 0 96px rgba(222, 154, 73, 0.3)) drop-shadow(0 14px 36px rgba(0, 0, 0, 0.7))',
           'animation': 'heroFloat 5.5s ease-in-out infinite',
         },
-        '.leap-admin-link': {
-          'font-family': "'DM Sans', sans-serif",
-          'font-weight': '700',
-          'font-size': '0.78rem',
-          'letter-spacing': '0.08em',
-          'text-transform': 'uppercase',
-          'color': '#de9a49',
-          'transition': 'color 0.2s',
-          'background': 'none',
-          'border': 'none',
-          'cursor': 'pointer',
-          '&:hover': {
-            'color': '#fae185',
-          },
-        },
         '.btn-leap-primary': {
           'font-family': "'DM Sans', sans-serif",
           'font-weight': '700',
@@ -173,4 +158,3 @@ export default {
     },
   ],
 }
-

@@ -25,7 +25,6 @@ export interface UserProfile {
   email: string | null;
   displayName: string | null;
   photoURL: string | null;
-  role: 'student' | 'admin';
   registeredClasses: string[];
 }
 
@@ -53,10 +52,8 @@ export interface NavigationProps {
   currentView: ViewType;
   onNavigate: (view: ViewType) => void;
   user: FirebaseUser | null;
-  isAdmin: boolean;
   onSignIn: () => void;
   onSignOut: () => void;
-  onAdminClick: () => void;
   isScrolled: boolean;
   isMenuOpen: boolean;
   onMenuToggle: () => void;
