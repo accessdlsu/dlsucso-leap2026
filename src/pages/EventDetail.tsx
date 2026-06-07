@@ -185,22 +185,26 @@ export default function EventDetail({ slug, onBack }: EventDetailProps) {
                 </span>
               </div>
             )}
-            {slots && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Users size={16} color={slots.isFull ? '#b05a32' : '#de9a49'} />
-                <span
-                  style={{
-                    fontSize: '0.9rem',
-                    color: slots.isFull ? '#b05a32' : '#334b46',
-                    fontWeight: slots.isFull ? 600 : 400,
-                  }}
-                >
-                  {slots.isFull
-                    ? 'Full'
-                    : `${slots.available} of ${slots.total} slots available`}
-                </span>
-              </div>
-            )}
+            {slots && (() => {
+              const isFull = slots.registered >= slots.total;
+              const available = Math.max(0, slots.total - slots.registered);
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Users size={16} color={isFull ? '#b05a32' : '#de9a49'} />
+                  <span
+                    style={{
+                      fontSize: '0.9rem',
+                      color: isFull ? '#b05a32' : '#334b46',
+                      fontWeight: isFull ? 600 : 400,
+                    }}
+                  >
+                    {isFull
+                      ? 'Full'
+                      : `${available} of ${slots.total} slots available`}
+                  </span>
+                </div>
+              );
+            })()}
             {event.price && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Ticket size={16} color="#de9a49" />

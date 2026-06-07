@@ -132,7 +132,6 @@ export interface LeapEvent {
   endTime: string | null;
   isSpotlight: boolean;
   maxSlots: number;
-  registeredSlots: number;
   gformsUrl: string | null;
   releaseAt: number | null;
   registrationClosesAt: number | null;
@@ -144,7 +143,6 @@ export interface LeapFaq {
   id: string;
   question: string;
   answer: string;
-  sortOrder: number;
   createdAt: number;
   updatedAt: number;
 }
@@ -171,7 +169,6 @@ export interface Theme {
   imageUrl: string | null;
   descriptionEn: string | null;
   descriptionFil: string | null;
-  sortOrder: number;
   createdAt: number;
   updatedAt: number;
 }
@@ -184,10 +181,8 @@ export interface Organization {
   createdAt: number;
 }
 export interface SlotInfo {
-  available: number;
   total: number;
   registered: number;
-  isFull: boolean;
 }
 export interface BookmarkEntry {
   bookmarkedAt: number;
@@ -299,7 +294,7 @@ class WsApiClient {
             if (res.status >= 200 && res.status < 300) {
               // Unwrap { data: T } envelope from backend
               const body = res.body as { data?: unknown };
-              p.resolve(body?.data ?? res.body);
+              p.resolve(rewriteUploadUrls(body?.data ?? res.body));
             } else {
               const body = res.body;
               let message: string;
@@ -383,6 +378,29 @@ class WsApiClient {
 
     return result;
   }
+}
+
+// ─── Upload URL proxy rewriting ─────────────────────────────────────────────
+
+const UPLOADS_PREFIX = "/api/uploads/";
+const DATA_PREFIX = "/data/";
+
+/** Recursively rewrite /api/uploads/ paths to /data/ for frontend proxy. */
+function rewriteUploadUrls(value: unknown): unknown {
+  if (typeof value === "string" && value.startsWith(UPLOADS_PREFIX)) {
+    return DATA_PREFIX + value.slice(UPLOADS_PREFIX.length);
+  }
+  if (Array.isArray(value)) {
+    return value.map(rewriteUploadUrls);
+  }
+  if (value !== null && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) {
+      out[k] = rewriteUploadUrls(v);
+    }
+    return out;
+  }
+  return value;
 }
 
 const wsClient = new WsApiClient();
