@@ -12,11 +12,11 @@ import {
   ChevronUp,
 } from "lucide-react";
 import type { LeapClass } from '../types';
-import type { User as FirebaseUser } from "firebase/auth";
+import type { UserProfile } from '../services/auth';
 
 
 interface HomeProps {
-  user: FirebaseUser | null;
+  user: UserProfile | null;
   classes: LeapClass[];
   searchQuery: string;
   onSearchChange: (query: string) => void;

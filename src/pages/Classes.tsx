@@ -10,13 +10,13 @@ import {
   X,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import type { User as FirebaseUser } from "firebase/auth";
+import type { UserProfile } from '../services/auth';
 
 
 
 import type { LeapClass } from '../types';
 interface ClassesPageProps {
-  user: FirebaseUser | null;
+  user: UserProfile | null;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   sortBy: "title-asc" | "title-desc" | "slots-desc" | "slots-asc";

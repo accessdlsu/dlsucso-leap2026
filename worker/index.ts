@@ -17,13 +17,6 @@ export interface Env {
   CONTENTFUL_ACCESS_TOKEN?: string;
   TURNSTILE_SECRET_KEY?: string;
   /** Injected by wrangler.jsonc `vars` */
-  VITE_FIREBASE_API_KEY?: string;
-  VITE_FIREBASE_AUTH_DOMAIN?: string;
-  VITE_FIREBASE_PROJECT_ID?: string;
-  VITE_FIREBASE_STORAGE_BUCKET?: string;
-  VITE_FIREBASE_MESSAGING_SENDER_ID?: string;
-  VITE_FIREBASE_APP_ID?: string;
-  VITE_FIREBASE_MEASUREMENT_ID?: string;
   VITE_TURNSTILE_SITE_KEY?: string;
   VITE_LEAPIFY_API_URL?: string;
   VITE_ENVIRONMENT?: string;
@@ -47,17 +40,16 @@ const SECURITY_HEADERS: Record<string, string> = {
    */
   "Content-Security-Policy": [
     "default-src 'self'",
-    // Firebase SDK + Google Auth popup + unsafe-inline
-    "script-src 'self' 'unsafe-inline' https://apis.google.com https://www.gstatic.com",
-    // Firebase, Contentful image CDN, Google Fonts, placeholder.com
+    // Google OAuth redirect + Turnstile
+    "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
     "img-src 'self' data: https: blob:",
-    // Firebase Firestore & Storage + Google APIs + Contentful CDN
-    "connect-src 'self' http://localhost:8787 http://127.0.0.1:8787 https://*.googleapis.com https://*.firebaseio.com https://*.contentful.com https://cdn.contentful.com wss://*.firebaseio.com",
+    // Backend API + Turnstile
+    "connect-src 'self' http://localhost:8787 http://127.0.0.1:8787 https://*.contentful.com https://cdn.contentful.com",
     // Google Fonts + self
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
-    // Firebase Auth popup
-    "frame-src https://accounts.google.com https://*.firebaseapp.com",
+    // Google OAuth (Better Auth uses redirect, not iframe/popup, but keep for safety)
+    "frame-src https://accounts.google.com",
   ].join("; "),
 };
 
@@ -272,6 +264,7 @@ async function handleApiRequest(
   pathname: string,
   ctx: ExecutionContext,
 ): Promise<Response | null> {
+  const url = new URL(request.url);
   // GET /api/health — uptime / smoke-test endpoint
   if (pathname === "/api/health" && request.method === "GET") {
     return jsonResponse({
@@ -316,6 +309,32 @@ async function handleApiRequest(
       status: upstream.status,
       headers: respHeaders,
     });
+  }
+
+  // Proxy Better Auth routes (OAuth callbacks, session endpoints)
+  if (pathname.startsWith("/api/auth/")) {
+    const backendUrl = env.VITE_LEAPIFY_API_URL;
+    if (!backendUrl && !env.BACKEND) {
+      return jsonResponse({ error: "Backend not configured" }, 500);
+    }
+    const targetUrl = `${backendUrl}${pathname}${url.search}`;
+    let upstream: Response;
+    if (env.BACKEND) {
+      upstream = await env.BACKEND.fetch(new Request(targetUrl, {
+        method: request.method,
+        headers: request.headers,
+        body: request.body,
+        signal: AbortSignal.timeout(15_000),
+      }));
+    } else {
+      upstream = await fetch(targetUrl, {
+        method: request.method,
+        headers: request.headers,
+        body: request.body,
+        signal: AbortSignal.timeout(15_000),
+      });
+    }
+    return upstream;
   }
 
   // No matching API route

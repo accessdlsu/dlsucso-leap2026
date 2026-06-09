@@ -1,4 +1,4 @@
-import type { LeapEvent } from "../services/leapify";
+import type { LeapEvent } from 'leapify/types';
 import type { MainEvent, LeapClass } from "../types";
 
 const ACCENT_COLORS = [

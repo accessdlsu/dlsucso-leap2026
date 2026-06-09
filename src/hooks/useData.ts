@@ -4,7 +4,7 @@ import type {
   LeapEvent,
   Theme,
   Organization,
-  LeapFaq,
+  Faq,
   SiteConfig,
   SlotInfo,
   BookmarkEntry,
@@ -236,8 +236,8 @@ export function useOrganizations(): FetchState<Organization[]> {
 
 // ─── useFaqs ─────────────────────────────────────────────────────────────────
 
-export function useFaqs(): FetchState<LeapFaq[]> {
-  const [state, setState] = useState<FetchState<LeapFaq[]>>(
+export function useFaqs(): FetchState<Faq[]> {
+  const [state, setState] = useState<FetchState<Faq[]>>(
     initialFetchState([]),
   );
   useEffect(() => {

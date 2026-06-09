@@ -27,7 +27,8 @@ declare global {
       render: (
         container: string | HTMLElement,
         opts: { sitekey: string; callback: (token: string) => void },
-      ) => void;
+      ) => string;
+      remove: (widgetId: string) => void;
     };
   }
 }
@@ -95,113 +96,38 @@ export async function solveTurnstileChallenge(): Promise<boolean> {
   return turnstilePromise;
 }
 
-// ─── Types (backend is source of truth) ──────────────────────────────────────
+// Types — imported from backend package, re-exported for consumers
+import type {
+  EventStatus,
+  UserRole,
+  LeapEvent,
+  Faq,
+  UserProfile,
+  SiteConfig,
+  Theme,
+  Organization,
+  SlotInfo,
+  BookmarkEntry,
+  ToggleBookmarkResult,
+  ServiceHealth,
+  HealthResponse,
+} from 'leapify/types';
 
-export type EventStatus =
-  | "draft"
-  | "queued"
-  | "published"
-  | "ended"
-  | "cancelled";
-export type UserRole = "student" | "admin" | "super_admin";
-export interface LeapEvent {
-  id: string;
-  slug: string;
-  themeId: string | null;
-  theme: {
-    id: string;
-    name: string;
-    path: string;
-  } | null;
-  organizationId: string | null;
-  organization: {
-    id: string;
-    name: string;
-    acronym: string;
-    logoUrl: string | null;
-    link: string | null;
-  } | null;
-  title: string;
-  description: string | null;
-  venue: string | null;
-  date: string | null;
-  price: string | null;
-  backgroundImageUrl: string | null;
-  classCode: string | null;
-  startTime: string | null;
-  endTime: string | null;
-  isSpotlight: boolean;
-  maxSlots: number;
-  gformsUrl: string | null;
-  releaseAt: number | null;
-  registrationClosesAt: number | null;
-  status: EventStatus;
-  createdAt: number;
-  updatedAt: number;
-}
-export interface LeapFaq {
-  id: string;
-  question: string;
-  answer: string;
-  createdAt: number;
-  updatedAt: number;
-}
-export interface UserProfile {
-  uid: string;
-  email: string | null;
-  displayName: string | null;
-  photoURL: string | null;
-  role: UserRole;
-  registeredClasses: string[];
-}
-export interface SiteConfig {
-  comingSoonUntil: number | null;
-  siteEndsAt: number | null;
-  siteName: string | null;
-  registrationGloballyOpen: boolean;
-  maintenanceMode: boolean;
-  now: number;
-}
-export interface Theme {
-  id: string;
-  name: string;
-  path: string;
-  imageUrl: string | null;
-  descriptionEn: string | null;
-  descriptionFil: string | null;
-  createdAt: number;
-  updatedAt: number;
-}
-export interface Organization {
-  id: string;
-  name: string;
-  acronym: string;
-  logoUrl: string | null;
-  link: string | null;
-  createdAt: number;
-}
-export interface SlotInfo {
-  total: number;
-  registered: number;
-}
-export interface BookmarkEntry {
-  bookmarkedAt: number;
-  event: LeapEvent;
-}
-export interface ToggleBookmarkResult {
-  bookmarked: boolean;
-}
-export interface ServiceHealth {
-  configured: boolean;
-  ok: boolean;
-  latencyMs: number;
-  error?: string;
-}
-export interface HealthResponse {
-  status: "OK" | "DEGRADED";
-  timestamp: string;
-  services: Record<string, ServiceHealth>;
-}
+export type {
+  EventStatus,
+  UserRole,
+  LeapEvent,
+  Faq,
+  UserProfile,
+  SiteConfig,
+  Theme,
+  Organization,
+  SlotInfo,
+  BookmarkEntry,
+  ToggleBookmarkResult,
+  ServiceHealth,
+  HealthResponse,
+};
 
 // ─── WebSocket API Client ────────────────────────────────────────────────────
 
@@ -430,7 +356,7 @@ export const leapifyApi = {
   // ─── Public: Organizations ───────────────────────────────────────────────
   getOrganizations: () => wsClient.request<Organization[]>("GET", "/organizations"),
   // ─── Public: FAQs ────────────────────────────────────────────────────────
-  getFaqs: () => wsClient.request<LeapFaq[]>("GET", "/faqs"),
+  getFaqs: () => wsClient.request<Faq[]>("GET", "/faqs"),
   // ─── Public: Config ──────────────────────────────────────────────────────
   getConfig: () => wsClient.request<SiteConfig>("GET", "/config"),
   // ─── Public: Health ──────────────────────────────────────────────────────

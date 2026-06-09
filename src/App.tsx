@@ -2,8 +2,8 @@
    * @license
    * SPDX-License-Identifier: Apache-2.0
    */
-import { getAuthModule } from './services/firebase';
-import type { User as FirebaseUser } from 'firebase/auth';
+import { signIn as authSignIn, signOut as authSignOut, restoreSession, getToken } from './services/auth';
+import type { UserProfile } from './services/auth';
 import { useState, useEffect, useRef, useMemo, Suspense, lazy, type CSSProperties, type ErrorInfo, type ReactNode, Component } from 'react';
 import { m, AnimatePresence, LazyMotion, domAnimation } from 'framer-motion';
 import {
@@ -1621,13 +1621,7 @@ const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => v
 
 
 const LeapApp = () => {
-  interface UserProfile {
-    uid: string; email: string | null; displayName: string | null;
-    photoURL: string | null; registeredClasses: string[]; savedClasses: string[];
-  }
-
-  const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const { data: classes, loading } = useClasses();
   const { data: _siteConfig } = useConfig(); // TODO: wire maintenance/coming-soon gating
   const [currentView, setCurrentView] = useState<'home' | 'about' | 'major-events' | 'classes' | 'faq' | 'contact' | 'saved-classes'>('home');
@@ -1635,15 +1629,12 @@ const LeapApp = () => {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'title-asc' | 'title-desc' | 'slots-desc' | 'slots-asc'>('title-asc');
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [viewingClass, setViewingClass] = useState<LeapClass | null>(null);
   const [savedClassIds, setSavedClassIds] = useState<Set<string>>(new Set());
-  const hasLoggedProfilePermissionIssue = useRef(false);
-  const profileDropdownRef = useRef<HTMLDivElement>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [showNayon, setShowNayon] = useState(false);
 
@@ -1715,88 +1706,39 @@ const LeapApp = () => {
       .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
   ), [filteredAndSortedClasses]);
 
-  const isVerifiedDlsuUser = Boolean(user?.emailVerified && user.email?.toLowerCase().endsWith('@dlsu.edu.ph'));
+  const isVerifiedDlsuUser = Boolean(user);
   const hasAppAccess = isVerifiedDlsuUser;
 
 
   useEffect(() => {
-    let unsubscribe: (() => void) | null = null;
     let cancelled = false;
 
-    // Defer firebase/auth load until browser is idle (after FCP/LCP)
-    const start = () => {
-      if (cancelled) return;
-      getAuthModule().then(({ auth, onAuthStateChanged, signOut }) => {
+    const init = async () => {
+      try {
+        const profile = await restoreSession();
         if (cancelled) return;
-        unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-          void (async () => {
-            try {
-              setUser(currentUser);
-              if (currentUser) {
-                const currentEmail = currentUser.email?.toLowerCase();
-                if (!currentUser.emailVerified || !currentEmail?.endsWith('@dlsu.edu.ph')) {
-                  setUserProfile(null); navigateTo('home');
-                  await signOut(auth);
-                  return;
-                }
-                try {
-                  const { doc, getDocFromServer, setDoc } = await import('firebase/firestore');
-                  const { getDb } = await import('./services/firebase-lazy');
-                  const db = await getDb();
-                  const userDoc = await getDocFromServer(doc(db, 'users', currentUser.uid));
-                  if (userDoc.exists()) {
-                    setUserProfile(userDoc.data() as UserProfile);
-                  } else {
-                    const newProfile: UserProfile = { uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, photoURL: currentUser.photoURL, registeredClasses: [], savedClasses: [] };
-                    await setDoc(doc(db, 'users', currentUser.uid), newProfile);
-                    setUserProfile(newProfile);
-                  }
-                } catch (error: unknown) {
-                  const isPermissionDenied = typeof error === 'object' && error !== null && 'code' in error && (error as { code?: string }).code === 'permission-denied';
-                  if (isPermissionDenied) { if (!hasLoggedProfilePermissionIssue.current) { console.warn('Firestore profile access denied.'); hasLoggedProfilePermissionIssue.current = true; } }
-                  else { console.error('Firestore profile bootstrap failed:', error); }
-                  setUserProfile({ uid: currentUser.uid, email: currentUser.email, displayName: currentUser.displayName, photoURL: currentUser.photoURL, registeredClasses: [], savedClasses: [] });
-                }
-              } else { setUserProfile(null); setCurrentView('home'); }
-            } catch (error: unknown) { console.error('Auth state handling failed:', error); setUserProfile(null); }
-          })();
-        });
-      });
-    };
-
-    if ('requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(start, { timeout: 1500 });
-    } else {
-      setTimeout(start, 200);
-    }
-
-    return () => {
-      cancelled = true;
-      if (unsubscribe) unsubscribe();
-    };
-  }, []);
-
-  // Load saved classes when user profile changes
-  useEffect(() => {
-    if (userProfile?.savedClasses) {
-      setSavedClassIds(new Set(userProfile.savedClasses));
-    } else {
-      setSavedClassIds(new Set());
-    }
-  }, [userProfile]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
-        setIsProfileOpen(false);
+        if (profile) {
+          setUser(profile);
+          const token = await getToken();
+          leapifyApi.setToken(token);
+          try {
+            const bookmarks = await leapifyApi.getBookmarks();
+            setSavedClassIds(new Set(bookmarks.map(b => b.event.id)));
+          } catch { /* guest or error */ }
+        }
+      } catch (err) {
+        if (!cancelled) console.error('Auth init error:', err);
       }
     };
 
-    if (isProfileOpen) {
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(init, { timeout: 1500 });
+    } else {
+      setTimeout(init, 200);
     }
-  }, [isProfileOpen]);
+
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     const handleScroll = rafThrottle(() => {
@@ -1820,32 +1762,21 @@ const LeapApp = () => {
     };
   }, [viewingClass]);
 
-  const handleSignIn = async () => {
-    setAuthError(null);
-    try {
-      const { auth, googleProvider, signInWithPopup, signOut } = await getAuthModule();
-      const result = await signInWithPopup(auth, googleProvider);
-      const email = result.user.email?.toLowerCase();
-      if (!result.user.emailVerified || !email?.endsWith('@dlsu.edu.ph')) {
-        await signOut(auth);
-        setAuthError('Access Denied: Please use your verified official @dlsu.edu.ph email to sign in.');
-      }
-    } catch (error: any) {
-      if (error.code !== 'auth/popup-closed-by-user') {
-        setAuthError('An error occurred during sign in. Please try again.');
-      }
-    }
+  const handleSignIn = () => {
+    authSignIn(window.location.pathname);
   };
 
   const handleSignOut = async () => {
-    const { auth, signOut } = await getAuthModule();
-    await signOut(auth);
+    await authSignOut();
+    leapifyApi.setToken(null);
+    setUser(null);
+    setSavedClassIds(new Set());
     setIsMenuOpen(false);
   };
 
   const toggleSaveClass = async (classId: string) => {
-    if (!user || !userProfile) {
-      console.warn('User or profile not loaded');
+    if (!user) {
+      console.warn('User not logged in');
       return;
     }
     const isSaved = savedClassIds.has(classId);
@@ -1858,15 +1789,9 @@ const LeapApp = () => {
     setSavedClassIds(newSavedIds);
 
     try {
-      const { doc, setDoc } = await import('firebase/firestore');
-      const { getDb } = await import('./services/firebase-lazy');
-      const db = await getDb();
-      const updatedProfile = { ...userProfile, savedClasses: Array.from(newSavedIds) };
-      await setDoc(doc(db, 'users', user.uid), updatedProfile, { merge: true });
-      setUserProfile(updatedProfile);
-      console.log('Class saved successfully:', classId);
+      await leapifyApi.toggleBookmark(classId);
     } catch (error) {
-      console.error('Error saving class:', error);
+      console.error('Bookmark toggle failed:', error);
       setSavedClassIds(savedClassIds);
     }
   };
@@ -2656,7 +2581,6 @@ const LeapApp = () => {
       <Navbar
         isLoggedIn={!!user}
         user={user}
-        userProfile={userProfile}
         currentView={currentView}
         scrolled={scrolled}
         isMenuOpen={isMenuOpen}

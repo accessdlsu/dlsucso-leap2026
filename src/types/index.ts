@@ -1,4 +1,4 @@
-import type { User as FirebaseUser } from 'firebase/auth';
+import type { UserProfile } from 'leapify/types';
 
 export type ViewType = 'home' | 'about' | 'major-events' | 'classes' | 'faq' | 'contact';
 export type SortOption = 'title-asc' | 'title-desc' | 'slots-desc' | 'slots-asc';
@@ -20,13 +20,8 @@ export interface LeapClass {
   isSpotlight: boolean;
 }
 
-export interface UserProfile {
-  uid: string;
-  email: string | null;
-  displayName: string | null;
-  photoURL: string | null;
-  registeredClasses: string[];
-}
+// Re-export the canonical UserProfile from the backend
+export type { UserProfile };
 
 export interface MainEvent {
   id: string;
@@ -42,8 +37,7 @@ export interface MainEvent {
 }
 
 export interface AuthContextType {
-  user: FirebaseUser | null;
-  userProfile: UserProfile | null;
+  user: UserProfile | null;
   loading: boolean;
   error: string | null;
 }
@@ -51,7 +45,7 @@ export interface AuthContextType {
 export interface NavigationProps {
   currentView: ViewType;
   onNavigate: (view: ViewType) => void;
-  user: FirebaseUser | null;
+  user: UserProfile | null;
   onSignIn: () => void;
   onSignOut: () => void;
   isScrolled: boolean;

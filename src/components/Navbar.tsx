@@ -13,13 +13,12 @@ function useIsMobile(breakpoint = 768) {
 }
 import { m, AnimatePresence } from 'framer-motion';
 import { Search, Menu, X, User, LogIn, LogOut, Bookmark, AlertCircle, ChevronRight } from 'lucide-react';
-import type { UserProfile } from '../types';
+import type { UserProfile } from '../services/auth';
 import styles from '../App.module.css';
 
 interface NavbarProps {
   isLoggedIn: boolean;
-  user: any;
-  userProfile: UserProfile | null;
+  user: UserProfile | null;
   currentView: string;
   scrolled: boolean;
   isMenuOpen: boolean;
@@ -160,9 +159,9 @@ export const Navbar = ({
             </button>
             {isLoggedIn ? (
               <div ref={profileDropdownRef} style={{ position: 'relative' }}>
-                <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="nav-icon-btn" title={user.displayName || 'Profile'}>
-                  {user.photoURL
-                    ? <img src={user.photoURL} alt="Profile" style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover' }} referrerPolicy="no-referrer" />
+                <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="nav-icon-btn" title={user?.name || 'Profile'}>
+                  {user?.image
+                    ? <img src={user.image} alt="Profile" style={{ width: 20, height: 20, borderRadius: '50%', objectFit: 'cover' }} referrerPolicy="no-referrer" />
                     : <User size={17} />
                   }
                 </button>
@@ -275,8 +274,8 @@ export const Navbar = ({
                 {/* User info or brand */}
                 {isLoggedIn ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
-                    {user.photoURL ? (
-                      <img src={user.photoURL} alt="Profile"
+                    {user?.image ? (
+                      <img src={user.image} alt="Profile"
                         style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid rgba(200,146,62,0.4)' }}
                         referrerPolicy="no-referrer" />
                     ) : (
@@ -290,10 +289,10 @@ export const Navbar = ({
                     )}
                     <div style={{ minWidth: 0 }}>
                       <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.82rem', fontWeight: 700, color: '#2e1e08', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {user.displayName || 'Signed in'}
+                        {user?.name || 'Signed in'}
                       </p>
                       <p style={{ fontSize: '0.68rem', color: '#9a7a50', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {user.email}
+                        {user?.email}
                       </p>
                     </div>
                   </div>

@@ -1,0 +1,3 @@
+[filter "leapify"]
+	clean = sed 's|file:../leapify|npm:@access-dlsu/leapify@latest|'
+	smudge = sed 's|npm:@access-dlsu/leapify@latest|file:../leapify|'

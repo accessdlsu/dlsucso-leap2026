@@ -56,7 +56,6 @@ export default defineConfig(({ mode }) => ({
   define: loadWranglerVars(mode),
   server: {
     headers: {
-      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
     },
   },
   build: {
@@ -79,10 +78,6 @@ export default defineConfig(({ mode }) => ({
           // Lucide icons
           if (id.includes('node_modules/lucide-react')) {
             return 'lucide';
-          }
-          // Firebase
-          if (id.includes('node_modules/firebase')) {
-            return 'firebase';
           }
         },
       },
