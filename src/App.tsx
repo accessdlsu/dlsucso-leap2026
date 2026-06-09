@@ -1715,9 +1715,11 @@ const LeapApp = () => {
 
     const init = async () => {
       try {
+        console.log('[auth] App init: restoring session');
         const profile = await restoreSession();
         if (cancelled) return;
         if (profile) {
+          console.log('[auth] App init: user restored:', profile.name, profile.role);
           setUser(profile);
           const token = await getToken();
           leapifyApi.setToken(token);
@@ -1725,9 +1727,11 @@ const LeapApp = () => {
             const bookmarks = await leapifyApi.getBookmarks();
             setSavedClassIds(new Set(bookmarks.map(b => b.event.id)));
           } catch { /* guest or error */ }
+        } else {
+          console.log('[auth] App init: no user (guest)');
         }
       } catch (err) {
-        if (!cancelled) console.error('Auth init error:', err);
+        if (!cancelled) console.error('[auth] App init error:', err);
       }
     };
 
@@ -1763,10 +1767,12 @@ const LeapApp = () => {
   }, [viewingClass]);
 
   const handleSignIn = () => {
+    console.log('[auth] handleSignIn: initiating Google OAuth');
     authSignIn(window.location.pathname);
   };
 
   const handleSignOut = async () => {
+    console.log('[auth] handleSignOut');
     await authSignOut();
     leapifyApi.setToken(null);
     setUser(null);

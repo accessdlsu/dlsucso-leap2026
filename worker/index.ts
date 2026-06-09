@@ -44,7 +44,7 @@ const SECURITY_HEADERS: Record<string, string> = {
     "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
     "img-src 'self' data: https: blob:",
     // Backend API + Turnstile
-    "connect-src 'self' http://localhost:8787 http://127.0.0.1:8787 https://*.contentful.com https://cdn.contentful.com",
+    "connect-src 'self' https://*.contentful.com https://cdn.contentful.com",
     // Google Fonts + self
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
@@ -318,19 +318,49 @@ async function handleApiRequest(
       return jsonResponse({ error: "Backend not configured" }, 500);
     }
     const targetUrl = `${backendUrl}${pathname}${url.search}`;
+    const modifiedHeaders = new Headers(request.headers);
+    modifiedHeaders.set("X-Forwarded-Host", url.host);
+    modifiedHeaders.set("X-Forwarded-Proto", url.protocol.replace(":", ""));
     let upstream: Response;
     if (env.BACKEND) {
       upstream = await env.BACKEND.fetch(new Request(targetUrl, {
         method: request.method,
-        headers: request.headers,
+        headers: modifiedHeaders,
         body: request.body,
+        redirect: "manual",
         signal: AbortSignal.timeout(15_000),
       }));
     } else {
       upstream = await fetch(targetUrl, {
         method: request.method,
-        headers: request.headers,
+        headers: modifiedHeaders,
         body: request.body,
+        redirect: "manual",
+        signal: AbortSignal.timeout(15_000),
+      });
+    }
+    return upstream;
+  }
+
+  // Proxy user profile endpoint via HTTP (used by restoreSession before
+  // WebSocket/Turnstile is ready).
+  if (pathname === "/api/users/me" && request.method === "GET") {
+    const backendUrl = env.VITE_LEAPIFY_API_URL;
+    if (!backendUrl && !env.BACKEND) {
+      return jsonResponse({ error: "Backend not configured" }, 500);
+    }
+    const targetUrl = `${backendUrl}/api/users/me`;
+    let upstream: Response;
+    if (env.BACKEND) {
+      upstream = await env.BACKEND.fetch(new Request(targetUrl, {
+        method: "GET",
+        headers: request.headers,
+        signal: AbortSignal.timeout(15_000),
+      }));
+    } else {
+      upstream = await fetch(targetUrl, {
+        method: "GET",
+        headers: request.headers,
         signal: AbortSignal.timeout(15_000),
       });
     }

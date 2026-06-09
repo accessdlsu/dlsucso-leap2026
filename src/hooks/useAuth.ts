@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { restoreSession, signOut as authSignOut, getToken } from '../services/auth';
+import { restoreSession, signOut as authSignOut } from '../services/auth';
 import { leapifyApi } from '../services/leapify';
 import type { UserProfile } from '../services/auth';
 
@@ -14,12 +14,8 @@ export function useAuth() {
     const init = async () => {
       try {
         const profile = await restoreSession();
-        if (cancelled) return;
-
-        if (profile) {
+        if (!cancelled && profile) {
           setUser(profile);
-          const token = await getToken();
-          leapifyApi.setToken(token);
         }
       } catch (err) {
         if (!cancelled) {
