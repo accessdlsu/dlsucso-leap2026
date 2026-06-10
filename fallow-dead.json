@@ -1,0 +1,1605 @@
+{
+  "kind": "combined",
+  "schema_version": 7,
+  "version": "2.90.0",
+  "elapsed_ms": 48,
+  "check": {
+    "schema_version": 7,
+    "version": "2.90.0",
+    "elapsed_ms": 48,
+    "total_issues": 71,
+    "entry_points": {
+      "total": 11,
+      "sources": {
+        "package.json": 1,
+        "plugin": 10
+      }
+    },
+    "summary": {
+      "total_issues": 71,
+      "unused_files": 5,
+      "unused_exports": 66,
+      "unused_types": 0,
+      "private_type_leaks": 0,
+      "unused_dependencies": 0,
+      "unused_enum_members": 0,
+      "unused_class_members": 0,
+      "unresolved_imports": 0,
+      "unlisted_dependencies": 0,
+      "duplicate_exports": 0,
+      "type_only_dependencies": 0,
+      "test_only_dependencies": 0,
+      "circular_dependencies": 0,
+      "re_export_cycles": 0,
+      "boundary_violations": 0,
+      "stale_suppressions": 0,
+      "unused_catalog_entries": 0,
+      "empty_catalog_groups": 0,
+      "unresolved_catalog_references": 0,
+      "unused_dependency_overrides": 0,
+      "misconfigured_dependency_overrides": 0
+    },
+    "unused_files": [
+      {
+        "path": "public/_worker.ts",
+        "actions": [
+          {
+            "type": "delete-file",
+            "auto_fixable": false,
+            "description": "Delete this file",
+            "note": "File deletion may remove runtime functionality not visible to static analysis"
+          },
+          {
+            "type": "suppress-file",
+            "auto_fixable": false,
+            "description": "Suppress with a file-level comment at the top of the file",
+            "comment": "// fallow-ignore-file unused-file"
+          }
+        ]
+      },
+      {
+        "path": "src/components/shared/Fireflies.tsx",
+        "actions": [
+          {
+            "type": "delete-file",
+            "auto_fixable": false,
+            "description": "Delete this file",
+            "note": "File deletion may remove runtime functionality not visible to static analysis"
+          },
+          {
+            "type": "suppress-file",
+            "auto_fixable": false,
+            "description": "Suppress with a file-level comment at the top of the file",
+            "comment": "// fallow-ignore-file unused-file"
+          }
+        ]
+      },
+      {
+        "path": "src/components/shared/ScrollProgress.tsx",
+        "actions": [
+          {
+            "type": "delete-file",
+            "auto_fixable": false,
+            "description": "Delete this file",
+            "note": "File deletion may remove runtime functionality not visible to static analysis"
+          },
+          {
+            "type": "suppress-file",
+            "auto_fixable": false,
+            "description": "Suppress with a file-level comment at the top of the file",
+            "comment": "// fallow-ignore-file unused-file"
+          }
+        ]
+      },
+      {
+        "path": "src/components/shared/TheAwakening.tsx",
+        "actions": [
+          {
+            "type": "delete-file",
+            "auto_fixable": false,
+            "description": "Delete this file",
+            "note": "File deletion may remove runtime functionality not visible to static analysis"
+          },
+          {
+            "type": "suppress-file",
+            "auto_fixable": false,
+            "description": "Suppress with a file-level comment at the top of the file",
+            "comment": "// fallow-ignore-file unused-file"
+          }
+        ]
+      },
+      {
+        "path": "src/hooks/useWindow.ts",
+        "actions": [
+          {
+            "type": "delete-file",
+            "auto_fixable": false,
+            "description": "Delete this file",
+            "note": "File deletion may remove runtime functionality not visible to static analysis"
+          },
+          {
+            "type": "suppress-file",
+            "auto_fixable": false,
+            "description": "Suppress with a file-level comment at the top of the file",
+            "comment": "// fallow-ignore-file unused-file"
+          }
+        ]
+      }
+    ],
+    "unused_exports": [
+      {
+        "path": "src/App.module.css",
+        "export_name": "firefliesContainer",
+        "is_type_only": false,
+        "line": 56,
+        "col": 1,
+        "span_start": 1909,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "firefly",
+        "is_type_only": false,
+        "line": 60,
+        "col": 1,
+        "span_start": 2005,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "counterWrapper",
+        "is_type_only": false,
+        "line": 104,
+        "col": 1,
+        "span_start": 3011,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "counterValue",
+        "is_type_only": false,
+        "line": 109,
+        "col": 1,
+        "span_start": 3078,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "counterLabel",
+        "is_type_only": false,
+        "line": 117,
+        "col": 1,
+        "span_start": 3246,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "heroStatsContainer",
+        "is_type_only": false,
+        "line": 127,
+        "col": 1,
+        "span_start": 3463,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "statsDivider",
+        "is_type_only": false,
+        "line": 140,
+        "col": 1,
+        "span_start": 3793,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "tooltipBox",
+        "is_type_only": false,
+        "line": 146,
+        "col": 1,
+        "span_start": 3888,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "tooltipLabel",
+        "is_type_only": false,
+        "line": 163,
+        "col": 1,
+        "span_start": 4277,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "tooltipDescription",
+        "is_type_only": false,
+        "line": 171,
+        "col": 1,
+        "span_start": 4416,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemesSection",
+        "is_type_only": false,
+        "line": 182,
+        "col": 1,
+        "span_start": 4960,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemesInner",
+        "is_type_only": false,
+        "line": 186,
+        "col": 1,
+        "span_start": 5030,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemesLabel",
+        "is_type_only": false,
+        "line": 190,
+        "col": 1,
+        "span_start": 5096,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemesRow",
+        "is_type_only": false,
+        "line": 194,
+        "col": 1,
+        "span_start": 5162,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemesCompactShell",
+        "is_type_only": false,
+        "line": 199,
+        "col": 1,
+        "span_start": 5240,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemesCompactInner",
+        "is_type_only": false,
+        "line": 209,
+        "col": 1,
+        "span_start": 5435,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemesBackdropTop",
+        "is_type_only": false,
+        "line": 223,
+        "col": 1,
+        "span_start": 5731,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemesBackdropRight",
+        "is_type_only": false,
+        "line": 237,
+        "col": 1,
+        "span_start": 6026,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemesCompactLabel",
+        "is_type_only": false,
+        "line": 252,
+        "col": 1,
+        "span_start": 6348,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemesRowCompact",
+        "is_type_only": false,
+        "line": 262,
+        "col": 1,
+        "span_start": 6590,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemeAssetButton",
+        "is_type_only": false,
+        "line": 290,
+        "col": 1,
+        "span_start": 7201,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemeAssetIcon",
+        "is_type_only": false,
+        "line": 318,
+        "col": 1,
+        "span_start": 7857,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemeAssetLabel",
+        "is_type_only": false,
+        "line": 345,
+        "col": 1,
+        "span_start": 8649,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemeAssetActive",
+        "is_type_only": false,
+        "line": 388,
+        "col": 1,
+        "span_start": 9608,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemePill",
+        "is_type_only": false,
+        "line": 494,
+        "col": 1,
+        "span_start": 11765,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemePillActive",
+        "is_type_only": false,
+        "line": 516,
+        "col": 1,
+        "span_start": 12358,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemePillIcon",
+        "is_type_only": false,
+        "line": 524,
+        "col": 1,
+        "span_start": 12550,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "subthemePillLabel",
+        "is_type_only": false,
+        "line": 538,
+        "col": 1,
+        "span_start": 12845,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "cardHeaderBar",
+        "is_type_only": false,
+        "line": 621,
+        "col": 1,
+        "span_start": 14971,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "cardBadge",
+        "is_type_only": false,
+        "line": 633,
+        "col": 1,
+        "span_start": 15181,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "cardBadgeTheme",
+        "is_type_only": false,
+        "line": 646,
+        "col": 1,
+        "span_start": 15651,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "cardBadgeDay",
+        "is_type_only": false,
+        "line": 654,
+        "col": 1,
+        "span_start": 15891,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "cardContent",
+        "is_type_only": false,
+        "line": 741,
+        "col": 1,
+        "span_start": 17537,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "cardMetadata",
+        "is_type_only": false,
+        "line": 770,
+        "col": 1,
+        "span_start": 18111,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "cardActions",
+        "is_type_only": false,
+        "line": 792,
+        "col": 1,
+        "span_start": 18468,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "registerBtn",
+        "is_type_only": false,
+        "line": 796,
+        "col": 1,
+        "span_start": 18530,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "learnMoreBtn",
+        "is_type_only": false,
+        "line": 824,
+        "col": 1,
+        "span_start": 19199,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "navBar",
+        "is_type_only": false,
+        "line": 926,
+        "col": 1,
+        "span_start": 21515,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "navBarScrolled",
+        "is_type_only": false,
+        "line": 941,
+        "col": 1,
+        "span_start": 21999,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "navBarHome",
+        "is_type_only": false,
+        "line": 960,
+        "col": 1,
+        "span_start": 22730,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "navBarLight",
+        "is_type_only": false,
+        "line": 977,
+        "col": 1,
+        "span_start": 23274,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "navLink",
+        "is_type_only": false,
+        "line": 1025,
+        "col": 1,
+        "span_start": 24210,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "navLinkActive",
+        "is_type_only": false,
+        "line": 1029,
+        "col": 1,
+        "span_start": 24262,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "navRight",
+        "is_type_only": false,
+        "line": 1035,
+        "col": 1,
+        "span_start": 24360,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "navIconBtn",
+        "is_type_only": false,
+        "line": 1049,
+        "col": 1,
+        "span_start": 24551,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "navProfileImg",
+        "is_type_only": false,
+        "line": 1053,
+        "col": 1,
+        "span_start": 24610,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "navSignOutBtn",
+        "is_type_only": false,
+        "line": 1060,
+        "col": 1,
+        "span_start": 24711,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "mobileMenu",
+        "is_type_only": false,
+        "line": 1141,
+        "col": 1,
+        "span_start": 27020,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "mobileMenuContent",
+        "is_type_only": false,
+        "line": 1157,
+        "col": 1,
+        "span_start": 27513,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "mobileMenuItem",
+        "is_type_only": false,
+        "line": 1163,
+        "col": 1,
+        "span_start": 27652,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "mobileMenuSignOutBtn",
+        "is_type_only": false,
+        "line": 1175,
+        "col": 1,
+        "span_start": 27916,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "mobileMenuSignInBtn",
+        "is_type_only": false,
+        "line": 1203,
+        "col": 1,
+        "span_start": 28625,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "heroEyebrow",
+        "is_type_only": false,
+        "line": 1313,
+        "col": 1,
+        "span_start": 31444,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "fade-up",
+        "is_type_only": false,
+        "line": 1331,
+        "col": 1,
+        "span_start": 31896,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "delay-1",
+        "is_type_only": false,
+        "line": 1335,
+        "col": 1,
+        "span_start": 31977,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "heroSubtext",
+        "is_type_only": false,
+        "line": 1350,
+        "col": 1,
+        "span_start": 32174,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "heroCTAButtons",
+        "is_type_only": false,
+        "line": 1360,
+        "col": 1,
+        "span_start": 32408,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "footerLinkList",
+        "is_type_only": false,
+        "line": 1435,
+        "col": 1,
+        "span_start": 34320,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "cardOrgName",
+        "is_type_only": false,
+        "line": 1465,
+        "col": 1,
+        "span_start": 35612,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "cardMeta",
+        "is_type_only": false,
+        "line": 1475,
+        "col": 1,
+        "span_start": 35819,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "cardMetaItem",
+        "is_type_only": false,
+        "line": 1480,
+        "col": 1,
+        "span_start": 35914,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "cardMetaIcon",
+        "is_type_only": false,
+        "line": 1484,
+        "col": 1,
+        "span_start": 35971,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "cardHeaderLeft",
+        "is_type_only": false,
+        "line": 1488,
+        "col": 1,
+        "span_start": 36033,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "cardBadgeSection",
+        "is_type_only": false,
+        "line": 1492,
+        "col": 1,
+        "span_start": 36092,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "cardBadgeText",
+        "is_type_only": false,
+        "line": 1496,
+        "col": 1,
+        "span_start": 36153,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      },
+      {
+        "path": "src/App.module.css",
+        "export_name": "mobileStickyCta",
+        "is_type_only": false,
+        "line": 1612,
+        "col": 1,
+        "span_start": 38909,
+        "is_re_export": false,
+        "actions": [
+          {
+            "type": "remove-export",
+            "auto_fixable": true,
+            "description": "Remove the unused export from the public API"
+          },
+          {
+            "type": "suppress-line",
+            "auto_fixable": false,
+            "description": "Suppress with an inline comment above the line",
+            "comment": "// fallow-ignore-next-line unused-export"
+          }
+        ]
+      }
+    ],
+    "unused_types": [],
+    "private_type_leaks": [],
+    "unused_dependencies": [],
+    "unused_dev_dependencies": [],
+    "unused_optional_dependencies": [],
+    "unused_enum_members": [],
+    "unused_class_members": [],
+    "unresolved_imports": [],
+    "unlisted_dependencies": [],
+    "duplicate_exports": [],
+    "type_only_dependencies": [],
+    "test_only_dependencies": [],
+    "circular_dependencies": [],
+    "re_export_cycles": [],
+    "boundary_violations": [],
+    "stale_suppressions": [],
+    "unused_catalog_entries": [],
+    "empty_catalog_groups": [],
+    "unresolved_catalog_references": [],
+    "unused_dependency_overrides": [],
+    "misconfigured_dependency_overrides": []
+  }
+}
