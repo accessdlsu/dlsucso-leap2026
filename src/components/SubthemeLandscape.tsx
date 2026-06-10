@@ -22,6 +22,20 @@ const GlowAura = ({ color }: { color: string }) => (
   <div style={{ position: 'absolute', inset: '-60px', borderRadius: '50%', background: `radial-gradient(circle, ${color} 0%, transparent 65%)`, opacity: 0.6, pointerEvents: 'none', zIndex: 1 }} />
 );
 
+type PalayGrainsProps = { steps: number[]; h: number; lean: number; offset: number; rx: string; ry: string; opacity: number; rotBase: number };
+const PalayGrains = ({ steps, h, lean, offset, rx, ry, opacity, rotBase }: PalayGrainsProps) => (
+  <>
+    {steps.map((t, gi) => {
+      const py = -h * t - 2;
+      const px = lean * t;
+      const side = gi % 2 === 0 ? -1 : 1;
+      return (
+        <ellipse key={gi} cx={px + side * offset} cy={py} rx={rx} ry={ry} fill="url(#palayG)" opacity={opacity} transform={`rotate(${side * rotBase + lean * 2}, ${px + side * offset}, ${py})`} />
+      );
+    })}
+  </>
+);
+
 export const SubthemeLandscape = ({ themes, setActiveSubtheme, themeColors }: SubthemeLandscapeProps) => {
   const [windowWidth, setWindowWidth] = useState(
     typeof window !== 'undefined' ? window.innerWidth : 1024
@@ -164,14 +178,7 @@ export const SubthemeLandscape = ({ themes, setActiveSubtheme, themeColors }: Su
             return (
               <g key={`palay-back-${i}`} transform={`translate(${x}, ${baseY})`} opacity="0.78">
                 <path d={`M0 0 Q${lean * 0.4} ${-h * 0.5} ${lean} ${-h}`} stroke="#3a6a22" strokeWidth="1.4" fill="none" strokeLinecap="round" />
-                {[0, 0.25, 0.5, 0.75, 1].map((t, gi) => {
-                  const py = -h * t - 2;
-                  const px = lean * t;
-                  const side = gi % 2 === 0 ? -1 : 1;
-                  return (
-                    <ellipse key={gi} cx={px + side * 2.8} cy={py} rx="2.2" ry="3.5" fill="url(#palayG)" opacity="0.85" transform={`rotate(${side * -18 + lean * 2}, ${px + side * 2.8}, ${py})`} />
-                  );
-                })}
+                <PalayGrains steps={[0, 0.25, 0.5, 0.75, 1]} h={h} lean={lean} offset={2.8} rx="2.2" ry="3.5" opacity={0.85} rotBase={-18} />
                 <path d="M0 0 Q-4 -3 -7 -4" stroke="#2e5a1c" strokeWidth="1.2" fill="none" strokeLinecap="round" opacity="0.7" />
               </g>
             );
@@ -186,14 +193,7 @@ export const SubthemeLandscape = ({ themes, setActiveSubtheme, themeColors }: Su
             return (
               <g key={`palay-front-${i}`} transform={`translate(${x}, ${baseY})`} opacity="0.92">
                 <path d={`M0 0 Q${lean * 0.4} ${-h * 0.5} ${lean} ${-h}`} stroke="#3e7028" strokeWidth="1.7" fill="none" strokeLinecap="round" />
-                {[0, 0.2, 0.4, 0.6, 0.8, 1].map((t, gi) => {
-                  const py = -h * t - 2;
-                  const px = lean * t;
-                  const side = gi % 2 === 0 ? -1 : 1;
-                  return (
-                    <ellipse key={gi} cx={px + side * 3.2} cy={py} rx="2.6" ry="4.2" fill="url(#palayG)" opacity="0.95" transform={`rotate(${side * -20 + lean * 2}, ${px + side * 3.2}, ${py})`} />
-                  );
-                })}
+                <PalayGrains steps={[0, 0.2, 0.4, 0.6, 0.8, 1]} h={h} lean={lean} offset={3.2} rx="2.6" ry="4.2" opacity={0.95} rotBase={-20} />
                 <ellipse cx={lean} cy={-h - 1} rx="1.4" ry="2" fill="rgba(255,235,160,0.85)" />
                 <path d="M0 0 Q-5 -4 -9 -6" stroke="#326020" strokeWidth="1.3" fill="none" strokeLinecap="round" opacity="0.75" />
                 <path d="M0 0 Q5 -3 8 -5" stroke="#326020" strokeWidth="1.3" fill="none" strokeLinecap="round" opacity="0.75" />

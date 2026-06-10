@@ -14,6 +14,58 @@ interface ClassCardProps {
   onLearnMore: (item: LeapClass) => void;
 }
 
+const CardOrgTitle = ({ item, onLearnMore }: { item: LeapClass; onLearnMore: (item: LeapClass) => void }) => (
+  <>
+    <p className={styles.cardOrganization}>{item.org}</p>
+    <h3
+      className={styles.cardTitle}
+      style={{ fontFamily: "'Playfair Display', serif" }}
+      onClick={() => onLearnMore(item)}
+    >
+      {item.title}
+    </h3>
+  </>
+);
+
+const CardMetadata = ({ item, showSlots }: { item: LeapClass; showSlots?: boolean }) => (
+  <>
+    <div className={styles.metadataItem}>
+      <Calendar size={12} className={styles.metadataIcon} />
+      <span>{item.date} · {item.time}</span>
+    </div>
+    <div className={styles.metadataItem}>
+      <MapPin size={12} className={styles.metadataIcon} />
+      <span>{item.venue}</span>
+    </div>
+    {showSlots && item.slots > 0 && (
+      <div className={styles.metadataItem}>
+        <Users size={12} className={styles.metadataIcon} />
+        <span>{item.slots} slots</span>
+      </div>
+    )}
+  </>
+);
+
+const CardActions = ({ item, onLearnMore }: { item: LeapClass; onLearnMore: (item: LeapClass) => void }) => (
+  <>
+    <a
+      href={item.googleFormUrl || '#'}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      className={styles.registerBtnOverlay}
+    >
+      Register <ExternalLink size={13} />
+    </a>
+    <button
+      onClick={() => onLearnMore(item)}
+      className={styles.learnMoreBtnOverlay}
+    >
+      Learn More <ChevronRight size={13} />
+    </button>
+  </>
+);
+
 export const ClassCard = memo(({
   item,
   index,
@@ -91,52 +143,12 @@ export const ClassCard = memo(({
 
       {/* Overlay content - desktop only */}
       <div className={styles.cardOverlayContent}>
-        <p className={styles.cardOrganization}>{item.org}</p>
-        <h3
-          className={styles.cardTitle}
-          style={{ fontFamily: "'Playfair Display', serif" }}
-          onClick={() => onLearnMore(item)}
-        >
-          {item.title}
-        </h3>
+        <CardOrgTitle item={item} onLearnMore={onLearnMore} />
         <div className={styles.cardMetadataOverlay}>
-          <div className={styles.metadataItem}>
-            <Calendar size={12} className={styles.metadataIcon} />
-            <span>
-              {item.date} · {item.time}
-            </span>
-          </div>
-          <div className={styles.metadataItem}>
-            <MapPin size={12} className={styles.metadataIcon} />
-            <span>
-              {item.venue}
-            </span>
-          </div>
-          {item.slots > 0 && (
-            <div className={styles.metadataItem}>
-              <Users size={12} className={styles.metadataIcon} />
-              <span>
-                {item.slots} slots
-              </span>
-            </div>
-          )}
+          <CardMetadata item={item} showSlots />
         </div>
         <div className={styles.cardActionsOverlay}>
-          <a
-            href={item.googleFormUrl || '#'}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className={styles.registerBtnOverlay}
-          >
-            Register <ExternalLink size={13} />
-          </a>
-          <button
-            onClick={() => onLearnMore(item)}
-            className={styles.learnMoreBtnOverlay}
-          >
-            Learn More <ChevronRight size={13} />
-          </button>
+          <CardActions item={item} onLearnMore={onLearnMore} />
         </div>
       </div>
     </div>
@@ -167,35 +179,10 @@ export const ClassCard = memo(({
         {item.title}
       </h3>
       <div className={styles.cardMetadataOverlay}>
-        <div className={styles.metadataItem}>
-          <Calendar size={12} className={styles.metadataIcon} />
-          <span>
-            {item.date} · {item.time}
-          </span>
-        </div>
-        <div className={styles.metadataItem}>
-          <MapPin size={12} className={styles.metadataIcon} />
-          <span>
-            {item.venue}
-          </span>
-        </div>
+        <CardMetadata item={item} />
       </div>
       <div className={styles.cardActionsOverlay}>
-        <a
-          href={item.googleFormUrl || '#'}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className={styles.registerBtnOverlay}
-        >
-          Register <ExternalLink size={13} />
-        </a>
-        <button
-          onClick={() => onLearnMore(item)}
-          className={styles.learnMoreBtnOverlay}
-        >
-          Learn More <ChevronRight size={13} />
-        </button>
+        <CardActions item={item} onLearnMore={onLearnMore} />
       </div>
     </div>
   </m.div>

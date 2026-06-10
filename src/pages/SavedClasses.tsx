@@ -1,6 +1,6 @@
-﻿import { m } from 'framer-motion';
-import { Bookmark } from 'lucide-react';
+﻿import { Bookmark } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { PageWrapper, PageHero } from '../components/PageCommon';
 import type { LeapClass } from '../types';
 import styles from '../App.module.css';
 
@@ -10,88 +10,6 @@ interface SavedClassesProps {
   savedClassIds: Set<string>;
   renderClassCard: (item: LeapClass, index: number) => ReactNode;
 }
-
-const PageWrapper = ({ children }: { children: ReactNode }) => (
-  <m.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-    style={{
-      flexGrow: 1,
-      background: 'linear-gradient(180deg, #f5f3ec 0%, #ebe8dd 60%, #d8e0d8 100%)',
-      width: '100%',
-      maxWidth: '100vw',
-      overflowX: 'hidden',
-      boxSizing: 'border-box',
-    }}
-  >
-    {children}
-  </m.div>
-);
-
-const PageHero = ({ title, subtitle, accent }: { title: string; subtitle: string; accent: string }) => (
-  <div
-    className="page-hero"
-    style={{
-      paddingTop: 'clamp(6rem, 12vw, 10rem)',
-      paddingBottom: 'clamp(2rem, 4vw, 4rem)',
-      textAlign: 'center',
-      position: 'relative',
-      overflow: 'hidden',
-    }}
-  >
-    <div className="page-hero-fireflies">
-      <span /><span /><span /><span /><span /><span />
-    </div>
-    <div className="page-hero-glow" />
-    <m.p
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 }}
-      style={{
-        fontFamily: "'DM Sans',sans-serif",
-        fontSize: '0.7rem',
-        fontWeight: 700,
-        letterSpacing: '0.3em',
-        textTransform: 'uppercase',
-        color: '#de9a49',
-        marginBottom: '1rem',
-      }}
-    >
-      {accent}
-    </m.p>
-    <m.h1
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.18 }}
-      className="page-hero-title"
-      style={{
-        fontFamily: "'Playfair Display', serif",
-        fontSize: 'clamp(2.5rem, 6vw, 4rem)',
-        fontWeight: 700,
-        color: '#334b46',
-        marginBottom: '0.5rem',
-      }}
-    >
-      {title}
-    </m.h1>
-    <m.p
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.25 }}
-      style={{
-        fontFamily: "'DM Sans',sans-serif",
-        fontSize: 'clamp(0.9rem, 2vw, 1.2rem)',
-        color: '#6a5040',
-        maxWidth: '600px',
-        margin: '0 auto',
-        lineHeight: 1.6,
-      }}
-    >
-      {subtitle}
-    </m.p>
-  </div>
-);
 
 export default function SavedClasses({
   filteredAndSortedClasses,
@@ -107,12 +25,39 @@ export default function SavedClasses({
   };
 
   return (
-    <PageWrapper>
+    <PageWrapper
+      style={{
+        background: 'linear-gradient(180deg, #f5f3ec 0%, #ebe8dd 60%, #d8e0d8 100%)',
+        width: '100%',
+        maxWidth: '100vw',
+        overflowX: 'hidden',
+        boxSizing: 'border-box',
+      }}
+    >
       <PageHero
         accent="YOUR SELECTIONS"
         title="Saved Classes"
         subtitle="All the classes you've bookmarked for easy access. Save more classes as you browse to build your perfect schedule."
-      />
+        titleStyle={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+          fontWeight: 700,
+          color: '#334b46',
+          marginBottom: '0.5rem',
+        }}
+        subtitleStyle={{
+          fontFamily: "'DM Sans',sans-serif",
+          fontSize: 'clamp(0.9rem, 2vw, 1.2rem)',
+          color: '#6a5040',
+          maxWidth: '600px',
+          margin: '0 auto',
+          lineHeight: 1.6,
+        }}
+      >
+        <div className="page-hero-fireflies">
+          <span /><span /><span /><span /><span /><span />
+        </div>
+      </PageHero>
 
       <section style={{ padding: 'clamp(1rem, 3vw, 3rem) clamp(0.75rem, 3vw, 1.5rem)' }}>
         <div style={{ maxWidth: '72rem', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>

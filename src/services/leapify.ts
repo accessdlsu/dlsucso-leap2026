@@ -70,7 +70,7 @@ async function executeTurnstile(siteKey: string): Promise<string> {
   });
 }
 
-export async function solveTurnstileChallenge(): Promise<boolean> {
+async function solveTurnstileChallenge(): Promise<boolean> {
   if (turnstileSolved) return true;
   if (turnstilePromise) return turnstilePromise;
   console.log("[leapify] Starting Turnstile challenge");
@@ -98,8 +98,6 @@ export async function solveTurnstileChallenge(): Promise<boolean> {
 
 // Types — imported from backend package, re-exported for consumers
 import type {
-  EventStatus,
-  UserRole,
   LeapEvent,
   Faq,
   UserProfile,
@@ -109,24 +107,15 @@ import type {
   SlotInfo,
   BookmarkEntry,
   ToggleBookmarkResult,
-  ServiceHealth,
   HealthResponse,
 } from 'leapify/types';
 
 export type {
-  EventStatus,
-  UserRole,
   LeapEvent,
   Faq,
-  UserProfile,
   SiteConfig,
   Theme,
   Organization,
-  SlotInfo,
-  BookmarkEntry,
-  ToggleBookmarkResult,
-  ServiceHealth,
-  HealthResponse,
 };
 
 // ─── WebSocket API Client ────────────────────────────────────────────────────
@@ -171,6 +160,7 @@ class WsApiClient {
     if (this.connecting) return this.connecting;
 
     console.log("[leapify] Ensuring WebSocket connection");
+    // eslint-disable-next-line no-async-promise-executor
     this.connecting = new Promise<void>(async (resolve, reject) => {
       this.connectResolve = resolve;
 

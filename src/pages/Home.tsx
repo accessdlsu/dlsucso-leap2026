@@ -11,23 +11,12 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import type { LeapClass } from '../types';
-import type { UserProfile } from '../services/auth';
+import type { LeapClass, PagePropsBase } from '../types';
+import { HOME_FIREFLY_CONFIG } from '../utils/constants';
+import { SortSelect } from '../components/shared/SortSelect';
 
-
-interface HomeProps {
-  user: UserProfile | null;
+interface HomeProps extends PagePropsBase {
   classes: LeapClass[];
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  sortBy: "title-asc" | "title-desc" | "slots-desc" | "slots-asc";
-  onSortChange: (
-    sort: "title-asc" | "title-desc" | "slots-desc" | "slots-asc",
-  ) => void;
-  filteredAndSortedClasses: LeapClass[];
-  uniqueDays: string[];
-  selectedDay: string | null;
-  onDaySelect: (day: string | null) => void;
   viewingClass: LeapClass | null;
   onClassSelect: (leapClass: LeapClass | null) => void;
   onSignIn: () => void;
@@ -38,27 +27,7 @@ interface HomeProps {
 }
 
 const CLASSES_PER_DAY = 3;
-
-const HOME_FLIES = Array.from({ length: 30 }, (_, i) => ({
-  id: i,
-  x: ((i * 16.7 + (i % 4) * 19) % 96) + 2,
-  y: ((i * 12.1 + (i % 6) * 11) % 94) + 2,
-  size: 2 + (i % 3),
-  delay: (i * 0.57) % 6.5,
-  dur: 3.2 + (i % 5) * 0.58,
-}));
-
-function useWindowWidth() {
-  const [width, setWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 1280,
-  );
-  useEffect(() => {
-    const h = () => setWidth(window.innerWidth);
-    window.addEventListener("resize", h, { passive: true });
-    return () => window.removeEventListener("resize", h);
-  }, []);
-  return width;
-}
+import { useWindowWidth } from '../hooks/useWindow';
 
 export default function Home({
   user,
@@ -120,6 +89,7 @@ export default function Home({
     });
 
     return () => observers.forEach((o) => o.disconnect());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, displayedDays.join(",")]);
 
   const scrollToDay = (day: string) => {
@@ -187,7 +157,7 @@ export default function Home({
           zIndex: 0,
         }}
       >
-        {HOME_FLIES.map((f) => (
+        {HOME_FIREFLY_CONFIG.map((f) => (
           <span
             key={f.id}
             className="firefly"
@@ -312,18 +282,9 @@ export default function Home({
                   onChange={(e) => onSearchChange(e.target.value)}
                 />
               </div>
-              <select
+              <SortSelect
                 value={sortBy}
-                onChange={(e) =>
-                  onSortChange(
-                    e.target.value as
-                    | "title-asc"
-                    | "title-desc"
-                    | "slots-desc"
-                    | "slots-asc",
-                  )
-                }
-                aria-label="Sort classes"
+                onChange={(v) => onSortChange(v as "title-asc" | "title-desc" | "slots-desc" | "slots-asc")}
                 className="leap-select"
                 style={{
                   padding: "0.75rem 1.25rem",
@@ -331,12 +292,7 @@ export default function Home({
                   minHeight: 46,
                   width: isMobile ? "100%" : "auto",
                 }}
-              >
-                <option value="title-asc">Title (A–Z)</option>
-                <option value="title-desc">Title (Z–A)</option>
-                <option value="slots-desc">Most Slots</option>
-                <option value="slots-asc">Fewest Slots</option>
-              </select>
+              />
             </div>
 
             {/* Layout grid — NOTE: overflow visible on wrapper so sticky works */}

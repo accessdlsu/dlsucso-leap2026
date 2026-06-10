@@ -1,3 +1,4 @@
+// fallow-ignore-file unused-file
 import { useOptimizedScrollProgress } from '../../hooks';
 
 /**
@@ -31,5 +32,3 @@ export const ScrollProgress = () => {
     </div>
   );
 };
-
-export default ScrollProgress;

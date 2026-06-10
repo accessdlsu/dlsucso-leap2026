@@ -11,17 +11,26 @@ import JSONC from 'jsonc-parser'
  * This ensures import.meta.env.VITE_* is populated at build time
  * from the single source of truth (wrangler.jsonc), avoiding duplication.
  */
+interface WranglerVars {
+  [key: string]: string;
+}
+
+interface WranglerConfig {
+  vars?: WranglerVars;
+  env?: Record<string, { vars?: WranglerVars }>;
+}
+
 function loadWranglerVars(mode?: string) {
   // Default to production mode if not specified
   const resolvedMode = mode || 'production'
 
   const wranglerPath = path.resolve(__dirname, 'wrangler.jsonc')
-  let wranglerConfig: any = {}
+  let wranglerConfig: WranglerConfig = {}
 
   try {
     const content = fs.readFileSync(wranglerPath, 'utf-8')
     wranglerConfig = JSONC.parse(content)
-  } catch (err) {
+  } catch {
     console.warn('⚠️  Could not read wrangler.jsonc, falling back to .env')
     return {}
   }

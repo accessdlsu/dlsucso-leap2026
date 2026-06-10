@@ -6,9 +6,6 @@ import type {
   Organization,
   Faq,
   SiteConfig,
-  SlotInfo,
-  BookmarkEntry,
-  HealthResponse,
 } from "../services/leapify";
 import type { MainEvent, LeapClass } from "../types";
 import { toMainEvent, toLeapClass } from "../utils/event-mappers";
@@ -25,30 +22,39 @@ function initialFetchState<T>(fallback: T): FetchState<T> {
   return { data: fallback, loading: true, error: null };
 }
 
-// ─── useEvents — all published events ────────────────────────────────────────
-
-export function useEvents(): FetchState<LeapEvent[]> & { refetch: () => void } {
-  const [state, setState] = useState<FetchState<LeapEvent[]>>(
-    initialFetchState([]),
-  );
-  const fetch = useCallback(async () => {
-    setState((s) => ({ ...s, loading: true, error: null }));
-    try {
-      const data = await leapifyApi.getEvents();
-      setState({ data, loading: false, error: null });
-    } catch (err) {
-      setState((s) => ({
-        ...s,
-        loading: false,
-        error: err instanceof Error ? err.message : "Failed to fetch events",
-      }));
-    }
-  }, []);
-  useEffect(() => {
-    void fetch();
-  }, [fetch]);
-  return { ...state, refetch: fetch };
+function createFetchHook<T>(
+  fetcher: () => Promise<T>,
+  fallback: T,
+  errorMessage: string,
+) {
+  return (): FetchState<T> & { refetch: () => void } => {
+    const [state, setState] = useState<FetchState<T>>(initialFetchState(fallback));
+    const fetch = useCallback(async () => {
+      setState((s) => ({ ...s, loading: true, error: null }));
+      try {
+        const data = await fetcher();
+        setState({ data, loading: false, error: null });
+      } catch (err) {
+        setState((s) => ({
+          ...s,
+          loading: false,
+          error: err instanceof Error ? err.message : errorMessage,
+        }));
+      }
+    }, []);
+    useEffect(() => {
+      void fetch();
+    }, [fetch]);
+    return { ...state, refetch: fetch };
+  };
 }
+
+// ─── useEvents — all published events ────────────────────────────────────────
+export const useEvents = createFetchHook(
+  () => leapifyApi.getEvents(),
+  [] as LeapEvent[],
+  "Failed to fetch events",
+);
 
 // ─── useMainEvents — spotlight events mapped to MainEvent ────────────────────
 
@@ -86,93 +92,14 @@ export function useMainEvents(): FetchState<MainEvent[]> {
 }
 
 // ─── useClasses — non-spotlight events mapped to LeapClass ───────────────────
-
-export function useClasses(): FetchState<LeapClass[]> & { refetch: () => void } {
-  const [state, setState] = useState<FetchState<LeapClass[]>>(
-    initialFetchState([]),
-  );
-  const fetch = useCallback(async () => {
-    setState((s) => ({ ...s, loading: true, error: null }));
-    try {
-      const events = await leapifyApi.getEvents();
-      const classes = events.map((e) => toLeapClass(e));
-      setState({ data: classes, loading: false, error: null });
-    } catch (err) {
-      setState((s) => ({
-        ...s,
-        loading: false,
-        error: err instanceof Error ? err.message : "Failed to fetch classes",
-      }));
-    }
-  }, []);
-  useEffect(() => {
-    void fetch();
-  }, [fetch]);
-  return { ...state, refetch: fetch };
-}
-
-// ─── useEvent — single event by slug ─────────────────────────────────────────
-
-export function useEvent(
-  slug: string,
-): FetchState<LeapEvent | null> & { refetch: () => void } {
-  const [state, setState] = useState<FetchState<LeapEvent | null>>(
-    initialFetchState(null),
-  );
-  const fetch = useCallback(async () => {
-    setState((s) => ({ ...s, loading: true, error: null }));
-    try {
-      const data = await leapifyApi.getEvent(slug);
-      setState({ data, loading: false, error: null });
-    } catch (err) {
-      setState((s) => ({
-        ...s,
-        loading: false,
-        error: err instanceof Error ? err.message : "Failed to fetch event",
-      }));
-    }
-  }, [slug]);
-  useEffect(() => {
-    void fetch();
-  }, [fetch]);
-  return { ...state, refetch: fetch };
-}
-
-// ─── useSlots — real-time slot availability with polling ─────────────────────
-
-export function useSlots(
-  slug: string,
-  pollIntervalMs = 10_000,
-): FetchState<SlotInfo | null> {
-  const [state, setState] = useState<FetchState<SlotInfo | null>>(
-    initialFetchState(null),
-  );
-  useEffect(() => {
-    let cancelled = false;
-    let timer: ReturnType<typeof setInterval> | null = null;
-    const fetch = async () => {
-      try {
-        const data = await leapifyApi.getSlots(slug);
-        if (!cancelled) setState({ data, loading: false, error: null });
-      } catch (err) {
-        if (!cancelled)
-          setState((s) => ({
-            ...s,
-            loading: false,
-            error:
-              err instanceof Error ? err.message : "Failed to fetch slots",
-          }));
-      }
-    };
-    void fetch();
-    timer = setInterval(fetch, pollIntervalMs);
-    return () => {
-      cancelled = true;
-      if (timer) clearInterval(timer);
-    };
-  }, [slug, pollIntervalMs]);
-  return state;
-}
+export const useClasses = createFetchHook(
+  async () => {
+    const events = await leapifyApi.getEvents();
+    return events.map((e) => toLeapClass(e));
+  },
+  [] as LeapClass[],
+  "Failed to fetch classes",
+);
 
 // ─── useThemes ───────────────────────────────────────────────────────────────
 
@@ -282,80 +209,6 @@ export function useConfig(): FetchState<SiteConfig | null> {
             loading: false,
             error:
               err instanceof Error ? err.message : "Failed to fetch config",
-          }));
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-  return state;
-}
-
-// ─── useBookmarks (functional after Better Auth migration) ───────────────────
-
-export function useBookmarks(): FetchState<BookmarkEntry[]> & {
-  toggle: (eventId: string) => Promise<boolean>;
-  remove: (eventId: string) => Promise<void>;
-  refetch: () => void;
-} {
-  const [state, setState] = useState<FetchState<BookmarkEntry[]>>(
-    initialFetchState([]),
-  );
-  const fetch = useCallback(async () => {
-    setState((s) => ({ ...s, loading: true, error: null }));
-    try {
-      const data = await leapifyApi.getBookmarks();
-      setState({ data, loading: false, error: null });
-    } catch (err) {
-      setState((s) => ({
-        ...s,
-        loading: false,
-        error:
-          err instanceof Error ? err.message : "Failed to fetch bookmarks",
-      }));
-    }
-  }, []);
-  useEffect(() => {
-    void fetch();
-  }, [fetch]);
-  const toggle = useCallback(
-    async (eventId: string) => {
-      const result = await leapifyApi.toggleBookmark(eventId);
-      await fetch();
-      return result.bookmarked;
-    },
-    [fetch],
-  );
-  const remove = useCallback(
-    async (eventId: string) => {
-      await leapifyApi.deleteBookmark(eventId);
-      await fetch();
-    },
-    [fetch],
-  );
-  return { ...state, toggle, remove, refetch: fetch };
-}
-
-// ─── useHealth ───────────────────────────────────────────────────────────────
-
-export function useHealth(): FetchState<HealthResponse | null> {
-  const [state, setState] = useState<FetchState<HealthResponse | null>>(
-    initialFetchState(null),
-  );
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const data = await leapifyApi.getHealth();
-        if (!cancelled) setState({ data, loading: false, error: null });
-      } catch (err) {
-        if (!cancelled)
-          setState((s) => ({
-            ...s,
-            loading: false,
-            error:
-              err instanceof Error ? err.message : "Failed to fetch health",
           }));
       }
     })();

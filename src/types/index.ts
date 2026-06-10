@@ -20,9 +20,6 @@ export interface LeapClass {
   isSpotlight: boolean;
 }
 
-// Re-export the canonical UserProfile from the backend
-export type { UserProfile };
-
 export interface MainEvent {
   id: string;
   title: string;
@@ -64,4 +61,16 @@ export interface MainEventCardProps {
   event: MainEvent;
   index: number;
   onClick?: () => void;
+}
+
+export interface PagePropsBase {
+  user: UserProfile | null;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  sortBy: SortOption;
+  onSortChange: (sort: SortOption) => void;
+  filteredAndSortedClasses: LeapClass[];
+  uniqueDays: string[];
+  selectedDay: string | null;
+  onDaySelect: (day: string | null) => void;
 }

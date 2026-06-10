@@ -72,7 +72,7 @@ export const FIREFLY_CONFIG = Array.from({ length: 24 }, (_, i) => ({
 }));
 
 // Home firefly seeds
-export const HOME_FIREFLY_CONFIG = Array.from({ length: 24 }, (_, i) => ({
+export const HOME_FIREFLY_CONFIG = Array.from({ length: 30 }, (_, i) => ({
   id: i,
   x: (i * 16.7 + (i % 4) * 19) % 96 + 2,
   y: (i * 12.1 + (i % 6) * 11) % 94 + 2,

@@ -1,19 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-
-function useIsMobile(breakpoint = 768) {
-  const [isMobile, setIsMobile] = useState(
-    typeof window !== 'undefined' ? window.innerWidth < breakpoint : false
-  );
-  useEffect(() => {
-    const h = () => setIsMobile(window.innerWidth < breakpoint);
-    window.addEventListener('resize', h, { passive: true });
-    return () => window.removeEventListener('resize', h);
-  }, [breakpoint]);
-  return isMobile;
-}
+import { useIsMobile } from '../hooks/useWindow';
 import { m, AnimatePresence } from 'framer-motion';
-import { Search, Menu, X, User, LogIn, LogOut, Bookmark, AlertCircle, ChevronRight } from 'lucide-react';
+import { Search, Menu, X, User, LogIn, LogOut, Bookmark, ChevronRight } from 'lucide-react';
 import type { UserProfile } from '../services/auth';
+import { AuthErrorToast } from './shared/AuthErrorToast';
 import styles from '../App.module.css';
 
 interface NavbarProps {
@@ -85,29 +75,7 @@ export const Navbar = ({
   return (
     <>
       {/* ── Auth error toast ── */}
-      <AnimatePresence>
-        {authError && (
-          <m.div
-            initial={{ opacity: 0, y: -40, x: '-50%' }}
-            animate={{ opacity: 1, y: 0, x: '-50%' }}
-            exit={{ opacity: 0, y: -20, x: '-50%' }}
-            style={{
-              position: 'fixed', top: '1.5rem', left: '50%', zIndex: 9999,
-              background: '#803e2f', color: '#fae185',
-              padding: '0.85rem 1.25rem', borderRadius: '12px',
-              display: 'flex', alignItems: 'center', gap: '0.75rem',
-              boxShadow: '0 12px 32px rgba(128,62,47,0.3)',
-              fontFamily: "'DM Sans', sans-serif",
-              fontSize: '0.85rem', fontWeight: 600,
-              maxWidth: '90vw',
-              border: '1px solid rgba(249,236,182,0.2)',
-            }}
-          >
-            <AlertCircle size={18} style={{ flexShrink: 0 }} />
-            <span>{authError}</span>
-          </m.div>
-        )}
-      </AnimatePresence>
+      <AuthErrorToast message={authError} />
 
       {/* ── Desktop/base navbar ── */}
       <nav

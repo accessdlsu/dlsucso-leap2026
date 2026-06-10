@@ -9,7 +9,7 @@ import { leapifyApi } from './leapify';
 
 const API_URL = window.location.origin;
 
-export const authClient = createLeapifyAuthClient(API_URL);
+const authClient = createLeapifyAuthClient(API_URL);
 
 export async function signIn(callbackPath = '/'): Promise<void> {
   const callbackURL = window.location.origin + callbackPath;

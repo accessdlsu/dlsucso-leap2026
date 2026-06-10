@@ -12,31 +12,8 @@ export function scrollToElement(elementId: string, offset = 104): void {
   window.scrollTo({ top: position, behavior: 'smooth' });
 }
 
-export function optimizeContentfulImage(
-  url: string,
-  { width, quality = 80, format = 'webp' }: { width?: number; quality?: number; format?: string } = {}
-): string {
-  if (!url) return url;
-
-  try {
-    const parsed = new URL(url);
-    const hostname = parsed.hostname.toLowerCase();
-    const isContentfulHost = hostname === 'ctfassets.net' || hostname.endsWith('.ctfassets.net');
-
-    if (!isContentfulHost) return url;
-
-    parsed.searchParams.set('fm', format);
-    parsed.searchParams.set('q', String(quality));
-    if (width) parsed.searchParams.set('w', String(width));
-
-    return parsed.toString();
-  } catch {
-    return url;
-  }
-}
-
 /**
- * Scroll to top of page
+ * Scroll to element with offset
  */
 export function scrollToTop(behavior: 'smooth' | 'auto' = 'smooth'): void {
   window.scrollTo({ top: 0, behavior });
@@ -85,7 +62,7 @@ export function formatTime(timeString: string): string {
 /**
  * Debounce function
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: never[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -105,7 +82,7 @@ export function debounce<T extends (...args: any[]) => any>(
 /**
  * Throttle function
  */
-export function throttle<T extends (...args: any[]) => any>(
+export function throttle<T extends (...args: never[]) => unknown>(
   func: T,
   limit: number
 ): (...args: Parameters<T>) => void {
@@ -139,8 +116,8 @@ export function isMobileScreen(width: number): boolean {
 /**
  * Extract image URL from Contentful asset
  */
-export function extractImageUrl(asset: any): string {
-  if (!asset || !asset.fields || !asset.fields.file) {
+export function extractImageUrl(asset: { fields?: { file?: { url?: string } } } | undefined): string {
+  if (!asset?.fields?.file?.url) {
     return 'https://placehold.co/420x260?text=No+Image';
   }
 
@@ -162,6 +139,14 @@ export function truncateText(text: string, maxLength: number): string {
  */
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function scheduleInit(fn: () => void): void {
+  if ('requestIdleCallback' in window) {
+    (window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => void }).requestIdleCallback?.(fn, { timeout: 1500 });
+  } else {
+    setTimeout(fn, 200);
+  }
 }
 
 /**

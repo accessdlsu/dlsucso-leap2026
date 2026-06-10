@@ -10,23 +10,10 @@ import {
   X,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import type { UserProfile } from '../services/auth';
-
-
-
-import type { LeapClass } from '../types';
-interface ClassesPageProps {
-  user: UserProfile | null;
-  searchQuery: string;
-  onSearchChange: (query: string) => void;
-  sortBy: "title-asc" | "title-desc" | "slots-desc" | "slots-asc";
-  onSortChange: (
-    sort: "title-asc" | "title-desc" | "slots-desc" | "slots-asc",
-  ) => void;
-  filteredAndSortedClasses: LeapClass[];
-  uniqueDays: string[];
-  selectedDay: string | null;
-  onDaySelect: (day: string | null) => void;
+import { PageWrapper, PageHero } from '../components/PageCommon';
+import { SortSelect } from '../components/shared/SortSelect';
+import type { LeapClass, PagePropsBase } from '../types';
+interface ClassesPageProps extends PagePropsBase {
   currentPage: number;
   onPageChange: (page: number) => void;
   viewingClass: LeapClass | null;
@@ -34,94 +21,6 @@ interface ClassesPageProps {
   onSignIn: () => void;
   renderClassCard: (item: LeapClass, index: number) => ReactNode;
 }
-
-interface PageWrapperProps {
-  children: ReactNode;
-}
-
-const PageWrapper = ({ children }: PageWrapperProps) => (
-  <m.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-    style={{
-      flexGrow: 1,
-      background: "linear-gradient(180deg, #fffdf6 0%, #fff9eb 100%)",
-      width: "100%",
-      maxWidth: "100vw",
-      overflowX: "hidden",
-      boxSizing: "border-box",
-    }}
-  >
-    {children}
-  </m.div>
-);
-
-const PageHero = ({
-  title,
-  subtitle,
-  accent,
-}: {
-  title: string;
-  subtitle: string;
-  accent: string;
-}) => (
-  <div
-    className="page-hero"
-    style={{
-      paddingTop: "clamp(6rem, 12vw, 10rem)",
-      paddingBottom: "clamp(2rem, 4vw, 4rem)",
-      textAlign: "center",
-      position: "relative",
-      overflow: "hidden",
-    }}
-  >
-    <div className="page-hero-glow" />
-    <m.p
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 }}
-      style={{
-        fontFamily: "'DM Sans',sans-serif",
-        fontSize: "0.7rem",
-        fontWeight: 700,
-        letterSpacing: "0.3em",
-        textTransform: "uppercase",
-        color: "#de9a49",
-        marginBottom: "1rem",
-      }}
-    >
-      {accent}
-    </m.p>
-    <m.h1
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.18 }}
-      className="page-hero-title"
-    >
-      {title}
-    </m.h1>
-    <m.p
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.26 }}
-      className="page-hero-subtitle"
-    >
-      {subtitle}
-    </m.p>
-    <m.div
-      initial={{ scaleX: 0 }}
-      animate={{ scaleX: 1 }}
-      transition={{ delay: 0.4, duration: 0.6 }}
-      style={{
-        width: 60,
-        height: 2,
-        background: "linear-gradient(90deg,transparent,#de9a49,transparent)",
-        margin: "2rem auto 0",
-      }}
-    />
-  </div>
-);
 
 export default function Classes({
   user,
@@ -150,19 +49,21 @@ export default function Classes({
   const paginatedClasses = dateFilteredClasses.slice(startIdx, endIdx);
 
   return (
-    <PageWrapper>
+    <PageWrapper
+      style={{
+        background: "linear-gradient(180deg, #fffdf6 0%, #fff9eb 100%)",
+        width: "100%",
+        maxWidth: "100vw",
+        overflowX: "hidden",
+        boxSizing: "border-box",
+      }}
+    >
       {/* ── HERO ── */}
-      <div
-        style={{
-          background: "linear-gradient(180deg, #fffdf6 0%, #fff9eb 100%)",
-        }}
-      >
-        <PageHero
-          title="All Classes"
-          subtitle="Choose from 200+ workshops, talks, and experiences"
-          accent="LEAP 2026 · Class Catalog"
-        />
-      </div>
+      <PageHero
+        title="All Classes"
+        subtitle="Choose from 200+ workshops, talks, and experiences"
+        accent="LEAP 2026 · Class Catalog"
+      />
 
       {/* ── MAIN CONTENT ── */}
       <main
@@ -357,30 +258,16 @@ export default function Classes({
                           onChange={(e) => onSearchChange(e.target.value)}
                         />
                       </div>
-                      <select
+                      <SortSelect
                         value={sortBy}
-                        onChange={(e) =>
-                          onSortChange(
-                            e.target.value as
-                            | "title-asc"
-                            | "title-desc"
-                            | "slots-desc"
-                            | "slots-asc",
-                          )
-                        }
-                        aria-label="Sort classes"
+                        onChange={(v) => onSortChange(v as "title-asc" | "title-desc" | "slots-desc" | "slots-asc")}
                         className="leap-select classes-sort-select"
                         style={{
                           padding: "0.875rem 1.25rem",
                           flexShrink: 0,
                           boxSizing: "border-box",
                         }}
-                      >
-                        <option value="title-asc">Title (A–Z)</option>
-                        <option value="title-desc">Title (Z–A)</option>
-                        <option value="slots-desc">Most Slots</option>
-                        <option value="slots-asc">Fewest Slots</option>
-                      </select>
+                      />
                     </div>
                   </div>
 

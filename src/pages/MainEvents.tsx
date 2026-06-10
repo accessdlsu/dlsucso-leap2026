@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import { m } from 'framer-motion';
 import { Calendar, Clock, MapPin, Users, ExternalLink } from 'lucide-react';
 import { PageWrapper, PageHero } from '../components/PageCommon';
@@ -52,11 +52,10 @@ function mapEvent(ev: LeapEvent, i: number): MainEvent {
 
 export default function MainEvents() {
   const { data: rawEvents, loading } = useEvents();
-  const [events, setEvents] = useState<MainEvent[]>([]);
 
-  useEffect(() => {
+  const events = useMemo(() => {
     const spotlightEvents = rawEvents.filter(e => e.isSpotlight || e.status === 'published');
-    setEvents(spotlightEvents.map((ev, i) => mapEvent(ev, i)));
+    return spotlightEvents.map((ev, i) => mapEvent(ev, i));
   }, [rawEvents]);
 
   return (

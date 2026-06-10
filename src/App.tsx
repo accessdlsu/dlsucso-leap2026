@@ -4,7 +4,7 @@
    */
 import { signIn as authSignIn, signOut as authSignOut, restoreSession, getToken } from './services/auth';
 import type { UserProfile } from './services/auth';
-import { useState, useEffect, useRef, useMemo, Suspense, lazy, type CSSProperties, type ErrorInfo, type ReactNode, Component } from 'react';
+import { useState, useEffect, useRef, useMemo, Suspense, lazy, type ErrorInfo, type ReactNode, Component } from 'react';
 import { m, AnimatePresence, LazyMotion, domAnimation } from 'framer-motion';
 import {
   Calendar, MapPin, ChevronRight, ChevronLeft,
@@ -15,6 +15,12 @@ import {
 import { leapifyApi, onTurnstileError, signalTurnstileContainer } from './services/leapify';
 import { useOptimizedScrollProgress, rafThrottle, useClasses, useConfig, useThemes, useEvents } from './hooks';
 import { THEME_ILLUSTRATIONS } from './components/shared/theme-illustrations';
+import { AuthErrorToast } from './components/shared/AuthErrorToast';
+import { scheduleInit } from './utils/helpers';
+import { MabuhayGreeting } from './components/MabuhayGreeting';
+import { AnimatedTagline } from './components/AnimatedTagline';
+import { Fireflies } from './components/shared/Fireflies';
+import { TheAwakening } from './components/shared/TheAwakening';
 import type { LeapClass } from './types';
 
 
@@ -82,40 +88,6 @@ const ScrollProgress = () => {
 
 
 
-/* ══════════════════════════════════════════════════════
-  FIREFLIES
-══════════════════════════════════════════════════════ */
-const FLIES = Array.from({ length: 24 }, (_, i) => ({
-  id: i,
-  x: (i * 17.3 + (i % 3) * 29) % 94 + 3,
-  y: (i * 11.7 + (i % 5) * 13) % 55 + 5,
-  size: 2 + (i % 3),
-  delay: (i * 0.61) % 7,
-  dur: 3.5 + (i % 5) * 0.6,
-  driftX: ((i % 7) - 3) * 28,
-  driftY: ((i % 5) - 2) * 20,
-}));
-
-const Fireflies = () => (
-  <div style={{ position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none', overflow: 'hidden' }}>
-    {FLIES.map(f => (
-      <div
-        key={f.id}
-        className="firefly"
-        style={{
-          left: `${f.x}%`,
-          top: `${f.y}%`,
-          width: f.size,
-          height: f.size,
-          animationDuration: `${f.dur}s, ${f.dur * 0.6}s`,
-          animationDelay: `${f.delay}s, ${f.delay}s`,
-          transform: `translate(0, 0)`,
-          boxShadow: `0 0 ${f.size * 3}px ${f.size * 2}px rgba(250,225,133,0.7)`,
-        } as CSSProperties}
-      />
-    ))}
-  </div>
-);
 // Lazy Rendering Wrapper Component
 const LazySection = ({ children, minHeight = 600 }: { children: ReactNode; minHeight?: number }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -139,658 +111,8 @@ const LazySection = ({ children, minHeight = 600 }: { children: ReactNode; minHe
 };
 
 /* ══════════════════════════════════════════════════════
-  THE AWAKENING — cinematic dawn transition scene
-══════════════════════════════════════════════════════ */
-const TheAwakening = () => {
-  const [progress, setProgress] = useState(0);
-  const sectionRef = useRef<HTMLElement | null>(null);
-
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const element = sectionRef.current;
-    if (!element) return;
-
-    const observer = new IntersectionObserver(([entry]) => {
-      setIsVisible(entry.isIntersecting);
-    }, { threshold: 0.05 });
-
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!isVisible) return;
-
-    const handleScroll = rafThrottle(() => {
-      if (!sectionRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const p = Math.max(0, Math.min(1, 1 - (rect.top + rect.height / 2) / (vh + rect.height / 2)));
-      setProgress(p);
-    });
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isVisible]);
-
-  return (
-    <section
-      ref={sectionRef}
-      style={{
-        position: 'relative',
-        width: '100%',
-        height: 'clamp(560px, 78vh, 760px)',
-        overflow: 'hidden',
-        background: `
-            linear-gradient(180deg,
-              #0d1f1c 0%,
-              #122830 12%,
-              #1a3a42 24%,
-              #2a5058 36%,
-              #3d6e78 48%,
-              #5a8a88 58%,
-              #7aa090 68%,
-              #9ab888 76%,
-              #c8b878 84%,
-              #d4a858 92%,
-              #c89848 100%
-            )
-          `,
-      }}
-    >
-      {/* === Stars (fade out as user scrolls down) === */}
-      <div style={{ position: 'absolute', inset: 0, opacity: 1 - progress * 1.5 }}>
-        {Array.from({ length: 28 }).map((_, i) => {
-          const x = (i * 37.3 + (i % 5) * 11) % 98 + 1;
-          const y = (i * 9.7) % 24 + 2;
-          return (
-            <span
-              key={i}
-              style={{
-                position: 'absolute',
-                left: `${x}%`,
-                top: `${y}%`,
-                width: 2 + (i % 3),
-                height: 2 + (i % 3),
-                borderRadius: '50%',
-                background: '#fae185',
-                opacity: 0.2 + (i % 4) * 0.15,
-                boxShadow: '0 0 6px rgba(250,225,133,0.6)',
-                animation: `starTwinkle ${2 + (i % 4) * 0.5}s ease-in-out infinite alternate`,
-                animationDelay: `${(i * 0.2) % 3}s`,
-              }}
-            />
-          );
-        })}
-      </div>
-
-      {/* === The Rising Sun === */}
-      <div
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '38%',
-          transform: `translate(-50%, -50%) translateY(${(1 - progress) * 60}px)`,
-          width: 280,
-          height: 280,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(255,225,140,0.95) 0%, rgba(250,190,100,0.5) 35%, rgba(222,154,73,0.2) 60%, transparent 80%)',
-          filter: 'blur(2px)',
-          animation: 'sunGlow 6s ease-in-out infinite',
-          pointerEvents: 'none',
-          zIndex: 1,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '38%',
-          transform: `translate(-50%, -50%) translateY(${(1 - progress) * 60}px)`,
-          width: 110,
-          height: 110,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, #fff4c4 0%, #f7d580 40%, #de9a49 90%)',
-          boxShadow: '0 0 100px 30px rgba(255,215,130,0.55)',
-          pointerEvents: 'none',
-          zIndex: 2,
-        }}
-      />
-
-      {/* === Drifting Clouds === */}
-      <svg
-        viewBox="0 0 1440 200"
-        preserveAspectRatio="none"
-        style={{ position: 'absolute', top: '18%', left: 0, width: '100%', height: '22%', zIndex: 3, pointerEvents: 'none' }}
-      >
-        <defs>
-          <radialGradient id="cloudG" cx="50%" cy="50%">
-            <stop offset="0%" stopColor="rgba(255,240,210,0.85)" />
-            <stop offset="100%" stopColor="rgba(255,240,210,0)" />
-          </radialGradient>
-        </defs>
-        <g className="cloud-drift-slow">
-          <ellipse cx="220" cy="80" rx="180" ry="32" fill="url(#cloudG)" opacity="0.7" />
-          <ellipse cx="280" cy="60" rx="120" ry="22" fill="url(#cloudG)" opacity="0.5" />
-        </g>
-        <g className="cloud-drift-med">
-          <ellipse cx="780" cy="120" rx="210" ry="36" fill="url(#cloudG)" opacity="0.55" />
-          <ellipse cx="850" cy="100" rx="140" ry="24" fill="url(#cloudG)" opacity="0.4" />
-        </g>
-        <g className="cloud-drift-fast">
-          <ellipse cx="1280" cy="90" rx="160" ry="28" fill="url(#cloudG)" opacity="0.6" />
-        </g>
-      </svg>
-
-      {/* === V-Formation of Migrating Birds === */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '28%',
-          left: 0,
-          width: '100%',
-          height: 80,
-          zIndex: 4,
-          pointerEvents: 'none',
-        }}
-      >
-        <div className="bird-formation">
-          <svg viewBox="0 0 120 60" width="120" height="60">
-            {[
-              [60, 30], [45, 20], [75, 20], [30, 10], [90, 10], [15, 0], [105, 0],
-            ].map(([cx, cy], i) => (
-              <path
-                key={i}
-                d={`M${cx - 7} ${cy + 2} Q${cx - 3.5} ${cy - 4} ${cx} ${cy} Q${cx + 3.5} ${cy - 4} ${cx + 7} ${cy + 2}`}
-                fill="none"
-                stroke="rgba(60,40,20,0.72)"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                className={`bird-flap bird-flap-d${i % 3}`}
-              />
-            ))}
-          </svg>
-        </div>
-      </div>
-
-      {/* === Distant Mountain Silhouettes === */}
-      <svg
-        viewBox="0 0 1440 300"
-        preserveAspectRatio="none"
-        style={{ position: 'absolute', bottom: '32%', left: 0, width: '100%', height: '28%', zIndex: 5, pointerEvents: 'none' }}
-      >
-        <path
-          d="M0 180 L80 140 L160 165 L240 120 L340 150 L440 100 L560 130 L680 95 L820 125 L960 105 L1080 135 L1200 115 L1320 140 L1440 120 L1440 300 L0 300 Z"
-          fill="rgba(50,75,90,0.55)"
-        />
-        <path
-          d="M0 220 L120 180 L240 200 L360 160 L500 195 L640 170 L780 195 L920 175 L1060 200 L1200 180 L1320 205 L1440 195 L1440 300 L0 300 Z"
-          fill="rgba(40,65,75,0.75)"
-        />
-        <path
-          d="M0 250 L140 220 L260 235 L400 210 L520 230 L660 215 L820 235 L960 220 L1100 240 L1240 225 L1360 245 L1440 235 L1440 300 L0 300 Z"
-          fill="rgba(28,48,52,0.92)"
-        />
-        {[[340, 236], [680, 226], [980, 232], [1180, 240]].map(([x, y], i) => (
-          <g key={i} transform={`translate(${x}, ${y})`}>
-            <path d={`M0 0 L-6 -8 L6 -8 Z`} fill="#1a2a24" />
-            <rect x="-5" y="-8" width="10" height="8" fill="#1a2a24" />
-            <rect x="-2" y="-6" width="3" height="3" fill="#fae185" opacity="0.7" className={`window-flicker window-flicker-d${i % 2}`} />
-          </g>
-        ))}
-      </svg>
-
-      {/* === Rising Paper Lanterns === */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 6,
-          pointerEvents: 'none',
-        }}
-      >
-        {[
-          { x: 18, delay: 0, size: 22, dur: 14 },
-          { x: 34, delay: 4, size: 16, dur: 16 },
-          { x: 68, delay: 2, size: 20, dur: 15 },
-          { x: 82, delay: 6, size: 14, dur: 17 },
-          { x: 52, delay: 8, size: 18, dur: 15.5 },
-        ].map((p, i) => (
-          <div
-            key={i}
-            className="parol-rise"
-            style={{
-              position: 'absolute',
-              left: `${p.x}%`,
-              bottom: '-40px',
-              width: p.size,
-              height: p.size * 1.2,
-              animationDelay: `${p.delay}s`,
-              animationDuration: `${p.dur}s`,
-            }}
-          >
-            <div
-              style={{
-                width: '100%',
-                height: '80%',
-                borderRadius: '40%',
-                background: 'radial-gradient(circle at 50% 40%, #ffd980 0%, #de9a49 65%, #a05820 100%)',
-                boxShadow: '0 0 18px 4px rgba(255,200,100,0.65), 0 0 38px 10px rgba(222,154,73,0.4)',
-                position: 'relative',
-              }}
-            />
-            <div
-              style={{
-                width: 2,
-                height: '22%',
-                background: 'rgba(100,50,20,0.6)',
-                margin: '0 auto',
-              }}
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* === Valley Mist === */}
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '24%',
-          left: 0,
-          right: 0,
-          height: '14%',
-          background: 'linear-gradient(180deg, transparent 0%, rgba(255,240,210,0.28) 50%, rgba(255,240,210,0.1) 100%)',
-          filter: 'blur(3px)',
-          zIndex: 7,
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* === River with ripple reflections === */}
-      <svg
-        viewBox="0 0 1440 180"
-        preserveAspectRatio="none"
-        style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', height: '26%', zIndex: 8, pointerEvents: 'none' }}
-      >
-        <defs>
-          <linearGradient id="riverG" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#e3c48c" />
-            <stop offset="40%" stopColor="#b59868" />
-            <stop offset="100%" stopColor="#6b5838" />
-          </linearGradient>
-          <linearGradient id="rippleG" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="rgba(255,240,210,0)" />
-            <stop offset="50%" stopColor="rgba(255,240,210,0.55)" />
-            <stop offset="100%" stopColor="rgba(255,240,210,0)" />
-          </linearGradient>
-        </defs>
-        <rect width="1440" height="180" fill="url(#riverG)" />
-        {[20, 55, 90, 130].map((y, i) => (
-          <path
-            key={i}
-            d={`M0 ${y} Q180 ${y - 3} 360 ${y} T720 ${y} T1080 ${y} T1440 ${y}`}
-            stroke="url(#rippleG)"
-            strokeWidth={1.2 + (i % 2) * 0.5}
-            fill="none"
-            className={`ripple-drift ripple-d${i}`}
-            opacity={0.6 - i * 0.1}
-          />
-        ))}
-        <ellipse cx="720" cy="50" rx="180" ry="6" fill="rgba(255,225,140,0.55)" className="sun-reflection" />
-        <ellipse cx="720" cy="70" rx="120" ry="4" fill="rgba(255,225,140,0.35)" className="sun-reflection" />
-      </svg>
-
-      {/* === EMBEDDED MABUHAY GREETING === */}
-      <MabuhayGreeting />
-
-      {/* === Genshin-style swirling bottom transition === */}
-      <svg
-        viewBox="0 0 1440 120"
-        preserveAspectRatio="none"
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          width: '100%',
-          height: 120,
-          zIndex: 9,
-          pointerEvents: 'none',
-        }}
-      >
-        <defs>
-          <linearGradient id="awakeTransG" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="rgba(200,152,72,0)" />
-            <stop offset="40%" stopColor="rgba(180,130,55,0.55)" />
-            <stop offset="100%" stopColor="#c89848" stopOpacity="1" />
-          </linearGradient>
-          <linearGradient id="swirlL" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="rgba(255,220,140,0)" />
-            <stop offset="30%" stopColor="rgba(255,220,140,0.28)" />
-            <stop offset="70%" stopColor="rgba(200,160,80,0.22)" />
-            <stop offset="100%" stopColor="rgba(255,220,140,0)" />
-          </linearGradient>
-        </defs>
-        <rect width="1440" height="120" fill="url(#awakeTransG)" />
-        <path d="M0 60 C200 40 400 80 600 55 C800 30 1000 70 1200 50 C1320 38 1400 55 1440 50"
-          stroke="url(#swirlL)" strokeWidth="2" fill="none" opacity="0.6" />
-        <path d="M0 75 C180 55 360 90 560 68 C760 45 960 82 1160 62 C1300 50 1400 68 1440 65"
-          stroke="url(#swirlL)" strokeWidth="1.5" fill="none" opacity="0.4" />
-        <path d="M0 90 C220 72 440 100 660 82 C880 62 1080 94 1280 78 C1360 72 1420 82 1440 80"
-          stroke="url(#swirlL)" strokeWidth="1" fill="none" opacity="0.3" />
-        {[120, 300, 520, 720, 940, 1160, 1340].map((x, i) => (
-          <g key={i} transform={`translate(${x}, ${58 + (i % 3) * 10})`} opacity="0.5">
-            <circle r="3" fill="rgba(255,215,120,0.7)" />
-            <circle r="1.5" fill="rgba(255,240,180,0.9)" />
-          </g>
-        ))}
-      </svg>
-
-      {/* Local animation styles */}
-      <style>{`
-          @keyframes sunGlow {
-            0%, 100% { opacity: 0.85; transform: translate(-50%, -50%) scale(1); }
-            50%      { opacity: 1;    transform: translate(-50%, -50%) scale(1.08); }
-          }
-          @keyframes cloudDriftSlow {
-            from { transform: translateX(-10%); }
-            to   { transform: translateX(10%); }
-          }
-          @keyframes cloudDriftMed {
-            from { transform: translateX(6%); }
-            to   { transform: translateX(-6%); }
-          }
-          @keyframes cloudDriftFast {
-            from { transform: translateX(-4%); }
-            to   { transform: translateX(4%); }
-          }
-          .cloud-drift-slow { animation: cloudDriftSlow 42s ease-in-out infinite alternate; }
-          .cloud-drift-med  { animation: cloudDriftMed 32s ease-in-out infinite alternate; }
-          .cloud-drift-fast { animation: cloudDriftFast 22s ease-in-out infinite alternate; }
-
-          @keyframes birdFormationFly {
-            0%   { transform: translate(-12%, 8px) scale(0.9); opacity: 0; }
-            10%  { opacity: 1; }
-            50%  { transform: translate(50%, -14px) scale(1); }
-            90%  { opacity: 1; }
-            100% { transform: translate(112%, 6px) scale(0.9); opacity: 0; }
-          }
-          .bird-formation {
-            animation: birdFormationFly 24s linear infinite;
-          }
-
-          @keyframes birdFlap {
-            0%, 100% { transform: translateY(0); }
-            50%      { transform: translateY(-2px); }
-          }
-          .bird-flap      { animation: birdFlap 0.6s ease-in-out infinite; transform-origin: center; }
-          .bird-flap-d0   { animation-delay: 0s; }
-          .bird-flap-d1   { animation-delay: 0.15s; }
-          .bird-flap-d2   { animation-delay: 0.3s; }
-
-          @keyframes parolRise {
-            0%   { transform: translateY(0) translateX(0); opacity: 0; }
-            15%  { opacity: 0.9; }
-            50%  { transform: translateY(-50vh) translateX(-6px); opacity: 1; }
-            85%  { opacity: 0.7; }
-            100% { transform: translateY(-100vh) translateX(10px); opacity: 0; }
-          }
-          .parol-rise { animation: parolRise linear infinite; }
-
-          @keyframes rippleDrift {
-            from { transform: translateX(0); }
-            to   { transform: translateX(-40px); }
-          }
-          .ripple-drift { animation: rippleDrift 6s linear infinite; }
-          .ripple-d0 { animation-duration: 5s; }
-          .ripple-d1 { animation-duration: 7s; animation-direction: reverse; }
-          .ripple-d2 { animation-duration: 6.2s; }
-          .ripple-d3 { animation-duration: 8s; animation-direction: reverse; }
-
-          @keyframes sunReflect {
-            0%, 100% { opacity: 0.55; transform: scaleX(1); }
-            50%      { opacity: 0.8;  transform: scaleX(1.1); }
-          }
-          .sun-reflection { animation: sunReflect 4s ease-in-out infinite; transform-origin: center; }
-        `}</style>
-    </section>
-  );
-};
-
-/* ══════════════════════════════════════════════════════
   MABUHAY GREETING — embedded in The Awakening
 ══════════════════════════════════════════════════════ */
-const MabuhayGreeting = () => {
-  const [progress, setProgress] = useState(0);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const element = containerRef.current;
-    if (!element) return;
-
-    const observer = new IntersectionObserver(([entry]) => {
-      setIsVisible(entry.isIntersecting);
-    }, { threshold: 0.05 });
-
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!isVisible) return;
-
-    const handleScroll = rafThrottle(() => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const p = Math.max(0, Math.min(1, 1 - (rect.top + rect.height * 0.6) / vh));
-      setProgress(p);
-    });
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isVisible]);
-
-  const fadeIn = Math.min(1, progress * 2);
-  const mabuhayReveal = Math.max(0, Math.min(1, (progress - 0.15) * 2.2));
-  const taglineReveal = Math.max(0, Math.min(1, (progress - 0.32) * 2.2));
-
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        position: 'absolute',
-        bottom: 'clamp(140px, 22%, 240px)',
-        left: 0,
-        right: 0,
-        zIndex: 10,
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        pointerEvents: 'none',
-        padding: '0 clamp(1rem, 4vw, 3rem)',
-      }}
-    >
-      {/* Soft dark backdrop scrim */}
-      <div style={{
-        position: 'absolute',
-        left: '50%',
-        top: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 'min(820px, 92vw)',
-        height: 'clamp(220px, 30vh, 320px)',
-        background: 'radial-gradient(ellipse at center, rgba(20,12,4,0.78) 0%, rgba(40,22,8,0.55) 35%, rgba(60,32,12,0.25) 60%, transparent 85%)',
-        filter: 'blur(8px)',
-        opacity: fadeIn,
-        pointerEvents: 'none',
-        zIndex: 1,
-        transition: 'opacity 0.4s',
-      }} />
-
-      {/* Concentric rings — Filipino sun motif */}
-      <svg viewBox="0 0 600 600" preserveAspectRatio="xMidYMid meet"
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 'min(520px, 85vw)',
-          height: 'min(520px, 85vw)',
-          opacity: fadeIn * 0.45,
-          zIndex: 2,
-          pointerEvents: 'none',
-        }}
-      >
-        {[120, 175, 230].map((r, i) => (
-          <circle key={i} cx="300" cy="300" r={r}
-            fill="none"
-            stroke="rgba(255,235,170,0.4)"
-            strokeWidth="1"
-            strokeDasharray={i % 2 === 0 ? "4 8" : "2 6"}
-            style={{
-              animation: `mabuhayRingPulse ${4 + i * 0.5}s ease-in-out infinite`,
-              animationDelay: `${i * 0.3}s`,
-              transformOrigin: 'center',
-            }}
-          />
-        ))}
-        {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
-          const rad = (angle * Math.PI) / 180;
-          return (
-            <line key={i}
-              x1={300 + Math.cos(rad) * 90}
-              y1={300 + Math.sin(rad) * 90}
-              x2={300 + Math.cos(rad) * 240}
-              y2={300 + Math.sin(rad) * 240}
-              stroke="rgba(255,235,170,0.28)"
-              strokeWidth="1.2"
-            />
-          );
-        })}
-      </svg>
-
-      {/* === Main content stack === */}
-      <div style={{
-        position: 'relative',
-        zIndex: 5,
-        textAlign: 'center',
-        maxWidth: 'min(720px, 92vw)',
-        width: '100%',
-        pointerEvents: 'auto',
-      }}>
-        {/* Top decorative ornament */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 'clamp(0.5rem, 1.5vw, 1rem)',
-          marginBottom: 'clamp(0.75rem, 1.5vw, 1.25rem)',
-          opacity: fadeIn,
-          transform: `translateY(${(1 - fadeIn) * 12}px)`,
-          transition: 'opacity 0.4s, transform 0.4s',
-        }}>
-          <span style={{
-            flex: '1 1 auto',
-            minWidth: 30,
-            maxWidth: 120,
-            height: 1,
-            background: 'linear-gradient(90deg, transparent, rgba(255,235,170,0.7))',
-          }} />
-          <svg width="20" height="20" viewBox="0 0 22 22" style={{ flexShrink: 0 }}>
-            <g transform="translate(11,11)">
-              {[0, 60, 120, 180, 240, 300].map((angle, i) => {
-                const rad = (angle * Math.PI) / 180;
-                return (
-                  <ellipse key={i}
-                    cx={Math.cos(rad) * 5}
-                    cy={Math.sin(rad) * 5}
-                    rx="2.5" ry="1"
-                    fill="rgba(255,235,170,0.95)"
-                    transform={`rotate(${angle}, ${Math.cos(rad) * 5}, ${Math.sin(rad) * 5})`}
-                  />
-                );
-              })}
-              <circle r="2.2" fill="rgba(255,245,200,1)" />
-            </g>
-          </svg>
-          <span style={{
-            flex: '1 1 auto',
-            minWidth: 30,
-            maxWidth: 120,
-            height: 1,
-            background: 'linear-gradient(90deg, rgba(255,235,170,0.7), transparent)',
-          }} />
-        </div>
-
-        {/* "Mabuhay!" */}
-        <h2 style={{
-          fontFamily: "'Tropikal', 'Playfair Display', serif",
-          fontSize: 'clamp(2.4rem, 8vw, 5.5rem)',
-          fontWeight: 700,
-          color: '#fff5c4',
-          lineHeight: 0.95,
-          margin: 0,
-          letterSpacing: '0.01em',
-          textShadow: '0 2px 0 rgba(80,40,10,0.5), 0 4px 24px rgba(0,0,0,0.85), 0 0 48px rgba(222,154,73,0.55), 0 0 80px rgba(0,0,0,0.6)',
-          opacity: mabuhayReveal,
-          transform: `translateY(${(1 - mabuhayReveal) * 28}px) scale(${0.88 + mabuhayReveal * 0.12})`,
-          transition: 'opacity 0.4s, transform 0.5s',
-          display: 'inline-block',
-        }}>
-          Mabuhay Lasallians!
-        </h2>
-
-        {/* Filipino subtitle + translation */}
-        <div style={{
-          opacity: taglineReveal,
-          transform: `translateY(${(1 - taglineReveal) * 18}px)`,
-          transition: 'opacity 0.5s, transform 0.5s',
-          marginTop: 'clamp(0.85rem, 2vw, 1.5rem)',
-        }}>
-          <p style={{
-            fontFamily: "'Tropikal', 'Playfair Display', serif",
-            fontSize: 'clamp(0.95rem, 2vw, 1.45rem)',
-            fontWeight: 500,
-            fontStyle: 'italic',
-            color: '#ffeaa3',
-            lineHeight: 1.4,
-            margin: 0,
-            letterSpacing: '0.02em',
-            textShadow: '0 2px 12px rgba(0,0,0,0.85), 0 0 24px rgba(0,0,0,0.6)',
-            padding: '0 0.5rem',
-          }}>
-            Sa bawat dasal at bigkis ng palay,<br />
-            may pag-asa, may bayanihan.
-          </p>
-          <p style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 'clamp(0.6rem, 1vw, 0.78rem)',
-            fontWeight: 600,
-            letterSpacing: 'clamp(0.16em, 0.5vw, 0.28em)',
-            textTransform: 'uppercase',
-            color: 'rgba(255,235,180,0.85)',
-            marginTop: 'clamp(0.6rem, 1.2vw, 0.95rem)',
-            padding: '0 0.5rem',
-            textShadow: '0 1px 6px rgba(0,0,0,0.75)',
-          }}>
-            In every prayer and bundle of rice — there is hope, there is community.
-          </p>
-        </div>
-      </div>
-
-      <style>{`
-          @keyframes mabuhayRingPulse {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50%      { transform: scale(1.04); opacity: 0.85; }
-          }
-        `}</style>
-    </div>
-  );
-};
 
 /* ══════════════════════════════════════════════════════
   SCROLL INVITATION — minimalist chevron
@@ -855,170 +177,6 @@ const ScrollInvitation = ({ onClick }: { onClick: () => void }) => (
 /* ══════════════════════════════════════════════════════
   ANIMATED TAGLINE
 ══════════════════════════════════════════════════════ */
-const AnimatedTagline = () => {
-  const text = 'Isang Nayon, Isang Layunin';
-  const [displayed, setDisplayed] = useState('');
-  const [done, setDone] = useState(false);
-
-  useEffect(() => {
-    let i = 0;
-    const timer = setInterval(() => {
-      i++;
-      setDisplayed(text.slice(0, i));
-      if (i >= text.length) {
-        clearInterval(timer);
-        setDone(true);
-      }
-    }, 48);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <m.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.15 }}
-      className="leap-tagline-wrap"
-      style={{
-        display: 'inline-flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 'clamp(0.45rem, 1vw, 0.6rem)',
-        width: '100%',
-        maxWidth: 'min(560px, 92vw)',
-        margin: '0 auto',
-        padding: '0 0.5rem',
-        boxSizing: 'border-box',
-        minHeight: 'clamp(140px, 18vw, 180px)',
-      }}
-    >
-      <div className="leap-tagline-ornament" style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 'clamp(0.4rem, 1.5vw, 0.65rem)',
-        width: '100%',
-        maxWidth: 320,
-        justifyContent: 'center',
-      }}>
-        <span style={{
-          flex: '1 1 auto',
-          minWidth: 24,
-          maxWidth: 100,
-          height: 1,
-          background: 'linear-gradient(90deg, transparent, rgba(222,154,73,0.55), rgba(222,154,73,0.7))',
-        }} />
-        <svg width="14" height="14" viewBox="0 0 14 14" style={{ flexShrink: 0 }}>
-          <g transform="translate(7,7)">
-            <path d="M0 -6 L1.4 -1.4 L6 0 L1.4 1.4 L0 6 L-1.4 1.4 L-6 0 L-1.4 -1.4 Z"
-              fill="rgba(250,225,133,0.85)" />
-            <circle r="1.2" fill="rgba(255,245,200,0.95)" />
-          </g>
-        </svg>
-        <span style={{
-          flex: '1 1 auto',
-          minWidth: 24,
-          maxWidth: 100,
-          height: 1,
-          background: 'linear-gradient(90deg, rgba(222,154,73,0.7), rgba(222,154,73,0.55), transparent)',
-        }} />
-      </div>
-
-      <span style={{
-        fontFamily: "'Tropikal', 'Playfair Display', serif",
-        textTransform: 'none',
-        fontSize: 'clamp(1.4rem, 5.5vw, 2.4rem)',
-        letterSpacing: '0.015em',
-        color: '#ffeaa3',
-        fontWeight: 700,
-        fontStyle: 'italic',
-        lineHeight: 1.15,
-        textAlign: 'center',
-        background: 'linear-gradient(180deg, #fff5c4 0%, #fae185 35%, #de9a49 75%, #b07820 100%)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text',
-        textShadow: '0 2px 0 rgba(80,40,10,0.4), 0 4px 24px rgba(0,0,0,0.55), 0 0 48px rgba(222,154,73,0.4), 0 0 96px rgba(250,225,133,0.2)',
-        filter: 'drop-shadow(0 3px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 24px rgba(222,154,73,0.35))',
-        padding: '0 0.25rem',
-        minHeight: '1.15em',
-        width: '100%',
-        wordBreak: 'normal',
-        overflowWrap: 'break-word',
-        position: 'relative',
-        display: 'inline-block',
-      }}>
-        {displayed}
-        {!done && (
-          <span style={{
-            display: 'inline-block',
-            width: 3,
-            height: '0.9em',
-            background: 'linear-gradient(180deg, #fff5c4, #de9a49)',
-            marginLeft: 4,
-            verticalAlign: 'middle',
-            animation: 'cursorBlink 0.7s step-end infinite',
-            boxShadow: '0 0 12px rgba(250,225,133,0.8), 0 0 24px rgba(222,154,73,0.5)',
-            borderRadius: 1,
-          }} />
-        )}
-      </span>
-      <div style={{ minHeight: 'clamp(14px, 3vw, 20px)', display: 'flex', alignItems: 'center' }}></div>
-      {done && (
-        <m.span
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: 'clamp(0.55rem, 2.2vw, 0.72rem)',
-            fontWeight: 600,
-            letterSpacing: 'clamp(0.18em, 0.6vw, 0.32em)',
-            textTransform: 'uppercase',
-            color: 'rgba(232,200,122,0.72)',
-            textAlign: 'center',
-            padding: '0 0.5rem',
-          }}>
-          One Village · One Purpose
-        </m.span>
-      )}
-
-      <div className="leap-tagline-ornament" style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 'clamp(0.4rem, 1.5vw, 0.65rem)',
-        width: '100%',
-        maxWidth: 380,
-        justifyContent: 'center',
-      }}>
-        <span style={{
-          flex: '1 1 auto',
-          minWidth: 32,
-          maxWidth: 140,
-          height: 1,
-          background: 'linear-gradient(90deg, transparent, rgba(222,154,73,0.4))',
-        }} />
-        <svg width="8" height="8" viewBox="0 0 8 8" style={{ flexShrink: 0 }}>
-          <circle cx="4" cy="4" r="1.5" fill="rgba(222,154,73,0.7)" />
-        </svg>
-        <span style={{
-          flex: '1 1 auto',
-          minWidth: 32,
-          maxWidth: 140,
-          height: 1,
-          background: 'linear-gradient(90deg, rgba(222,154,73,0.4), transparent)',
-        }} />
-      </div>
-
-      <style>{`
-          @keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
-          @media (max-width: 480px) {
-            .leap-tagline-wrap { gap: 0.35rem !important; }
-            .leap-tagline-ornament { max-width: 240px !important; }
-          }
-        `}</style>
-    </m.div>
-  );
-};
 
 /* ══════════════════════════════════════════════════════
   SUBTHEMES (fallback descriptions for themes without API data)
@@ -1190,6 +348,39 @@ const GlowRing = () => (
   }} />
 );
 
+const PALAY_DATA = [
+  { x: 20, lean: -8, h: 220 }, { x: 45, lean: 5, h: 260 }, { x: 70, lean: -4, h: 240 },
+  { x: 95, lean: 8, h: 280 }, { x: 118, lean: -6, h: 250 }, { x: 142, lean: 4, h: 230 },
+];
+
+const PalayStalks = ({ side }: { side: 'left' | 'right' }) => (
+  <svg viewBox="0 0 180 320" width="180" height="320"
+    style={{
+      position: 'absolute',
+      [side]: 0,
+      bottom: 0,
+      opacity: 0.22,
+      pointerEvents: 'none',
+      zIndex: 1,
+      ...(side === 'right' ? { transform: 'scaleX(-1)' } : {}),
+    }}
+    preserveAspectRatio="xMinYMax meet">
+    {PALAY_DATA.map((s, i) => (
+      <g key={i}>
+        <path d={`M${s.x} 320 Q${s.x + s.lean * 0.5} ${320 - s.h * 0.5} ${s.x + s.lean} ${320 - s.h}`}
+          stroke="#4a8a28" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+        {[0, 0.22, 0.44, 0.66, 0.82, 1].map((t, gi) => {
+          const py = 320 - s.h * t;
+          const px = s.x + s.lean * t;
+          const side = gi % 2 === 0 ? -1 : 1;
+          return <ellipse key={gi} cx={px + side * 5} cy={py - 2} rx="4" ry="7" fill="#de9a49" opacity="0.8"
+            transform={`rotate(${side * -22 + s.lean * 0.5}, ${px + side * 5}, ${py - 2})`} />;
+        })}
+      </g>
+    ))}
+  </svg>
+);
+
 const NayonBanner = () => {
   const { data: events } = useEvents();
   const { data: themes } = useThemes();
@@ -1211,49 +402,9 @@ const NayonBanner = () => {
         <div style={{ position: 'absolute', right: '12%', top: '35%', width: 200, height: 200, background: 'radial-gradient(circle, rgba(222,154,73,0.1) 0%, transparent 65%)', filter: 'blur(18px)' }} />
       </div>
 
-      {/* Palay stalks — left */}
-      <svg viewBox="0 0 180 320" width="180" height="320"
-        style={{ position: 'absolute', left: 0, bottom: 0, opacity: 0.22, pointerEvents: 'none', zIndex: 1 }}
-        preserveAspectRatio="xMinYMax meet">
-        {[
-          { x: 20, lean: -8, h: 220 }, { x: 45, lean: 5, h: 260 }, { x: 70, lean: -4, h: 240 },
-          { x: 95, lean: 8, h: 280 }, { x: 118, lean: -6, h: 250 }, { x: 142, lean: 4, h: 230 },
-        ].map((s, i) => (
-          <g key={i}>
-            <path d={`M${s.x} 320 Q${s.x + s.lean * 0.5} ${320 - s.h * 0.5} ${s.x + s.lean} ${320 - s.h}`}
-              stroke="#4a8a28" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-            {[0, 0.22, 0.44, 0.66, 0.82, 1].map((t, gi) => {
-              const py = 320 - s.h * t;
-              const px = s.x + s.lean * t;
-              const side = gi % 2 === 0 ? -1 : 1;
-              return <ellipse key={gi} cx={px + side * 5} cy={py - 2} rx="4" ry="7" fill="#de9a49" opacity="0.8"
-                transform={`rotate(${side * -22 + s.lean * 0.5}, ${px + side * 5}, ${py - 2})`} />;
-            })}
-          </g>
-        ))}
-      </svg>
-
-      {/* Palay stalks — right (mirrored) */}
-      <svg viewBox="0 0 180 320" width="180" height="320"
-        style={{ position: 'absolute', right: 0, bottom: 0, opacity: 0.22, pointerEvents: 'none', zIndex: 1, transform: 'scaleX(-1)' }}
-        preserveAspectRatio="xMinYMax meet">
-        {[
-          { x: 20, lean: -8, h: 220 }, { x: 45, lean: 5, h: 260 }, { x: 70, lean: -4, h: 240 },
-          { x: 95, lean: 8, h: 280 }, { x: 118, lean: -6, h: 250 }, { x: 142, lean: 4, h: 230 },
-        ].map((s, i) => (
-          <g key={i}>
-            <path d={`M${s.x} 320 Q${s.x + s.lean * 0.5} ${320 - s.h * 0.5} ${s.x + s.lean} ${320 - s.h}`}
-              stroke="#4a8a28" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-            {[0, 0.22, 0.44, 0.66, 0.82, 1].map((t, gi) => {
-              const py = 320 - s.h * t;
-              const px = s.x + s.lean * t;
-              const side = gi % 2 === 0 ? -1 : 1;
-              return <ellipse key={gi} cx={px + side * 5} cy={py - 2} rx="4" ry="7" fill="#de9a49" opacity="0.8"
-                transform={`rotate(${side * -22 + s.lean * 0.5}, ${px + side * 5}, ${py - 2})`} />;
-            })}
-          </g>
-        ))}
-      </svg>
+      {/* Palay stalks */}
+      <PalayStalks side="left" />
+      <PalayStalks side="right" />
 
       {/* Top gold divider line */}
       <svg viewBox="0 0 1440 32" preserveAspectRatio="none"
@@ -1353,8 +504,42 @@ const NayonBanner = () => {
 /* ══════════════════════════════════════════════════════
   MAIN EVENTS — carousel style
 ══════════════════════════════════════════════════════ */
-const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: any) => void }) => {
-  const [events, setEvents] = useState<any[]>([]);
+const WAVE_STARS = [120, 280, 450, 620, 790, 960, 1130, 1300];
+const STALK_X = [40, 110, 190, 270, 340, 420, 510, 590, 670, 760, 840, 920, 1010, 1090, 1180, 1260, 1340, 1410];
+
+const GrainStalk = ({ x, i, stemId }: { x: number; i: number; stemId: string }) => {
+  const h = 28 + (i % 4) * 6;
+  const lean = ((i % 3) - 1) * 4;
+  const grainY = [0, 5, 10, 15, 20];
+  return (
+    <g key={i} transform={`translate(${x}, ${55 - h})`} opacity="0.55">
+      <path d={`M0,${h} Q${lean},${h / 2} ${lean * 0.6},0`} stroke={`url(#${stemId})`} strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      {grainY.map((gy, gi) => (
+        <ellipse key={gi} cx={lean * (gy / h) + (gi % 2 === 0 ? -3 : 3)} cy={gy} rx="2.8" ry="5"
+          fill="#de9a49" opacity="0.7" transform={`rotate(${-18 + (gi % 2) * 36}, ${lean * (gy / h) + (gi % 2 === 0 ? -3 : 3)}, ${gy})`} />
+      ))}
+    </g>
+  );
+};
+
+interface DisplayEvent {
+  id: string;
+  label: string;
+  title?: string;
+  image: string;
+  org: string;
+  date: string;
+  time: string;
+  venue: string;
+  slots: number;
+  subtheme: string;
+  orgLogo: string | null;
+  googleFormUrl: string;
+  description: string;
+}
+
+const MainEventsSection = ({ onEventSelect }: { onEventSelect?: (item: DisplayEvent) => void }) => {
+  const [events, setEvents] = useState<DisplayEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -1624,6 +809,7 @@ const LeapApp = () => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const { data: classes, loading } = useClasses();
   const { data: _siteConfig } = useConfig(); // TODO: wire maintenance/coming-soon gating
+  void _siteConfig;
   const [currentView, setCurrentView] = useState<'home' | 'about' | 'major-events' | 'classes' | 'faq' | 'contact' | 'saved-classes'>('home');
   const [scrolled, setScrolled] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -1640,9 +826,9 @@ const LeapApp = () => {
 
 
   useEffect(() => {
-    const ric = (window as any).requestIdleCallback;
-    const cic = (window as any).cancelIdleCallback;
-    let idleHandle: any;
+    const ric = (window as Window & { requestIdleCallback?: (cb: IdleRequestCallback, opts?: { timeout: number }) => number }).requestIdleCallback;
+    const cic = (window as Window & { cancelIdleCallback?: (handle: number) => void }).cancelIdleCallback;
+    let idleHandle: number | undefined;
     let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
 
     if (ric) {
@@ -1686,7 +872,7 @@ const LeapApp = () => {
   };
 
   const filteredAndSortedClasses: LeapClass[] = useMemo(() => {
-    let result = classes.filter((c) => (
+    const result = classes.filter((c) => (
       c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.org.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.subtheme.toLowerCase().includes(searchQuery.toLowerCase())
@@ -1735,11 +921,7 @@ const LeapApp = () => {
       }
     };
 
-    if ('requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(init, { timeout: 1500 });
-    } else {
-      setTimeout(init, 200);
-    }
+    scheduleInit(init);
 
     return () => { cancelled = true; };
   }, []);
@@ -1780,6 +962,9 @@ const LeapApp = () => {
     setIsMenuOpen(false);
   };
 
+  const onSearch = (q: string) => { setSearchQuery(q); setCurrentPage(1); };
+  const onDay = (d: string | null) => { setSelectedDay(d); setCurrentPage(1); };
+
   const toggleSaveClass = async (classId: string) => {
     if (!user) {
       console.warn('User not logged in');
@@ -1814,6 +999,7 @@ const LeapApp = () => {
     />
   );
 
+   
   const Contact = () => (
     <div style={{ padding: '9rem 1.5rem 4rem', background: 'linear-gradient(180deg, #fdf7e8 0%, #f0e5c8 100%)', minHeight: '70vh' }}>
       <div style={{ maxWidth: 880, margin: '0 auto' }}>
@@ -2306,7 +1492,9 @@ const LeapApp = () => {
       </div>
 
       <LazySection minHeight={700}>
-        <TheAwakening />
+        <TheAwakening>
+          <MabuhayGreeting />
+        </TheAwakening>
       </LazySection>
       <LazySection minHeight={500}>
         {/* Main Events Section */}
@@ -2433,7 +1621,7 @@ const LeapApp = () => {
           `}</style>
 
           <div style={{ position: 'relative', zIndex: 2 }}>
-            <MainEventsSection onEventSelect={(item) => setViewingClass(item)} />
+            <MainEventsSection onEventSelect={(item) => setViewingClass(item as unknown as LeapClass)} />
           </div>
         </div>
       </LazySection>
@@ -2482,21 +1670,10 @@ const LeapApp = () => {
                 const yWave = 8 + Math.sin(i * 1.2) * 5;
                 return <circle key={`gold-${i}`} cx={x} cy={yWave} r="1.2" fill="#fae185" opacity="0.85" filter="url(#topGoldGlow)" />;
               })}
-              {[40, 110, 190, 270, 340, 420, 510, 590, 670, 760, 840, 920, 1010, 1090, 1180, 1260, 1340, 1410].map((x, i) => {
-                const h = 28 + (i % 4) * 6;
-                const lean = ((i % 3) - 1) * 4;
-                const grainY = [0, 5, 10, 15, 20];
-                return (
-                  <g key={i} transform={`translate(${x}, ${55 - h})`} opacity="0.55">
-                    <path d={`M0,${h} Q${lean},${h / 2} ${lean * 0.6},0`} stroke="url(#stemGradTop)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                    {grainY.map((gy, gi) => (
-                      <ellipse key={gi} cx={lean * (gy / h) + (gi % 2 === 0 ? -3 : 3)} cy={gy} rx="2.8" ry="5"
-                        fill="#de9a49" opacity="0.7" transform={`rotate(${-18 + (gi % 2) * 36}, ${lean * (gy / h) + (gi % 2 === 0 ? -3 : 3)}, ${gy})`} />
-                    ))}
-                  </g>
-                );
-              })}
-              {[120, 280, 450, 620, 790, 960, 1130, 1300].map((x, i) => (
+              {STALK_X.map((x, i) => (
+                <GrainStalk key={i} x={x} i={i} stemId="stemGradTop" />
+              ))}
+              {WAVE_STARS.map((x, i) => (
                 <circle key={i} cx={x} cy={i % 2 === 0 ? 44 : 50} r="1.5" fill="#fae185" opacity="0.45" />
               ))}
             </svg>
@@ -2520,24 +1697,13 @@ const LeapApp = () => {
                 </linearGradient>
               </defs>
               <path d="M0,20 C180,50 360,10 540,30 C720,50 900,15 1080,35 C1260,55 1380,25 1440,38 L1440,90 L0,90 Z" fill="#132015" opacity="0.7" />
-              {[40, 110, 190, 270, 340, 420, 510, 590, 670, 760, 840, 920, 1010, 1090, 1180, 1260, 1340, 1410].map((x, i) => {
-                const h = 28 + (i % 4) * 6;
-                const lean = ((i % 3) - 1) * 4;
-                const grainY = [0, 5, 10, 15, 20];
-                return (
-                  <g key={i} transform={`translate(${x}, ${55 - h})`} opacity="0.55">
-                    <path d={`M0,${h} Q${lean},${h / 2} ${lean * 0.6},0`} stroke="url(#stemGrad)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                    {grainY.map((gy, gi) => (
-                      <ellipse key={gi} cx={lean * (gy / h) + (gi % 2 === 0 ? -3 : 3)} cy={gy} rx="2.8" ry="5"
-                        fill="#de9a49" opacity="0.7" transform={`rotate(${-18 + (gi % 2) * 36}, ${lean * (gy / h) + (gi % 2 === 0 ? -3 : 3)}, ${gy})`} />
-                    ))}
-                  </g>
-                );
-              })}
+              {STALK_X.map((x, i) => (
+                <GrainStalk key={i} x={x} i={i} stemId="stemGrad" />
+              ))}
               <path d="M0,35 C200,15 400,55 600,35 C800,15 1000,50 1200,30 C1320,18 1400,40 1440,45 L1440,90 L0,90 Z" fill="#1d2e1a" opacity="0.5" />
               <path d="M0,48 C160,28 320,62 520,45 C720,28 880,58 1080,42 C1240,30 1360,52 1440,56 L1440,90 L0,90 Z" fill="url(#waveGrad1)" />
               <path d="M0,48 C160,28 320,62 520,45 C720,28 880,58 1080,42 C1240,30 1360,52 1440,56" stroke="rgba(222,154,73,0.28)" strokeWidth="1" fill="none" />
-              {[120, 280, 450, 620, 790, 960, 1130, 1300].map((x, i) => (
+              {WAVE_STARS.map((x, i) => (
                 <circle key={i} cx={x} cy={i % 2 === 0 ? 44 : 50} r="1.5" fill="#fae185" opacity="0.45" />
               ))}
             </svg>
@@ -2550,22 +1716,7 @@ const LeapApp = () => {
   if (!hasAppAccess) {
     return (
       <div className={styles.appContainer}>
-        <AnimatePresence>
-          {authError && (
-            <m.div
-              initial={{ opacity: 0, y: -40, x: '-50%' }}
-              animate={{ opacity: 1, y: 0, x: '-50%' }}
-              exit={{ opacity: 0, y: -20, x: '-50%' }}
-              style={{ position: 'fixed', top: '1.5rem', left: '50%', zIndex: 9999, background: '#803e2f', color: '#fae185', padding: '0.85rem 1.25rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '0.75rem', boxShadow: '0 12px 32px rgba(128, 62, 47, 0.3)', fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem', fontWeight: 600, maxWidth: '90vw', border: '1px solid rgba(249, 236, 182, 0.2)' }}
-            >
-              <AlertCircle size={18} style={{ flexShrink: 0 }} />
-              <span>{authError}</span>
-              <button onClick={() => setAuthError(null)} style={{ background: 'transparent', border: 'none', color: '#fae185', cursor: 'pointer', padding: 0, display: 'flex', marginLeft: '0.5rem' }}>
-                <X size={16} />
-              </button>
-            </m.div>
-          )}
-        </AnimatePresence>
+        <AuthErrorToast message={authError} onDismiss={() => setAuthError(null)} />
         <nav className={`fixed top-0 w-full z-50 transition-all duration-300 py-5`}
           style={{ background: 'linear-gradient(180deg, rgba(26,41,64,0.98) 0%, rgba(29,49,72,0.82) 40%, rgba(31,58,76,0.4) 72%, rgba(35,64,72,0) 100%)', backdropFilter: 'blur(0px)', WebkitBackdropFilter: 'blur(0px)' }}>
           <div className={styles.navInner}>
@@ -2636,7 +1787,7 @@ const LeapApp = () => {
                 <label style={{ display: 'block', fontFamily: "'DM Sans', sans-serif", fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#de9a49', marginBottom: '0.5rem' }}>Sort By</label>
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
+                  onChange={(e) => setSortBy(e.target.value as 'title-asc' | 'title-desc' | 'slots-desc' | 'slots-asc')}
                   style={{
                     width: '100%',
                     padding: '0.8rem 1rem',
@@ -2678,11 +1829,11 @@ const LeapApp = () => {
               <Home
                 user={user} classes={classes}
                 searchQuery={searchQuery}
-                onSearchChange={(q) => { setSearchQuery(q); setCurrentPage(1); }}
+                onSearchChange={onSearch}
                 sortBy={sortBy}
-                onSortChange={(s) => setSortBy(s)}
+                onSortChange={setSortBy}
                 filteredAndSortedClasses={filteredAndSortedClasses} uniqueDays={uniqueDays}
-                selectedDay={selectedDay} onDaySelect={(d) => { setSelectedDay(d); setCurrentPage(1); }}
+                selectedDay={selectedDay} onDaySelect={onDay}
                 viewingClass={viewingClass} onClassSelect={(c) => { setViewingClass(c) }}
                 onSignIn={handleSignIn} onHeroScroll={() => navigateTo('classes')}
                 HeroSection={HeroSection} HeroExtras={HeroExtras} renderClassCard={renderClassCard}
@@ -2709,6 +1860,7 @@ const LeapApp = () => {
               />
             )}
             {currentView === 'faq' && <FAQs />}
+            {/* eslint-disable-next-line react-hooks/static-components */}
             {currentView === 'contact' && <Contact />}
           </Suspense>
 

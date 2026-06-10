@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { restoreSession, signOut as authSignOut } from '../services/auth';
 import { leapifyApi } from '../services/leapify';
+import { scheduleInit } from '../utils/helpers';
 import type { UserProfile } from '../services/auth';
 
 export function useAuth() {
@@ -27,11 +28,7 @@ export function useAuth() {
       }
     };
 
-    if ('requestIdleCallback' in window) {
-      (window as any).requestIdleCallback(init, { timeout: 1500 });
-    } else {
-      setTimeout(init, 200);
-    }
+    scheduleInit(init);
 
     return () => { cancelled = true; };
   }, []);

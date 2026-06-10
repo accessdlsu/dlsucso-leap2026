@@ -1,9 +1,6 @@
 import type { CSSProperties } from 'react';
 import { FIREFLY_CONFIG } from '../../utils';
 
-/**
- * Reusable Fireflies animation component
- */
 export const Fireflies = () => (
   <div
     style={{
@@ -33,9 +30,7 @@ export const Fireflies = () => (
   </div>
 );
 
-/**
- * Simple page hero fireflies (inline spans)
- */
+// fallow-ignore-next-line unused-export
 export const PageHeroFireflies = () => (
   <div className="page-hero-fireflies">
     {Array.from({ length: 6 }).map((_, i) => (
@@ -43,5 +38,3 @@ export const PageHeroFireflies = () => (
     ))}
   </div>
 );
-
-export default Fireflies;
