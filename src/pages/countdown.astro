@@ -18,6 +18,23 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
   delay: (i * 0.61) % 7,
   dur: 3.5 + (i % 5) * 0.6,
 }));
+
+const bubbles = Array.from({ length: 10 }, (_, i) => ({
+  id: i,
+  x: 5 + (i * 9.5 + (i % 2) * 6) % 90,
+  size: 6 + (i % 4) * 5,
+  delay: (i * 0.8 + (i % 3) * 0.3) % 6,
+  dur: 5 + (i % 3) * 2,
+}));
+
+const bioDots = Array.from({ length: 10 }, (_, i) => ({
+  id: i,
+  x: 3 + (i * 11.3 + (i % 3) * 7) % 94,
+  y: 10 + (i * 8.7 + (i % 5) * 9) % 55,
+  size: 2 + (i % 3),
+  delay: (i * 0.55) % 6,
+  dur: 3 + (i % 4) * 0.8,
+}));
 ---
 
 <Layout title="Countdown — LEAP 2026" showNavbar={false}>
@@ -32,6 +49,31 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
           height: f.size,
           animationDelay: `${f.delay}s`,
           animationDuration: `${f.dur}s`,
+        }}
+      />
+    ))}
+    {bubbles.map((b) => (
+      <div
+        class="bubble"
+        style={{
+          left: `${b.x}%`,
+          width: b.size,
+          height: b.size,
+          animationDelay: `${b.delay}s`,
+          animationDuration: `${b.dur}s`,
+        }}
+      />
+    ))}
+    {bioDots.map((d) => (
+      <div
+        class="bio-dot"
+        style={{
+          left: `${d.x}%`,
+          top: `${d.y}%`,
+          width: d.size,
+          height: d.size,
+          animationDelay: `${d.delay}s`,
+          animationDuration: `${d.dur}s`,
         }}
       />
     ))}
@@ -109,14 +151,12 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
             <stop offset="100%" stop-color="#040a18" stop-opacity="1" />
           </linearGradient>
         </defs>
-        <path d="M900 0 L710 200 L1090 200 Z" fill="url(#vG)" />
-        <path d="M900 0 L1090 200 L1020 200 Z" fill="rgba(0,0,0,0.12)" />
-        <path d="M0 170 Q150 130 310 150 Q430 165 550 145 Q620 132 710 200 L0 200 Z" fill="url(#h3G)" />
-        <path d="M1090 200 Q1170 130 1280 122 Q1360 115 1440 140 L1440 200 Z" fill="url(#h3G)" />
-        <path d="M0 200 Q130 170 280 184 Q430 200 560 174 Q680 150 800 180 Q920 210 1060 178 Q1180 150 1310 180 Q1390 196 1440 186 L1440 360 L0 360 Z" fill="url(#h2G)" />
-        <path d="M0 250 Q130 225 300 238 Q460 252 620 228 Q760 205 900 234 Q1050 264 1200 238 Q1330 215 1440 234 L1440 360 L0 360 Z" fill="url(#h1G)" />
-        <path d="M0 280 C160 262 320 308 540 280 C760 252 960 304 1180 276 C1340 258 1420 290 1440 282 L1440 360 L0 360 Z" fill="url(#gG)" />
-        <path d="M0 300 C200 284 400 320 600 298 C800 276 1000 316 1200 294 C1340 280 1410 308 1440 300 L1440 360 L0 360 Z" fill="#122845" opacity="0.55" />
+        <path d="M0 90 Q180 120 360 100 T720 95 T1080 100 T1440 95 L1440 180 L0 180 Z" fill="url(#vG)" />
+        <path d="M0 120 Q180 160 360 130 T720 125 T1080 130 T1440 125 L1440 210 L0 210 Z" fill="url(#h3G)" />
+        <path d="M0 150 Q200 200 400 160 T800 155 T1200 160 T1440 155 L1440 360 L0 360 Z" fill="url(#h2G)" />
+        <path d="M0 190 Q220 250 440 205 T880 200 T1320 205 T1440 200 L1440 360 L0 360 Z" fill="url(#h1G)" />
+        <path d="M0 240 Q250 310 500 260 T1000 255 T1440 260 L1440 360 L0 360 Z" fill="url(#gG)" />
+        <path d="M0 310 Q200 295 400 315 T800 305 T1200 315 T1440 310 L1440 360 L0 360 Z" fill="#122845" opacity="0.3" />
         <rect x="0" y="335" width="1440" height="25" fill="url(#fadeG)" />
       </svg>
     </div>
@@ -166,12 +206,13 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
 
   .cnt-title {
     font-family: 'Tropikal', 'Playfair Display', serif;
+    font-style: italic;
     font-weight: 700;
-    font-size: clamp(1.6rem, 5vw, 2.4rem);
-    letter-spacing: 0.04em;
-    line-height: 1.1;
+    font-size: clamp(1.4rem, 5.5vw, 2.4rem);
+    letter-spacing: 0.015em;
+    line-height: 1.15;
     text-align: center;
-    margin: 0.5rem 0 0;
+    margin-top: -0.5rem;
     background: linear-gradient(180deg, #fff5c4 0%, #fae185 35%, #de9a49 75%, #b07820 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -272,17 +313,13 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
 
   /* ── Entrance Animation ── */
   @keyframes fadeInUp {
-    from { transform: translateY(8px); }
+    from { transform: translateY(4px); }
     to { transform: translateY(0); }
   }
 
   .anim-in {
-    animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: fadeInUp 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
-  .anim-in:nth-child(2) { animation-delay: 0.05s; }
-  .anim-in:nth-child(3) { animation-delay: 0.1s; }
-  .anim-in:nth-child(4) { animation-delay: 0.15s; }
-  .anim-in:nth-child(5) { animation-delay: 0.2s; }
 
   /* ── Landscape ── */
   .landscape {
@@ -311,6 +348,45 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
   @keyframes fireflyBlink {
     0%, 100% { opacity: 0.06; }
     50% { opacity: 0.7; }
+  }
+
+  /* ── Bubbles ── */
+  .bubble {
+    position: absolute;
+    bottom: -20px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, rgba(150, 220, 255, 0.25), rgba(100, 180, 255, 0.08));
+    border: 1px solid rgba(150, 220, 255, 0.1);
+    pointer-events: none;
+    z-index: 1;
+    animation: bubbleRise ease-in-out infinite;
+  }
+
+  @keyframes bubbleRise {
+    0% { transform: translateY(0) scale(1); opacity: 0; }
+    10% { opacity: 0.5; }
+    50% { opacity: 0.3; }
+    90% { opacity: 0.1; }
+    100% { transform: translateY(calc(-1 * 55vh)) scale(0.6); opacity: 0; }
+  }
+
+  /* ── Bioluminescent Dots ── */
+  .bio-dot {
+    position: absolute;
+    border-radius: 50%;
+    background: #4fd1c5;
+    will-change: opacity, transform;
+    box-shadow: 0 0 8px 4px rgba(79, 209, 197, 0.35);
+    pointer-events: none;
+    z-index: 3;
+    animation: bioGlow 4s ease-in-out infinite;
+  }
+
+  @keyframes bioGlow {
+    0%, 100% { opacity: 0.05; transform: scale(0.8); }
+    25% { transform: translateY(-6px) scale(1.1); opacity: 0.5; }
+    50% { opacity: 0.15; transform: translateY(0) scale(0.9); }
+    75% { transform: translateY(-3px) scale(1); opacity: 0.35; }
   }
 
   /* ── Footer ── */
@@ -355,8 +431,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
       font-size: 0.55rem;
     }
     .cnt-title {
-      margin: 0.25rem 0 0;
-      font-size: clamp(1.2rem, 4.5vw, 1.6rem);
+      max-width: 85vw;
     }
     .cnt-date {
       font-size: 0.7rem;
@@ -370,6 +445,8 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
 
   @media (prefers-reduced-motion: reduce) {
     .firefly { animation: none; opacity: 0.3; }
+    .bubble { display: none; }
+    .bio-dot { animation: none; opacity: 0.15; }
     .anim-in { animation: none; }
   }
 </style>
