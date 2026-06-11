@@ -1,0 +1,43 @@
+---
+import { ClientRouter } from "astro:transitions";
+import Navbar from "../components/navigation/Navbar";
+
+interface Props {
+  title?: string;
+  description?: string;
+  showNavbar?: boolean;
+}
+
+const {
+  title = "LEAP 2026",
+  description = "De La Salle University CSO LEAP 2026: Isang Nayon, Isang Layunin.",
+  showNavbar = true,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.png" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="preload" as="image" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800;900&family=Poppins:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <ClientRouter />
+  </head>
+  <body>
+    {showNavbar && <Navbar client:only="react" />}
+    <main transition:animate="fade">
+      <slot />
+    </main>
+  </body>
+</html>

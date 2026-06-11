@@ -1,0 +1,246 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Image } from 'astro:assets';
+import logo from '../assets/favicon.png';
+
+const fireflies = Array.from({ length: 16 }, (_, i) => ({
+  id: i,
+  x: (i * 17.3 + (i % 3) * 29) % 94 + 3,
+  y: (i * 11.7 + (i % 5) * 13) % 55 + 5,
+  size: 2 + (i % 3),
+  delay: (i * 0.61) % 7,
+  dur: 3.5 + (i % 5) * 0.6,
+}));
+---
+
+<Layout title="Maintenance — LEAP 2026" showNavbar={false}>
+  <div class="mnt-bg">
+    {fireflies.map((f) => (
+      <div
+        class="firefly"
+        style={{
+          left: `${f.x}%`,
+          top: `${f.y}%`,
+          width: f.size,
+          height: f.size,
+          animationDelay: `${f.delay}s`,
+          animationDuration: `${f.dur}s`,
+        }}
+      />
+    ))}
+    <div class="mnt-content">
+      <div class="mnt-icon anim-in">
+        <Image
+          src={logo}
+          alt="LEAP 2026"
+          widths={[400, 600, 800]}
+          sizes="(max-width: 768px) 80vw, 500px"
+          loading="eager"
+          style={{
+            width: "min(500px, 90vw)",
+            height: "auto",
+            display: "block",
+          }}
+        />
+      </div>
+      <h1 class="mnt-title anim-in">Under Maintenance</h1>
+      <p class="mnt-desc anim-in">We're making improvements to serve you better.</p>
+      <p class="mnt-sub anim-in">Please check back soon.</p>
+    </div>
+
+    <footer class="mnt-footer" style="position:absolute">LEAP 2026 &copy; DLSUCSO</footer>
+
+    <div class="landscape">
+      <svg viewBox="0 0 1440 360" preserveAspectRatio="xMidYMax slice" style="display:block;width:100%;height:100%;">
+        <defs>
+          <linearGradient id="vG" x1="0%" y1="0%" x2="60%" y2="100%">
+            <stop offset="0%" stop-color="#1a3520" /><stop offset="100%" stop-color="#0d1e10" />
+          </linearGradient>
+          <linearGradient id="h3G" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#193825" /><stop offset="100%" stop-color="#0f2018" />
+          </linearGradient>
+          <linearGradient id="h2G" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#1e4a2c" /><stop offset="100%" stop-color="#12271a" />
+          </linearGradient>
+          <linearGradient id="h1G" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#245630" /><stop offset="100%" stop-color="#152e1c" />
+          </linearGradient>
+          <linearGradient id="gG" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#2a6234" /><stop offset="100%" stop-color="#1a3a20" />
+          </linearGradient>
+          <linearGradient id="fadeG" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#1a2940" stop-opacity="0" />
+            <stop offset="100%" stop-color="#3a4a35" stop-opacity="1" />
+          </linearGradient>
+        </defs>
+        <path d="M900 0 L710 200 L1090 200 Z" fill="url(#vG)" />
+        <path d="M900 0 L1090 200 L1020 200 Z" fill="rgba(0,0,0,0.12)" />
+        <path d="M0 170 Q150 130 310 150 Q430 165 550 145 Q620 132 710 200 L0 200 Z" fill="url(#h3G)" />
+        <path d="M1090 200 Q1170 130 1280 122 Q1360 115 1440 140 L1440 200 Z" fill="url(#h3G)" />
+        <path d="M0 200 Q130 170 280 184 Q430 200 560 174 Q680 150 800 180 Q920 210 1060 178 Q1180 150 1310 180 Q1390 196 1440 186 L1440 360 L0 360 Z" fill="url(#h2G)" />
+        <path d="M0 250 Q130 225 300 238 Q460 252 620 228 Q760 205 900 234 Q1050 264 1200 238 Q1330 215 1440 234 L1440 360 L0 360 Z" fill="url(#h1G)" />
+        <path d="M0 280 C160 262 320 308 540 280 C760 252 960 304 1180 276 C1340 258 1420 290 1440 282 L1440 360 L0 360 Z" fill="url(#gG)" />
+        <path d="M0 300 C200 284 400 320 600 298 C800 276 1000 316 1200 294 C1340 280 1410 308 1440 300 L1440 360 L0 360 Z" fill="#1a3a20" opacity="0.55" />
+        <rect x="0" y="335" width="1440" height="25" fill="url(#fadeG)" />
+      </svg>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  @font-face {
+    font-family: 'Tropikal';
+    src: url('/fonts/Tropikal-Bold.woff2') format('woff2'),
+         url('/fonts/Tropikal-Bold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+  }
+
+  body {
+    margin: 0;
+    overflow: hidden;
+    cursor: url('/salakot_cursor.png'), auto;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  main {
+    padding: 0;
+  }
+
+  /* ── Background ── */
+  .mnt-bg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100svh;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(180deg, #1a2940 0%, #1d3148 8%, #1f3a4c 18%, #234048 28%, #284240 38%, #2c4338 48%, #2e4632 58%, #314830 68%, #344932 78%, #3a4a35 86%, #4a4a3a 94%, #5a4838 100%);
+  }
+
+  /* ── Content ── */
+  .mnt-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(0.5rem, 1.5vw, 0.75rem);
+  }
+
+  .mnt-icon {
+    width: min(500px, 90vw);
+  }
+  .mnt-icon img {
+    display: block;
+    height: auto;
+  }
+
+  .mnt-title {
+    font-family: 'Tropikal', 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: clamp(1.8rem, 6vw, 2.8rem);
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+    text-align: center;
+    margin: 0;
+    background: linear-gradient(180deg, #fff5c4 0%, #fae185 35%, #de9a49 75%, #b07820 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 0 rgba(80,40,10,0.4), 0 4px 24px rgba(0,0,0,0.55), 0 0 48px rgba(222,154,73,0.4), 0 0 96px rgba(250,225,133,0.2);
+    filter: drop-shadow(0 3px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 24px rgba(222,154,73,0.35));
+  }
+
+  .mnt-desc {
+    font-family: 'DM Sans', sans-serif;
+    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+    color: rgba(255,255,255,0.75);
+    text-align: center;
+    line-height: 1.5;
+    margin: 0.5rem 0 0;
+    max-width: 360px;
+  }
+
+  .mnt-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: clamp(0.8rem, 2vw, 0.95rem);
+    color: rgba(255,255,255,0.45);
+    text-align: center;
+    line-height: 1.5;
+    margin: 0.25rem 0 0;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Entrance Animation ── */
+  @keyframes fadeInUp {
+    from { transform: translateY(8px); }
+    to { transform: translateY(0); }
+  }
+
+  .anim-in {
+    animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .anim-in:nth-child(2) { animation-delay: 0.05s; }
+  .anim-in:nth-child(3) { animation-delay: 0.1s; }
+  .anim-in:nth-child(4) { animation-delay: 0.15s; }
+
+  /* ── Landscape ── */
+  .landscape {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 55%;
+    z-index: 1;
+    pointer-events: none;
+    line-height: 0;
+  }
+
+  /* ── Fireflies ── */
+  .firefly {
+    position: absolute;
+    border-radius: 50%;
+    background: #fae185;
+    will-change: opacity;
+    box-shadow: 0 0 6px 4px rgba(250, 225, 133, 0.5);
+    pointer-events: none;
+    z-index: 3;
+    animation: fireflyBlink 4s ease-in-out infinite;
+  }
+
+  @keyframes fireflyBlink {
+    0%, 100% { opacity: 0.06; }
+    50% { opacity: 0.7; }
+  }
+
+  /* ── Footer ── */
+  .mnt-footer {
+    position: absolute;
+    bottom: 1rem;
+    left: 0;
+    right: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.3);
+    text-align: center;
+    letter-spacing: 0.06em;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .landscape {
+      height: 35%;
+    }
+    .mnt-desc {
+      max-width: 80vw;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .firefly { animation: none; opacity: 0.3; }
+    .anim-in { animation: none; }
+  }
+</style>

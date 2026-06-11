@@ -1,0 +1,536 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Image } from 'astro:assets';
+import logo from '../assets/favicon.png';
+
+const fireflies = Array.from({ length: 16 }, (_, i) => ({
+  id: i,
+  x: (i * 17.3 + (i % 3) * 29) % 94 + 3,
+  y: (i * 11.7 + (i % 5) * 13) % 55 + 5,
+  size: 2 + (i % 3),
+  delay: (i * 0.61) % 7,
+  dur: 3.5 + (i % 5) * 0.6,
+}));
+---
+
+<Layout title="Login — LEAP 2026" showNavbar={false}>
+  <div class="login-bg">
+    {fireflies.map((f) => (
+      <div
+        class="firefly"
+        style={{
+          left: `${f.x}%`,
+          top: `${f.y}%`,
+          width: f.size,
+          height: f.size,
+          animationDelay: `${f.delay}s`,
+          animationDuration: `${f.dur}s`,
+        }}
+      />
+    ))}
+    <div class="login-content">
+      <div class="logo-wrapper anim-in">
+        <Image
+          src={logo}
+          alt="LEAP 2026"
+          widths={[400, 600, 800]}
+          sizes="(max-width: 768px) 80vw, 500px"
+          loading="eager"
+          style={{
+            width: "min(500px, 90vw)",
+            height: "auto",
+            display: "block",
+          }}
+        />
+      </div>
+      <span class="tagline anim-in">Isang Nayon, Isang Layunin</span>
+      <p id="login-error" class="error-msg" role="alert"></p>
+      <button class="gsi-material-button anim-in" id="google-signin-btn">
+        <div class="gsi-material-button-state"></div>
+        <div class="gsi-material-button-content-wrapper">
+          <div class="gsi-material-button-icon">
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+              <path fill="none" d="M0 0h48v48H0z"></path>
+            </svg>
+          </div>
+          <span class="gsi-material-button-contents">Sign in with Google</span>
+          <span style="display: none;">Sign in with Google</span>
+        </div>
+        <div class="spinner" aria-hidden="true"></div>
+      </button>
+      <p class="terms anim-in">
+        By clicking continue, you agree to our{' '}
+        <a href="#" data-dialog="tos">Terms of Service</a> and{' '}
+        <a href="#" data-dialog="pp">Privacy Policy</a>.
+      </p>
+    </div>
+
+    <footer class="login-footer" style="position:absolute">LEAP 2026 &copy; DLSUCSO</footer>
+
+    <dialog class="legal-dialog" id="legal-dialog">
+      <div class="legal-dialog-content">
+        <button class="legal-dialog-close" id="dialog-close" aria-label="Close">&times;</button>
+        <h2 id="dialog-title"></h2>
+        <p id="dialog-body"></p>
+      </div>
+    </dialog>
+
+    <div class="landscape">
+      <svg viewBox="0 0 1440 360" preserveAspectRatio="xMidYMax slice" style="display:block;width:100%;height:100%;">
+        <defs>
+          <linearGradient id="vG" x1="0%" y1="0%" x2="60%" y2="100%">
+            <stop offset="0%" stop-color="#1a3520" /><stop offset="100%" stop-color="#0d1e10" />
+          </linearGradient>
+          <linearGradient id="h3G" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#193825" /><stop offset="100%" stop-color="#0f2018" />
+          </linearGradient>
+          <linearGradient id="h2G" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#1e4a2c" /><stop offset="100%" stop-color="#12271a" />
+          </linearGradient>
+          <linearGradient id="h1G" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#245630" /><stop offset="100%" stop-color="#152e1c" />
+          </linearGradient>
+          <linearGradient id="gG" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#2a6234" /><stop offset="100%" stop-color="#1a3a20" />
+          </linearGradient>
+          <linearGradient id="fadeG" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#1a2940" stop-opacity="0" />
+            <stop offset="100%" stop-color="#3a4a35" stop-opacity="1" />
+          </linearGradient>
+        </defs>
+        <path d="M900 0 L710 200 L1090 200 Z" fill="url(#vG)" />
+        <path d="M900 0 L1090 200 L1020 200 Z" fill="rgba(0,0,0,0.12)" />
+        <path d="M0 170 Q150 130 310 150 Q430 165 550 145 Q620 132 710 200 L0 200 Z" fill="url(#h3G)" />
+        <path d="M1090 200 Q1170 130 1280 122 Q1360 115 1440 140 L1440 200 Z" fill="url(#h3G)" />
+        <path d="M0 200 Q130 170 280 184 Q430 200 560 174 Q680 150 800 180 Q920 210 1060 178 Q1180 150 1310 180 Q1390 196 1440 186 L1440 360 L0 360 Z" fill="url(#h2G)" />
+        <path d="M0 250 Q130 225 300 238 Q460 252 620 228 Q760 205 900 234 Q1050 264 1200 238 Q1330 215 1440 234 L1440 360 L0 360 Z" fill="url(#h1G)" />
+        <path d="M0 280 C160 262 320 308 540 280 C760 252 960 304 1180 276 C1340 258 1420 290 1440 282 L1440 360 L0 360 Z" fill="url(#gG)" />
+        <path d="M0 300 C200 284 400 320 600 298 C800 276 1000 316 1200 294 C1340 280 1410 308 1440 300 L1440 360 L0 360 Z" fill="#1a3a20" opacity="0.55" />
+        <rect x="0" y="335" width="1440" height="25" fill="url(#fadeG)" />
+      </svg>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  @font-face {
+    font-family: 'Tropikal';
+    src: url('/fonts/Tropikal-Bold.woff2') format('woff2'),
+         url('/fonts/Tropikal-Bold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+  }
+
+  body {
+    margin: 0;
+    overflow: hidden;
+    cursor: url('/salakot_cursor.png'), auto;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  main {
+    padding: 0;
+  }
+
+  /* ── Background ── */
+  .login-bg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100svh;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(180deg, #1a2940 0%, #1d3148 8%, #1f3a4c 18%, #234048 28%, #284240 38%, #2c4338 48%, #2e4632 58%, #314830 68%, #344932 78%, #3a4a35 86%, #4a4a3a 94%, #5a4838 100%);
+  }
+
+  /* ── Content ── */
+  .login-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(0.75rem, 2.5vw, 1.25rem);
+  }
+
+  .tagline {
+    margin-top: -0.5rem;
+    font-family: 'Tropikal', 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: clamp(1.4rem, 5.5vw, 2.4rem);
+    letter-spacing: 0.015em;
+    line-height: 1.15;
+    text-align: center;
+    background: linear-gradient(180deg, #fff5c4 0%, #fae185 35%, #de9a49 75%, #b07820 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 2px 0 rgba(80,40,10,0.4), 0 4px 24px rgba(0,0,0,0.55), 0 0 48px rgba(222,154,73,0.4), 0 0 96px rgba(250,225,133,0.2);
+    filter: drop-shadow(0 3px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 24px rgba(222,154,73,0.35));
+  }
+
+  /* ── Entrance Animation ── */
+  @keyframes fadeInUp {
+    from { transform: translateY(8px); }
+    to { transform: translateY(0); }
+  }
+
+  .anim-in {
+    animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .anim-in:nth-child(2) { animation-delay: 0.05s; }
+  .anim-in:nth-child(4) { animation-delay: 0.1s; }
+  .anim-in:nth-child(5) { animation-delay: 0.15s; }
+
+  /* ── Landscape ── */
+  .landscape {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 55%;
+    z-index: 1;
+    pointer-events: none;
+    line-height: 0;
+  }
+
+  /* ── Fireflies ── */
+  .firefly {
+    position: absolute;
+    border-radius: 50%;
+    background: #fae185;
+    will-change: opacity;
+    box-shadow: 0 0 6px 4px rgba(250, 225, 133, 0.5);
+    pointer-events: none;
+    z-index: 3;
+    animation: fireflyBlink 4s ease-in-out infinite;
+  }
+
+  @keyframes fireflyBlink {
+    0%, 100% { opacity: 0.06; }
+    50% { opacity: 0.7; }
+  }
+
+  /* ── Error Message ── */
+  .error-msg {
+    display: none;
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: #fca5a5;
+    text-align: center;
+    background: rgba(220, 38, 38, 0.12);
+    border: 1px solid rgba(220, 38, 38, 0.25);
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    max-width: 400px;
+    width: 100%;
+    box-sizing: border-box;
+    line-height: 1.4;
+  }
+  .error-msg.visible {
+    display: block;
+  }
+
+  /* ── Google Sign-In Button ── */
+  .gsi-material-button {
+    position: relative;
+    margin-top: 1.25rem;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    -webkit-appearance: none;
+    background-color: WHITE;
+    background-image: none;
+    border: 1px solid #747775;
+    -webkit-border-radius: 20px;
+    border-radius: 20px;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    color: #1f1f1f;
+    cursor: pointer;
+    font-family: 'Roboto', arial, sans-serif;
+    font-size: 14px;
+    height: 40px;
+    letter-spacing: 0.25px;
+    outline: none;
+    overflow: hidden;
+    padding: 0 12px;
+    text-align: center;
+    -webkit-transition: background-color .218s, border-color .218s, box-shadow .218s;
+    transition: background-color .218s, border-color .218s, box-shadow .218s;
+    vertical-align: middle;
+    white-space: nowrap;
+    width: auto;
+    max-width: 400px;
+    min-width: min-content;
+  }
+
+  .gsi-material-button .gsi-material-button-icon {
+    height: 20px;
+    margin-right: 10px;
+    min-width: 20px;
+    width: 20px;
+  }
+
+  .gsi-material-button .gsi-material-button-content-wrapper {
+    -webkit-align-items: center;
+    align-items: center;
+    display: flex;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+    -webkit-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+    height: 100%;
+    justify-content: space-between;
+    position: relative;
+    width: 100%;
+  }
+
+  .gsi-material-button .gsi-material-button-contents {
+    -webkit-flex-grow: 1;
+    flex-grow: 1;
+    font-family: 'Roboto', arial, sans-serif;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: top;
+  }
+
+  .gsi-material-button .gsi-material-button-state {
+    -webkit-transition: opacity .218s;
+    transition: opacity .218s;
+    bottom: 0;
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+
+  .gsi-material-button:disabled {
+    cursor: default;
+    background-color: #ffffff61;
+    border-color: #1f1f1f1f;
+  }
+  .gsi-material-button:disabled .gsi-material-button-contents { opacity: 38%; }
+  .gsi-material-button:disabled .gsi-material-button-icon { opacity: 38%; }
+
+  .gsi-material-button:not(:disabled):active .gsi-material-button-state,
+  .gsi-material-button:not(:disabled):focus .gsi-material-button-state {
+    background-color: #303030;
+    opacity: 12%;
+  }
+
+  .gsi-material-button:not(:disabled):hover {
+    -webkit-box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
+    box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
+  }
+
+  .gsi-material-button:not(:disabled):hover .gsi-material-button-state {
+    background-color: #303030;
+    opacity: 8%;
+  }
+
+  /* ── Loading Spinner ── */
+  .gsi-material-button.loading .gsi-material-button-content-wrapper {
+    visibility: hidden;
+  }
+  .gsi-material-button.loading .spinner {
+    display: block;
+  }
+
+  .spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 2.5px solid #747775;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.65s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -10px 0 0 -10px;
+    box-sizing: border-box;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ── Terms Text ── */
+  .terms {
+    margin: 1rem 0 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.55);
+    text-align: center;
+    max-width: 260px;
+    line-height: 1.45;
+  }
+  .terms a {
+    color: rgba(255,255,255,0.8);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: rgba(255,255,255,0.3);
+    transition: color 0.2s, text-decoration-color 0.2s;
+    cursor: url('/salakot_cursor.png'), pointer;
+  }
+  .terms a:hover {
+    color: #fff;
+    text-decoration-color: rgba(255,255,255,0.7);
+  }
+
+  /* ── Footer ── */
+  .login-footer {
+    position: absolute;
+    bottom: 1rem;
+    left: 0;
+    right: 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.3);
+    text-align: center;
+    letter-spacing: 0.06em;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* ── Legal Dialog ── */
+  .legal-dialog {
+    border: none;
+    border-radius: 14px;
+    padding: 0;
+    max-width: 480px;
+    width: 90vw;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 24px 48px rgba(0,0,0,0.35);
+    cursor: url('/salakot_cursor.png'), auto;
+  }
+  .legal-dialog::backdrop {
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px);
+  }
+  .legal-dialog-content {
+    padding: 2rem;
+    position: relative;
+  }
+  .legal-dialog-content h2 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #1f1f1f;
+    margin: 0 0 1rem;
+    padding-right: 2rem;
+  }
+  .legal-dialog-content p {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: #444;
+    margin: 0;
+  }
+  .legal-dialog-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #888;
+    cursor: url('/salakot_cursor.png'), pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s, color 0.2s;
+    padding: 0;
+    line-height: 1;
+  }
+  .legal-dialog-close:hover {
+    background: #f0f0f0;
+    color: #333;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .landscape {
+      height: 35%;
+    }
+    .error-msg {
+      max-width: 360px;
+    }
+    .tagline {
+      max-width: 85vw;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .firefly { animation: none; opacity: 0.3; }
+    .anim-in { animation: none; }
+  }
+</style>
+
+<script>
+  const btn = document.getElementById('google-signin-btn');
+  const errorEl = document.getElementById('login-error');
+  const dialog = document.getElementById('legal-dialog');
+  const dialogTitle = document.getElementById('dialog-title');
+  const dialogBody = document.getElementById('dialog-body');
+  const dialogClose = document.getElementById('dialog-close');
+
+  const legalCopy = {
+    tos: {
+      title: 'Terms of Service',
+      body: 'By using LEAP 2026, you agree to comply with the policies and regulations set forth by the De La Salle University College Student Organization (DLSUCSO). You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. LEAP 2026 reserves the right to modify or terminate the service at any time without prior notice. Continued use of the platform constitutes acceptance of any such changes.',
+    },
+    pp: {
+      title: 'Privacy Policy',
+      body: 'LEAP 2026 collects personal information — including your name, email address, and student ID — solely for the purposes of event registration, class scheduling, and organization communication. Your data will not be shared with third parties without your explicit consent, except as required by law. We implement reasonable security measures to protect your information, though no method of electronic storage is completely secure. You may request access to or deletion of your data by contacting DLSUCSO.',
+    },
+  };
+
+  btn.addEventListener('click', async () => {
+    if (btn.disabled) return;
+
+    btn.classList.add('loading');
+    btn.disabled = true;
+    errorEl.classList.remove('visible');
+    errorEl.textContent = '';
+
+    await new Promise((r) => setTimeout(r, 2000));
+
+    btn.classList.remove('loading');
+    btn.disabled = false;
+    errorEl.textContent = 'Sign in with Google is not yet connected. Please try again later.';
+    errorEl.classList.add('visible');
+  });
+
+  document.querySelectorAll('[data-dialog]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const type = link.getAttribute('data-dialog');
+      const copy = legalCopy[type];
+      if (copy) {
+        dialogTitle.textContent = copy.title;
+        dialogBody.textContent = copy.body;
+        dialog.showModal();
+      }
+    });
+  });
+
+  dialogClose.addEventListener('click', () => dialog.close());
+
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog) dialog.close();
+  });
+</script>

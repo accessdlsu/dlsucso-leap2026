@@ -199,6 +199,9 @@ vite.config.ts.timestamp-*
 worker-configuration.d.ts
 tsconfig.worker.tsbuildinfo
 
+# Astro
+.astro/
+
 # Tests
 load-tests/
 test-client/
