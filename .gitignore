@@ -202,3 +202,4 @@ tsconfig.worker.tsbuildinfo
 # Tests
 load-tests/
 test-client/
+legacy/
