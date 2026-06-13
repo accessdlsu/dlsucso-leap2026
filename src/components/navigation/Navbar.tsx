@@ -3,8 +3,10 @@ import {
   useRef,
   useCallback,
   useEffect,
+  useLayoutEffect,
   type CSSProperties,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   House,
   BookOpen,
@@ -30,21 +32,82 @@ const cubicBezier = "cubic-bezier(0.22, 1, 0.36, 1)";
 export default function Navbar() {
   const [currentPath, setCurrentPath] = useState("/");
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [indicatorStyle, setIndicatorStyle] = useState<CSSProperties>({});
   const [hoverIndicatorStyle, setHoverIndicatorStyle] = useState<CSSProperties>(
     {},
   );
   const [profileOpen, setProfileOpen] = useState(false);
+  const [menuRendered, setMenuRendered] = useState(false);
+  const [menuClosing, setMenuClosing] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+  const [popupPos, setPopupPos] = useState<{ top: number; right: number } | null>(null);
   const [windowWidth, setWindowWidth] = useState(1400);
-  const isMobile = windowWidth <= 768;
+  const [mounted, setMounted] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [showNavLogo, setShowNavLogo] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.location.pathname !== "/";
+    }
+    return false;
+  });
+  const isMobile = windowWidth <= 968;
+
+  useEffect(() => {
+    if (currentPath !== "/") {
+      setShowNavLogo(true);
+      return;
+    }
+
+    const checkScroll = () => {
+      const bg = document.querySelector(".home-bg");
+      if (bg) {
+        setShowNavLogo(bg.scrollTop > 80);
+      } else {
+        setShowNavLogo(false); // Default to false if home-bg is loading
+      }
+    };
+
+    // Check scroll position immediately
+    checkScroll();
+
+    // Secondary fallback in case container takes a frame to render
+    const timer = setTimeout(checkScroll, 50);
+
+    const bg = document.querySelector(".home-bg");
+    if (bg) {
+      bg.addEventListener("scroll", checkScroll, { passive: true });
+    }
+
+    return () => {
+      clearTimeout(timer);
+      if (bg) {
+        bg.removeEventListener("scroll", checkScroll);
+      }
+    };
+  }, [currentPath]);
 
   useEffect(() => {
     const check = () => setWindowWidth(window.innerWidth);
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (mq.matches) { setMounted(true); return; }
+    requestAnimationFrame(() => {
+      setMounted(true);
+      void document.body.offsetHeight;
+    });
+  }, []);
+
+  useEffect(() => {
+    const check = () => setDrawerOpen(document.documentElement.getAttribute('data-drawer-open') === 'true');
+    check();
+    const mo = new MutationObserver(check);
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-drawer-open'] });
+    return () => mo.disconnect();
   }, []);
 
   useEffect(() => {
@@ -60,43 +123,44 @@ export default function Navbar() {
     Math.max(min, Math.min(val, max));
   const denom = 1400 - 769;
   const t = clamp(0, (windowWidth - 769) / denom, 1);
-  const desktopLinkPadH = Math.round(10 + t * 10);
   const desktopFontSize = (0.8 + t * 0.2).toFixed(2);
   const desktopIconSize = Math.round(14 + t * 2);
 
-  const positionIndicator = useCallback((index: number) => {
-    const el = linkRefs.current[index];
-    if (!el) return;
-    return {
-      left: el.offsetLeft + 4,
-      top: el.offsetTop + 4,
-      width: el.offsetWidth - 8,
-      height: el.offsetHeight - 8,
-    };
-  }, []);
 
-  const mobilePositionIndicator = useCallback((index: number) => {
-    const el = linkRefs.current[index];
-    if (!el) return;
+
+  const getIndicatorStyle = useCallback((index: number) => {
+    const targetHeight = 50; // Centered height (58 - 8)
+    const targetTop = 4;
+    
+    // Stretch to the full width allocated for the item (20%) minus a small inset margin (4px on each side)
+    const targetLeft = `calc(${index * 20}% + 4px)`;
+    const targetWidth = `calc(20% - 8px)`;
+    
     return {
-      left: el.offsetLeft + 6,
-      top: el.offsetTop,
-      width: el.offsetWidth - 12,
-      height: el.offsetHeight,
-    };
+      left: targetLeft,
+      top: targetTop,
+      width: targetWidth,
+      height: targetHeight,
+    } as CSSProperties;
   }, []);
 
   useEffect(() => {
-    const pos = (isMobile ? mobilePositionIndicator : positionIndicator)(activeIndex);
-    if (pos) setIndicatorStyle(pos);
-  }, [activeIndex, positionIndicator, mobilePositionIndicator, isMobile, windowWidth]);
+    setIndicatorStyle(getIndicatorStyle(activeIndex));
+  }, [activeIndex, getIndicatorStyle]);
 
   useEffect(() => {
     if (hoveredIndex !== null) {
-      const pos = (isMobile ? mobilePositionIndicator : positionIndicator)(hoveredIndex);
-      if (pos) setHoverIndicatorStyle(pos);
+      setHoverIndicatorStyle(getIndicatorStyle(hoveredIndex));
     }
-  }, [hoveredIndex, positionIndicator, mobilePositionIndicator, isMobile, windowWidth]);
+  }, [hoveredIndex, getIndicatorStyle]);
+
+  const glassStyle: CSSProperties = {
+    background: "rgba(0, 0, 0, 0.25)",
+    backdropFilter: "blur(20px)",
+    WebkitBackdropFilter: "blur(20px)",
+    borderRadius: 9999,
+    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15)",
+  };
 
   const pillContainer: CSSProperties = {
     position: "fixed",
@@ -107,11 +171,7 @@ export default function Navbar() {
     alignItems: "center",
     justifyContent: "center",
     padding: "9px 24px",
-    borderRadius: 9999,
-    background: "rgba(255, 255, 255, 0.15)",
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
-    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
+    ...glassStyle,
   };
 
   const pillStyle: CSSProperties = {
@@ -120,11 +180,9 @@ export default function Navbar() {
     alignItems: "center",
     height: 58,
     padding: "0 2px",
-    borderRadius: 9999,
-    background: "rgba(255, 255, 255, 0.15)",
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
-    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
+    width: "100%",
+    maxWidth: 680,
+    ...glassStyle,
   };
 
   const linkStyle: CSSProperties = {
@@ -134,11 +192,12 @@ export default function Navbar() {
     fontSize: "1rem",
     fontWeight: 500,
     textDecoration: "none",
-    padding: "17px 32px",
+    padding: "17px 0",
     borderRadius: 9999,
     whiteSpace: "nowrap",
     display: "flex",
     alignItems: "center",
+    justifyContent: "center",
     cursor: "pointer",
     background: "none",
     border: "none",
@@ -146,20 +205,18 @@ export default function Navbar() {
   };
 
   const profileMenuStyle: CSSProperties = {
-    position: "absolute",
-    top: "calc(100% + 8px)",
-    right: 0,
     minWidth: 200,
     borderRadius: 16,
     padding: 6,
-    background: "rgba(255, 255, 255, 0.85)",
+    background: "rgba(0, 0, 0, 0.25)",
     backdropFilter: "blur(20px)",
     WebkitBackdropFilter: "blur(20px)",
-    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-    border: "1px solid rgba(255, 255, 255, 0.4)",
+    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15)",
+    border: "1px solid rgba(255, 255, 255, 0.06)",
     display: "flex",
     flexDirection: "column",
     gap: 2,
+    zIndex: 1000,
   };
 
   const menuItemStyle: CSSProperties = {
@@ -171,7 +228,7 @@ export default function Navbar() {
     fontFamily: "'DM Sans', sans-serif",
     fontSize: "0.9rem",
     fontWeight: 500,
-    color: "rgba(0, 0, 0, 0.75)",
+    color: "rgba(255, 255, 255, 0.85)",
     cursor: "pointer",
     background: "none",
     border: "none",
@@ -180,12 +237,41 @@ export default function Navbar() {
   };
 
   useEffect(() => {
+    if (profileOpen) void document.body.offsetHeight;
+  }, [profileOpen]);
+
+  useLayoutEffect(() => {
+    if (profileOpen && profileRef.current) {
+      const rect = profileRef.current.getBoundingClientRect();
+      setPopupPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
+    }
+  }, [profileOpen]);
+
+  const toggleProfile = () => {
+    if (profileOpen) {
+      setMenuClosing(true);
+      setProfileOpen(false);
+      setTimeout(() => {
+        setMenuRendered(false);
+      }, 200);
+    } else {
+      setMenuClosing(false);
+      setMenuRendered(true);
+      setProfileOpen(true);
+    }
+  };
+
+  useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (
         profileRef.current &&
         !profileRef.current.contains(e.target as Node)
       ) {
+        setMenuClosing(true);
         setProfileOpen(false);
+        setTimeout(() => {
+          setMenuRendered(false);
+        }, 200);
       }
     };
     if (profileOpen) document.addEventListener("mousedown", onClick);
@@ -199,21 +285,23 @@ export default function Navbar() {
     transition: `left 0.15s ${cubicBezier}, top 0.15s ${cubicBezier}, width 0.15s ${cubicBezier}, height 0.15s ${cubicBezier}`,
   };
 
-  const mobileIndicatorBase: CSSProperties = {
-    position: "absolute",
-    borderRadius: 9999,
-    pointerEvents: "none",
-    transition: `left 0.15s ${cubicBezier}, top 0.15s ${cubicBezier}, width 0.15s ${cubicBezier}, height 0.15s ${cubicBezier}`,
-  };
-
   const topPills = (
     <>
       <div style={{
-        ...pillContainer,
+        position: "fixed",
         top: isMobile ? 12 : 24,
         left: isMobile ? 12 : 24,
+        zIndex: 1001,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         padding: isMobile ? "9px 16px" : "9px 24px",
-      }}>
+        ...glassStyle,
+        opacity: (mounted && showNavLogo) ? 1 : 0,
+        pointerEvents: showNavLogo ? "auto" : "none",
+        transform: (mounted && showNavLogo) ? "translateY(0) scale(1)" : "translateY(-15px) scale(0.9)",
+        transition: "opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)",
+      } as CSSProperties}>
         <a
           href="/"
           style={{
@@ -250,6 +338,9 @@ export default function Navbar() {
             width: isMobile ? 44 : 58,
             height: isMobile ? 44 : 58,
             padding: 0,
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0) scale(1)" : "translateY(-20px) scale(0.9)",
+            transition: "opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.1s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.1s",
           }}
         >
               <button
@@ -260,7 +351,7 @@ export default function Navbar() {
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  color: "rgba(0, 0, 0, 0.6)",
+                  color: "rgba(255, 255, 255, 0.7)",
                   WebkitTapHighlightColor: "transparent",
                 }}
               >
@@ -278,10 +369,13 @@ export default function Navbar() {
             width: isMobile ? 44 : 58,
             height: isMobile ? 44 : 58,
             padding: 0,
+            opacity: mounted ? 1 : 0,
+            marginTop: mounted ? 0 : -20,
+            transition: "opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s, margin-top 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s",
           }}
         >
           <button
-            onClick={() => setProfileOpen((v) => !v)}
+            onClick={toggleProfile}
             style={{
               display: "flex",
               alignItems: "center",
@@ -298,46 +392,55 @@ export default function Navbar() {
             <CircleUser
               size={isMobile ? 28 : 40}
               strokeWidth={1.5}
-              color="rgba(0, 0, 0, 0.6)"
+              color="rgba(255, 255, 255, 0.7)"
             />
           </button>
-
-          {profileOpen && (
-            <div style={profileMenuStyle}>
-              <a
-                href="/saved"
-                style={menuItemStyle}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "rgba(0, 0, 0, 0.06)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "none")
-                }
-              >
-                <Bookmark size={18} strokeWidth={1.75} />
-                Saved Classes
-              </a>
-              <button
-                style={menuItemStyle}
-                onClick={() => {}}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "rgba(0, 0, 0, 0.06)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "none")
-                }
-              >
-                <LogOut size={18} strokeWidth={1.75} />
-                Signout
-              </button>
-            </div>
-          )}
         </div>
       </div>
+
+      {menuRendered && popupPos && createPortal(
+        <div 
+          className={`profile-popup ${menuClosing ? 'closing' : ''}`}
+          style={{
+            ...profileMenuStyle,
+            position: "fixed",
+            top: popupPos.top,
+            right: popupPos.right,
+          }}
+        >
+          <a
+            href="/saved"
+            style={menuItemStyle}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background = "none")
+            }
+          >
+            <Bookmark size={18} strokeWidth={1.75} />
+            Saved Classes
+          </a>
+          <button
+            style={menuItemStyle}
+            onClick={() => {}}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background = "none")
+            }
+          >
+            <LogOut size={18} strokeWidth={1.75} />
+            Signout
+          </button>
+        </div>,
+        document.body
+      )}
     </>
   );
 
-  const ib = isMobile ? mobileIndicatorBase : indicatorBase;
+  const ib = indicatorBase;
 
   if (isMobile) {
     return (
@@ -347,13 +450,15 @@ export default function Navbar() {
         <nav
           style={{
             position: "fixed",
-            bottom: 0,
+            bottom: 12,
             left: 0,
             right: 0,
             zIndex: 1000,
             display: "flex",
             justifyContent: "center",
-            padding: "8px 4px",
+            padding: "0 12px",
+            boxSizing: "border-box",
+            width: "100%",
           }}
         >
           <div
@@ -367,10 +472,13 @@ export default function Navbar() {
               padding: "0",
               borderRadius: 9999,
               overflow: "hidden",
-              background: "rgba(255, 255, 255, 0.15)",
+              background: "rgba(0, 0, 0, 0.25)",
               backdropFilter: "blur(20px)",
               WebkitBackdropFilter: "blur(20px)",
               boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
+              opacity: mounted ? 1 : 0,
+              transform: mounted ? "translateY(0) scale(1)" : "translateY(20px) scale(0.95)",
+              transition: "opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s",
             }}
             onMouseLeave={() => setHoveredIndex(null)}
           >
@@ -378,14 +486,14 @@ export default function Navbar() {
               style={{
                 ...ib,
                 ...indicatorStyle,
-                background: "rgba(0, 0, 0, 0.08)",
+                background: "rgba(255, 255, 255, 0.08)",
               }}
             />
             <div
               style={{
                 ...ib,
                 ...hoverIndicatorStyle,
-                background: "rgba(0, 0, 0, 0.05)",
+                background: "rgba(255, 255, 255, 0.05)",
                 opacity:
                   hoveredIndex !== null && hoveredIndex !== activeIndex ? 1 : 0,
                 transition: `opacity 0.2s, left 0.15s ${cubicBezier}, top 0.15s ${cubicBezier}, width 0.15s ${cubicBezier}, height 0.15s ${cubicBezier}`,
@@ -399,9 +507,6 @@ export default function Navbar() {
                 <a
                   key={link.href}
                   href={link.href}
-                  ref={(el) => {
-                    linkRefs.current[i] = el;
-                  }}
                   onMouseEnter={() => setHoveredIndex(i)}
                   style={{
                     position: "relative",
@@ -412,7 +517,7 @@ export default function Navbar() {
                     alignItems: "center",
                     justifyContent: "center",
                     gap: 2,
-                    padding: "6px 8px",
+                    padding: "6px 4px",
                     borderRadius: 9999,
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize: "0.65rem",
@@ -424,10 +529,10 @@ export default function Navbar() {
                     border: "none",
                     WebkitTapHighlightColor: "transparent",
                     color: isActive
-                      ? "rgba(0, 0, 0, 0.95)"
+                      ? "rgba(255, 255, 255, 0.95)"
                       : hoveredIndex === i
-                        ? "rgba(0, 0, 0, 0.9)"
-                        : "rgba(0, 0, 0, 0.6)",
+                        ? "rgba(255, 255, 255, 0.85)"
+                        : "rgba(255, 255, 255, 0.6)",
                   }}
                 >
                   <Icon size={22} strokeWidth={1.75} />
@@ -443,7 +548,7 @@ export default function Navbar() {
 
   return (
     <>
-      {topPills}
+      {drawerOpen ? null : topPills}
 
       <nav
         style={{
@@ -452,24 +557,32 @@ export default function Navbar() {
           left: 0,
           right: 0,
           zIndex: 1000,
-          display: "flex",
+          display: drawerOpen ? "none" : "flex",
           justifyContent: "center",
           padding: "24px 24px",
         }}
       >
-        <div style={pillStyle} onMouseLeave={() => setHoveredIndex(null)}>
+        <div 
+          style={{ 
+            ...pillStyle, 
+            opacity: mounted ? 1 : 0, 
+            transform: mounted ? "translateY(0) scale(1)" : "translateY(-20px) scale(0.95)",
+            transition: "opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s" 
+          }} 
+          onMouseLeave={() => setHoveredIndex(null)}
+        >
           <div
             style={{
               ...indicatorBase,
               ...indicatorStyle,
-              background: "rgba(0, 0, 0, 0.08)",
+              background: "rgba(255, 255, 255, 0.08)",
             }}
           />
           <div
             style={{
               ...indicatorBase,
               ...hoverIndicatorStyle,
-              background: "rgba(0, 0, 0, 0.05)",
+              background: "rgba(255, 255, 255, 0.05)",
               opacity:
                 hoveredIndex !== null && hoveredIndex !== activeIndex ? 1 : 0,
               transition: `opacity 0.2s, left 0.3s ${cubicBezier}, top 0.3s ${cubicBezier}, width 0.3s ${cubicBezier}, height 0.3s ${cubicBezier}`,
@@ -483,20 +596,17 @@ export default function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                ref={(el) => {
-                  linkRefs.current[i] = el;
-                }}
                 onMouseEnter={() => setHoveredIndex(i)}
                 style={{
                   ...linkStyle,
-                  padding: `17px ${desktopLinkPadH}px`,
+                  flex: 1,
                   fontSize: `${desktopFontSize}rem`,
                   gap: "6px",
                   color: isActive
-                    ? "rgba(0, 0, 0, 0.95)"
+                    ? "rgba(255, 255, 255, 0.95)"
                     : hoveredIndex === i
-                      ? "rgba(0, 0, 0, 0.9)"
-                      : "rgba(0, 0, 0, 0.6)",
+                      ? "rgba(255, 255, 255, 0.85)"
+                      : "rgba(255, 255, 255, 0.6)",
                   fontWeight: isActive ? 600 : 500,
                 }}
               >

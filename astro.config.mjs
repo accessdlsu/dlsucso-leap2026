@@ -16,7 +16,7 @@ export default defineConfig({
       include: ['react', 'react-dom', 'lucide-react'],
     },
     ssr: {
-      noExternal: ['react', 'react-dom', 'lucide-react'],
+      noExternal: ['react', 'react-dom'],
     },
   },
 });

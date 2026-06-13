@@ -1,7 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { Image } from 'astro:assets';
-import logo from '../assets/favicon.png';
 
 const targetDate = "2027-01-01T00:00:00";
 const displayDate = new Date(targetDate).toLocaleDateString('en-US', {
@@ -78,22 +76,16 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
       />
     ))}
     <div class="cnt-content">
-      <div class="cnt-logo anim-in">
-        <Image
-          src={logo}
+      <div class="cnt-logo anim-in" style="opacity:0;transform:translateY(8px)">
+        <img
+          src="/logo/logo-hd.png"
           alt="LEAP 2026"
-          widths={[400, 600, 800]}
-          sizes="(max-width: 768px) 80vw, 500px"
           loading="eager"
-          style={{
-            width: "min(500px, 90vw)",
-            height: "auto",
-            display: "block",
-          }}
+          style="width: min(500px, 90vw); height: auto; display: block;"
         />
       </div>
-      <h1 class="cnt-title anim-in">Coming Soon</h1>
-      <div class="cnt-timer anim-in" id="countdown" data-target={targetDate}>
+      <h1 class="cnt-title anim-in" style="opacity:0;transform:translateY(8px)">Coming Soon</h1>
+      <div class="cnt-timer anim-in" id="countdown" data-target={targetDate} style="opacity:0;transform:translateY(8px)">
         <div class="cnt-unit">
           <div class="cnt-card">
             <span class="cnt-num" id="cnt-days">00</span>
@@ -122,8 +114,8 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
           <span class="cnt-label">Seconds</span>
         </div>
       </div>
-      <p class="cnt-date anim-in">{displayDate}</p>
-      <p class="cnt-desc anim-in">Get ready for an unforgettable experience.</p>
+      <p class="cnt-date anim-in" style="opacity:0;transform:translateY(8px)">{displayDate}</p>
+      <p class="cnt-desc anim-in" style="opacity:0;transform:translateY(8px)">Get ready for an unforgettable experience.</p>
     </div>
 
     <footer class="cnt-footer" style="position:absolute">LEAP 2026 &copy; DLSUCSO</footer>
@@ -165,11 +157,11 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
 
 <style>
   @font-face {
-    font-family: 'Tropikal';
-    src: url('/fonts/Tropikal-Bold.woff2') format('woff2'),
-         url('/fonts/Tropikal-Bold.otf') format('opentype');
-    font-weight: bold;
+    font-family: 'TD-Sulog';
+    src: url('/fonts/TD-Sulog.woff2') format('woff2');
+    font-weight: 700;
     font-style: normal;
+    font-display: swap;
   }
 
   body {
@@ -203,10 +195,11 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
     align-items: center;
     gap: clamp(0.5rem, 1.5vw, 0.75rem);
   }
-
+  .cnt-content .cnt-logo img {
+    filter: drop-shadow(0 0 50px rgba(222, 154, 73, 0.18));
+  }
   .cnt-title {
-    font-family: 'Tropikal', 'Playfair Display', serif;
-    font-style: italic;
+    font-family: 'TD-Sulog', serif;
     font-weight: 700;
     font-size: clamp(1.4rem, 5.5vw, 2.4rem);
     letter-spacing: 0.015em;
@@ -313,12 +306,12 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
 
   /* ── Entrance Animation ── */
   @keyframes fadeInUp {
-    from { transform: translateY(4px); }
-    to { transform: translateY(0); }
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .anim-in {
-    animation: fadeInUp 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
   }
 
   /* ── Landscape ── */
@@ -447,7 +440,7 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
     .firefly { animation: none; opacity: 0.3; }
     .bubble { display: none; }
     .bio-dot { animation: none; opacity: 0.15; }
-    .anim-in { animation: none; }
+    .anim-in { animation: none; opacity: 1; transform: none; }
   }
 </style>
 

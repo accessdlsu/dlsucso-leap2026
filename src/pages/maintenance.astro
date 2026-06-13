@@ -1,7 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { Image } from 'astro:assets';
-import logo from '../assets/favicon.png';
 
 const fireflies = Array.from({ length: 16 }, (_, i) => ({
   id: i,
@@ -25,7 +23,7 @@ const shapes = Array.from({ length: 8 }, (_, i) => ({
 ---
 
 <Layout title="Maintenance — LEAP 2026" showNavbar={false}>
-  <div class="mnt-bg">
+  <div class="mnt-bg" style="background:linear-gradient(180deg,#2a2a35 0%,#22222e 10%,#1c1c28 25%,#161622 40%,#0f0f1a 55%,#0a0a14 70%,#07070e 85%,#05050a 100%)">
     {fireflies.map((f) => (
       <div
         class="firefly"
@@ -56,23 +54,17 @@ const shapes = Array.from({ length: 8 }, (_, i) => ({
       />
     ))}
     <div class="mnt-content">
-      <div class="mnt-icon anim-in">
-        <Image
-          src={logo}
+      <div class="mnt-icon anim-in" style="opacity:0;transform:translateY(8px)">
+        <img
+          src="/logo/logo-hd.png"
           alt="LEAP 2026"
-          widths={[400, 600, 800]}
-          sizes="(max-width: 768px) 80vw, 500px"
           loading="eager"
-          style={{
-            width: "min(500px, 90vw)",
-            height: "auto",
-            display: "block",
-          }}
+          style="width: min(500px, 90vw); height: auto; display: block;"
         />
       </div>
-      <h1 class="mnt-title anim-in">Under Maintenance</h1>
-      <p class="mnt-desc anim-in">We're making improvements to serve you better.</p>
-      <p class="mnt-sub anim-in">Please check back soon.</p>
+      <h1 class="mnt-title anim-in" style="opacity:0;transform:translateY(8px)">Under Maintenance</h1>
+      <p class="mnt-desc anim-in" style="opacity:0;transform:translateY(8px)">We're making improvements to serve you better.</p>
+      <p class="mnt-sub anim-in" style="opacity:0;transform:translateY(8px)">Please check back soon.</p>
     </div>
 
     <footer class="mnt-footer" style="position:absolute">LEAP 2026 &copy; DLSUCSO</footer>
@@ -115,11 +107,11 @@ const shapes = Array.from({ length: 8 }, (_, i) => ({
 
 <style>
   @font-face {
-    font-family: 'Tropikal';
-    src: url('/fonts/Tropikal-Bold.woff2') format('woff2'),
-         url('/fonts/Tropikal-Bold.otf') format('opentype');
-    font-weight: bold;
+    font-family: 'TD-Sulog';
+    src: url('/fonts/TD-Sulog.woff2') format('woff2');
+    font-weight: 700;
     font-style: normal;
+    font-display: swap;
   }
 
   body {
@@ -160,25 +152,22 @@ const shapes = Array.from({ length: 8 }, (_, i) => ({
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(0.5rem, 1.5vw, 0.75rem);
-  }
-
-  .mnt-icon {
-    width: min(500px, 90vw);
+    gap: clamp(0.75rem, 2.5vw, 1.25rem);
   }
   .mnt-icon img {
     display: block;
     height: auto;
+    filter: drop-shadow(0 0 50px rgba(222, 154, 73, 0.18));
   }
 
   .mnt-title {
-    font-family: 'Tropikal', 'Playfair Display', serif;
+    font-family: 'TD-Sulog', serif;
     font-weight: 700;
-    font-size: clamp(1.8rem, 6vw, 2.8rem);
-    letter-spacing: 0.02em;
-    line-height: 1.1;
+    font-size: clamp(1.4rem, 5.5vw, 2.4rem);
+    letter-spacing: 0.015em;
+    line-height: 1.15;
     text-align: center;
-    margin: 0;
+    margin-top: -0.5rem;
     background: linear-gradient(180deg, #fff5c4 0%, #fae185 35%, #de9a49 75%, #b07820 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -189,11 +178,12 @@ const shapes = Array.from({ length: 8 }, (_, i) => ({
 
   .mnt-desc {
     font-family: 'DM Sans', sans-serif;
-    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
-    color: rgba(255,255,255,0.75);
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    color: rgba(255,255,255,0.6);
     text-align: center;
     line-height: 1.5;
-    margin: 0.5rem 0 0;
+    margin: 0.25rem 0 0;
+    letter-spacing: 0.04em;
     max-width: 360px;
   }
 
@@ -204,17 +194,17 @@ const shapes = Array.from({ length: 8 }, (_, i) => ({
     text-align: center;
     line-height: 1.5;
     margin: 0.25rem 0 0;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
   }
 
   /* ── Entrance Animation ── */
   @keyframes fadeInUp {
-    from { transform: translateY(4px); }
-    to { transform: translateY(0); }
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .anim-in {
-    animation: fadeInUp 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
   }
 
   /* ── Landscape ── */
@@ -290,6 +280,6 @@ const shapes = Array.from({ length: 8 }, (_, i) => ({
   @media (prefers-reduced-motion: reduce) {
     .firefly { animation: none; opacity: 0.3; }
     .geo-shape { display: none; }
-    .anim-in { animation: none; }
+    .anim-in { animation: none; opacity: 1; transform: none; }
   }
 </style>

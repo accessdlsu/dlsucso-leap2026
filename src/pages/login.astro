@@ -1,7 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { Image } from 'astro:assets';
-import logo from '../assets/favicon.png';
 
 const fireflies = Array.from({ length: 16 }, (_, i) => ({
   id: i,
@@ -29,23 +27,17 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
       />
     ))}
     <div class="login-content">
-      <div class="logo-wrapper anim-in">
-        <Image
-          src={logo}
+      <div class="logo-wrapper anim-in" style="opacity:0;transform:translateY(8px)">
+        <img
+          src="/logo/logo-hd.png"
           alt="LEAP 2026"
-          widths={[400, 600, 800]}
-          sizes="(max-width: 768px) 80vw, 500px"
           loading="eager"
-          style={{
-            width: "min(500px, 90vw)",
-            height: "auto",
-            display: "block",
-          }}
+          style="width: min(500px, 90vw); height: auto; display: block;"
         />
       </div>
-      <span class="tagline anim-in">Isang Nayon, Isang Layunin</span>
+      <span class="tagline anim-in" style="opacity:0;transform:translateY(8px)">Isang Nayon, Isang Layunin</span>
       <p id="login-error" class="error-msg" role="alert"></p>
-      <button class="gsi-material-button anim-in" id="google-signin-btn">
+      <button class="gsi-material-button anim-in" id="google-signin-btn" style="opacity:0;transform:translateY(8px)">
         <div class="gsi-material-button-state"></div>
         <div class="gsi-material-button-content-wrapper">
           <div class="gsi-material-button-icon">
@@ -62,7 +54,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
         </div>
         <div class="spinner" aria-hidden="true"></div>
       </button>
-      <p class="terms anim-in">
+      <p class="terms anim-in" style="opacity:0;transform:translateY(8px)">
         By clicking continue, you agree to our{' '}
         <a href="#" data-dialog="tos">Terms of Service</a> and{' '}
         <a href="#" data-dialog="pp">Privacy Policy</a>.
@@ -118,11 +110,11 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
 
 <style>
   @font-face {
-    font-family: 'Tropikal';
-    src: url('/fonts/Tropikal-Bold.woff2') format('woff2'),
-         url('/fonts/Tropikal-Bold.otf') format('opentype');
-    font-weight: bold;
+    font-family: 'TD-Sulog';
+    src: url('/fonts/TD-Sulog.woff2') format('woff2');
+    font-weight: 700;
     font-style: normal;
+    font-display: swap;
   }
 
   body {
@@ -156,11 +148,12 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     align-items: center;
     gap: clamp(0.75rem, 2.5vw, 1.25rem);
   }
-
+  .login-content .logo-wrapper img {
+    filter: drop-shadow(0 0 50px rgba(222, 154, 73, 0.18));
+  }
   .tagline {
     margin-top: -0.5rem;
-    font-family: 'Tropikal', 'Playfair Display', serif;
-    font-style: italic;
+    font-family: 'TD-Sulog', serif;
     font-weight: 700;
     font-size: clamp(1.4rem, 5.5vw, 2.4rem);
     letter-spacing: 0.015em;
@@ -176,16 +169,16 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
 
   /* ── Entrance Animation ── */
   @keyframes fadeInUp {
-    from { transform: translateY(8px); }
-    to { transform: translateY(0); }
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .anim-in {
-    animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
   }
-  .anim-in:nth-child(2) { animation-delay: 0.05s; }
-  .anim-in:nth-child(4) { animation-delay: 0.1s; }
-  .anim-in:nth-child(5) { animation-delay: 0.15s; }
+  .anim-in:nth-child(2) { animation-delay: 0.15s; }
+  .anim-in:nth-child(4) { animation-delay: 0.2s; }
+  .anim-in:nth-child(5) { animation-delay: 0.25s; }
 
   /* ── Landscape ── */
   .landscape {
@@ -254,7 +247,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     box-sizing: border-box;
     color: #1f1f1f;
     cursor: pointer;
-    font-family: 'Roboto', arial, sans-serif;
+    font-family: 'Google Sans', arial, sans-serif;
     font-size: 14px;
     height: 40px;
     letter-spacing: 0.25px;
@@ -295,7 +288,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
   .gsi-material-button .gsi-material-button-contents {
     -webkit-flex-grow: 1;
     flex-grow: 1;
-    font-family: 'Roboto', arial, sans-serif;
+    font-family: 'Google Sans', arial, sans-serif;
     font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -476,7 +469,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
 
   @media (prefers-reduced-motion: reduce) {
     .firefly { animation: none; opacity: 0.3; }
-    .anim-in { animation: none; }
+    .anim-in { animation: none; opacity: 1; transform: none; }
   }
 </style>
 
