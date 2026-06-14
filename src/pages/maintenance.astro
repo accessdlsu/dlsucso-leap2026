@@ -1,10 +1,10 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
 
 const fireflies = Array.from({ length: 16 }, (_, i) => ({
   id: i,
-  x: (i * 17.3 + (i % 3) * 29) % 94 + 3,
-  y: (i * 11.7 + (i % 5) * 13) % 55 + 5,
+  x: ((i * 17.3 + (i % 3) * 29) % 94) + 3,
+  y: ((i * 11.7 + (i % 5) * 13) % 55) + 5,
   size: 2 + (i % 3),
   delay: (i * 0.61) % 7,
   dur: 3.5 + (i % 5) * 0.6,
@@ -12,47 +12,123 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
 
 const shapes = Array.from({ length: 8 }, (_, i) => ({
   id: i,
-  x: 5 + (i * 12.5 + (i % 2) * 4) % 90,
-  y: 8 + (i * 9.3 + (i % 3) * 7) % 75,
+  x: 5 + ((i * 12.5 + (i % 2) * 4) % 90),
+  y: 8 + ((i * 9.3 + (i % 3) * 7) % 75),
   size: 30 + (i % 4) * 20,
   delay: (i * 1.2) % 6,
   dur: 10 + (i % 3) * 5,
   type: i % 3,
   rotation: (i * 52) % 360,
 }));
+
+const bgBuildings = [
+  { x: 30, w: 70, y: 270 },
+  { x: 150, w: 70, y: 280 },
+  { x: 280, w: 70, y: 260 },
+  { x: 410, w: 70, y: 275 },
+  { x: 530, w: 70, y: 255 },
+  { x: 820, w: 70, y: 265 },
+  { x: 940, w: 70, y: 285 },
+  { x: 1070, w: 70, y: 270 },
+  { x: 1210, w: 70, y: 260 },
+  { x: 1320, w: 70, y: 280 },
+];
+
+const midBuildings = [
+  { x: 10, w: 70, y: 230 },
+  { x: 110, w: 70, y: 215 },
+  { x: 230, w: 70, y: 225 },
+  { x: 350, w: 70, y: 210 },
+  { x: 480, w: 70, y: 205 },
+  { x: 800, w: 70, y: 220 },
+  { x: 910, w: 70, y: 210 },
+  { x: 1040, w: 70, y: 225 },
+  { x: 1170, w: 70, y: 215 },
+  { x: 1290, w: 70, y: 230 },
+];
+
+const fgBuildings = [
+  { x: 0, w: 70, y: 200 },
+  { x: 100, w: 70, y: 185 },
+  { x: 260, w: 70, y: 195 },
+  { x: 420, w: 70, y: 175 },
+  { x: 560, w: 70, y: 165 },
+  { x: 700, w: 70, y: 180 },
+  { x: 840, w: 70, y: 170 },
+  { x: 980, w: 70, y: 190 },
+  { x: 1120, w: 70, y: 175 },
+  { x: 1280, w: 70, y: 195 },
+];
+
+const getRackSlots = (
+  b: { x: number; w: number; y: number },
+  step = 10,
+  slotH = 3,
+) => {
+  const slots = [];
+  const startY = b.y + 8;
+  const endY = 310; // Ground line
+  const rackW = b.w - 18;
+  const rackX = b.x + 9;
+
+  for (let cy = startY; cy < endY - 6; cy += step) {
+    const hasLight = (cy + b.x) % 11 < 3;
+    const lightGap = 12; // Blank space offset for indicator LED
+    slots.push({
+      x: hasLight ? rackX + lightGap : rackX,
+      y: cy,
+      w: hasLight ? rackW - lightGap : rackW,
+      h: slotH,
+      hasLight,
+      lightX: rackX + 4,
+      lightColor: (cy + b.x) % 2 === 0 ? "#10b981" : "#f59e0b",
+    });
+  }
+  return slots;
+};
 ---
 
-<Layout title="Maintenance — LEAP 2026" showNavbar={false}>
-  <div class="mnt-bg" style="background:linear-gradient(180deg,#2a2a35 0%,#22222e 10%,#1c1c28 25%,#161622 40%,#0f0f1a 55%,#0a0a14 70%,#07070e 85%,#05050a 100%)">
-    {fireflies.map((f) => (
-      <div
-        class="firefly"
-        style={{
-          left: `${f.x}%`,
-          top: `${f.y}%`,
-          width: f.size,
-          height: f.size,
-          animationDelay: `${f.delay}s`,
-          animationDuration: `${f.dur}s`,
-        }}
-      />
-    ))}
-    {shapes.map((s) => (
-      <div
-        class="geo-shape"
-        style={{
-          left: `${s.x}%`,
-          top: `${s.y}%`,
-          width: s.size,
-          height: s.size,
-          animationDelay: `${s.delay}s`,
-          animationDuration: `${s.dur}s`,
-          borderRadius: s.type === 0 ? '50%' : s.type === 1 ? '4px' : '',
-          '--r': `${s.rotation}deg`,
-          clipPath: s.type === 2 ? 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' : '',
-        }}
-      />
-    ))}
+<Layout title="Maintenance | LEAP 2026" showNavbar={false}>
+  <div
+    class="mnt-bg"
+    style="background:linear-gradient(180deg,#2a2a35 0%,#22222e 10%,#1c1c28 25%,#161622 40%,#0f0f1a 55%,#0a0a14 70%,#07070e 85%,#05050a 100%)"
+  >
+    {
+      fireflies.map((f) => (
+        <div
+          class="firefly"
+          style={{
+            left: `${f.x}%`,
+            top: `${f.y}%`,
+            width: f.size,
+            height: f.size,
+            animationDelay: `${f.delay}s`,
+            animationDuration: `${f.dur}s`,
+          }}
+        />
+      ))
+    }
+    {
+      shapes.map((s) => (
+        <div
+          class="geo-shape"
+          style={{
+            left: `${s.x}%`,
+            top: `${s.y}%`,
+            width: s.size,
+            height: s.size,
+            animationDelay: `${s.delay}s`,
+            animationDuration: `${s.dur}s`,
+            borderRadius: s.type === 0 ? "50%" : s.type === 1 ? "4px" : "",
+            "--r": `${s.rotation}deg`,
+            clipPath:
+              s.type === 2
+                ? "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)"
+                : "",
+          }}
+        />
+      ))
+    }
     <div class="mnt-content">
       <div class="mnt-icon anim-in" style="opacity:0;transform:translateY(8px)">
         <img
@@ -62,62 +138,223 @@ const shapes = Array.from({ length: 8 }, (_, i) => ({
           style="width: min(500px, 90vw); height: auto; display: block;"
         />
       </div>
-      <h1 class="mnt-title anim-in" style="opacity:0;transform:translateY(8px)">Under Maintenance</h1>
-      <p class="mnt-desc anim-in" style="opacity:0;transform:translateY(8px)">We're making improvements to serve you better.</p>
-      <p class="mnt-sub anim-in" style="opacity:0;transform:translateY(8px)">Please check back soon.</p>
+      <h1 class="mnt-title anim-in" style="opacity:0;transform:translateY(8px)">
+        Under Maintenance
+      </h1>
+      <p class="mnt-desc anim-in" style="opacity:0;transform:translateY(8px)">
+        We're making improvements to serve you better.
+      </p>
+      <p class="mnt-sub anim-in" style="opacity:0;transform:translateY(8px)">
+        Please check back soon.
+      </p>
     </div>
 
-    <footer class="mnt-footer" style="position:absolute">LEAP 2026 &copy; DLSUCSO</footer>
+    <footer class="mnt-footer" style="position:absolute">
+      &copy; LEAP&nbsp;2026 &middot; CSO &middot; DLSU
+      <br /><br />
+      <span style="opacity:0.5">
+        Made by Association&nbsp;of&nbsp;Computer&nbsp;Engineering&nbsp;Students
+        (ACCESS&nbsp;DLSU)
+      </span>
+    </footer>
 
     <div class="landscape">
-      <svg viewBox="0 0 1440 360" preserveAspectRatio="xMidYMax slice" style="display:block;width:100%;height:100%;">
+      <svg
+        viewBox="0 0 1440 360"
+        preserveAspectRatio="xMidYMax slice"
+        style="display:block;width:100%;height:100%;"
+      >
         <defs>
           <linearGradient id="vG" x1="0%" y1="0%" x2="60%" y2="100%">
-            <stop offset="0%" stop-color="#1e1e2a" /><stop offset="100%" stop-color="#0d0d16" />
+            <stop offset="0%" stop-color="#1e1e2a"></stop><stop
+              offset="100%"
+              stop-color="#0d0d16"></stop>
           </linearGradient>
           <linearGradient id="h3G" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#1a1a26" /><stop offset="100%" stop-color="#0e0e18" />
+            <stop offset="0%" stop-color="#1a1a26"></stop><stop
+              offset="100%"
+              stop-color="#0e0e18"></stop>
           </linearGradient>
           <linearGradient id="h2G" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#222230" /><stop offset="100%" stop-color="#12121e" />
+            <stop offset="0%" stop-color="#222230"></stop><stop
+              offset="100%"
+              stop-color="#12121e"></stop>
           </linearGradient>
           <linearGradient id="h1G" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#262638" /><stop offset="100%" stop-color="#161624" />
+            <stop offset="0%" stop-color="#262638"></stop><stop
+              offset="100%"
+              stop-color="#161624"></stop>
           </linearGradient>
           <linearGradient id="gG" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#2e2e3e" /><stop offset="100%" stop-color="#1a1a28" />
+            <stop offset="0%" stop-color="#2e2e3e"></stop><stop
+              offset="100%"
+              stop-color="#1a1a28"></stop>
           </linearGradient>
           <linearGradient id="fadeG" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#2a2a35" stop-opacity="0" />
-            <stop offset="100%" stop-color="#0a0a14" stop-opacity="1" />
+            <stop offset="0%" stop-color="#2a2a35" stop-opacity="0"></stop>
+            <stop offset="100%" stop-color="#0a0a14" stop-opacity="1"></stop>
           </linearGradient>
         </defs>
-        <path d="M650 360 L650 80 L790 80 L790 360 Z" fill="url(#vG)" />
-        <path d="M650 80 L790 80 L790 110 L650 110 Z" fill="rgba(0,0,0,0.12)" />
-        <path d="M30 360 L30 270 L100 270 L100 360 Z M150 360 L150 280 L220 280 L220 360 Z M280 360 L280 260 L350 260 L350 360 Z M410 360 L410 275 L480 275 L480 360 Z M530 360 L530 255 L600 255 L600 360 Z M820 360 L820 265 L890 265 L890 360 Z M940 360 L940 285 L1010 285 L1010 360 Z M1070 360 L1070 270 L1140 270 L1140 360 Z M1210 360 L1210 260 L1280 260 L1280 360 Z M1320 360 L1320 280 L1390 280 L1390 360 Z" fill="url(#h3G)" />
-        <path d="M10 360 L10 230 L80 230 L80 360 Z M110 360 L110 215 L180 215 L180 360 Z M230 360 L230 225 L300 225 L300 360 Z M350 360 L350 210 L420 210 L420 360 Z M480 360 L480 205 L550 205 L550 360 Z M800 360 L800 220 L870 220 L870 360 Z M910 360 L910 210 L980 210 L980 360 Z M1040 360 L1040 225 L1110 225 L1110 360 Z M1170 360 L1170 215 L1240 215 L1240 360 Z M1290 360 L1290 230 L1360 230 L1360 360 Z" fill="url(#h2G)" />
-        <path d="M0 360 L0 200 L70 200 L70 360 Z M100 360 L100 185 L170 185 L170 360 Z M260 360 L260 195 L330 195 L330 360 Z M420 360 L420 175 L490 175 L490 360 Z M560 360 L560 165 L630 165 L630 360 Z M700 360 L700 180 L770 180 L770 360 Z M840 360 L840 170 L910 170 L910 360 Z M980 360 L980 190 L1050 190 L1050 360 Z M1120 360 L1120 175 L1190 175 L1190 360 Z M1280 360 L1280 195 L1350 195 L1350 360 Z" fill="url(#h1G)" />
-        <path d="M0 360 L0 310 L1440 310 L1440 360 Z" fill="url(#gG)" />
-        <rect x="0" y="330" width="1440" height="30" fill="#1a1a28" opacity="0.4" />
-        <rect x="0" y="335" width="1440" height="25" fill="url(#fadeG)" />
+        <!-- Central Volcano/Tower -->
+        <rect x="650" y="80" width="140" height="280" fill="url(#vG)"></rect>
+        <path d="M650 80 L790 80 L790 110 L650 110 Z" fill="rgba(0,0,0,0.12)"
+        ></path>
+        {
+          getRackSlots({ x: 650, w: 140, y: 80 }, 14, 4).map((s) => (
+            <g>
+              <rect
+                x={s.x}
+                y={s.y}
+                width={s.w}
+                height={s.h}
+                fill="rgba(255,255,255,0.03)"
+              />
+              {s.hasLight && (
+                <circle
+                  cx={s.lightX}
+                  cy={s.y + s.h / 2}
+                  r="1.5"
+                  fill={s.lightColor}
+                  opacity="0.6"
+                />
+              )}
+            </g>
+          ))
+        }
+
+        <!-- Background Layer -->
+        {
+          bgBuildings.map((b) => (
+            <g>
+              <rect
+                x={b.x}
+                y={b.y}
+                width={b.w}
+                height={360 - b.y}
+                fill="url(#h3G)"
+              />
+              {getRackSlots(b, 12, 3).map((s) => (
+                <g>
+                  <rect
+                    x={s.x}
+                    y={s.y}
+                    width={s.w}
+                    height={s.h}
+                    fill="rgba(255,255,255,0.015)"
+                  />
+                  {s.hasLight && (
+                    <circle
+                      cx={s.lightX}
+                      cy={s.y + s.h / 2}
+                      r="1"
+                      fill={s.lightColor}
+                      opacity="0.25"
+                    />
+                  )}
+                </g>
+              ))}
+            </g>
+          ))
+        }
+
+        <!-- Middle Layer -->
+        {
+          midBuildings.map((b) => (
+            <g>
+              <rect
+                x={b.x}
+                y={b.y}
+                width={b.w}
+                height={360 - b.y}
+                fill="url(#h2G)"
+              />
+              {getRackSlots(b, 10, 3).map((s) => (
+                <g>
+                  <rect
+                    x={s.x}
+                    y={s.y}
+                    width={s.w}
+                    height={s.h}
+                    fill="rgba(255,255,255,0.025)"
+                  />
+                  {s.hasLight && (
+                    <circle
+                      cx={s.lightX}
+                      cy={s.y + s.h / 2}
+                      r="1.2"
+                      fill={s.lightColor}
+                      opacity="0.4"
+                    />
+                  )}
+                </g>
+              ))}
+            </g>
+          ))
+        }
+
+        <!-- Foreground Layer -->
+        {
+          fgBuildings.map((b) => (
+            <g>
+              <rect
+                x={b.x}
+                y={b.y}
+                width={b.w}
+                height={360 - b.y}
+                fill="url(#h1G)"
+              />
+              {getRackSlots(b, 8, 3).map((s) => (
+                <g>
+                  <rect
+                    x={s.x}
+                    y={s.y}
+                    width={s.w}
+                    height={s.h}
+                    fill="rgba(255,255,255,0.04)"
+                  />
+                  {s.hasLight && (
+                    <circle
+                      cx={s.lightX}
+                      cy={s.y + s.h / 2}
+                      r="1.5"
+                      fill={s.lightColor}
+                      opacity="0.75"
+                    />
+                  )}
+                </g>
+              ))}
+            </g>
+          ))
+        }
+
+        <rect x="0" y="310" width="1440" height="50" fill="url(#gG)"></rect>
+        <rect
+          x="0"
+          y="330"
+          width="1440"
+          height="30"
+          fill="#1a1a28"
+          opacity="0.4"></rect>
+        <rect x="0" y="335" width="1440" height="25" fill="url(#fadeG)"></rect>
       </svg>
     </div>
   </div>
 </Layout>
 
-<style>
-  @font-face {
-    font-family: 'TD-Sulog';
-    src: url('/fonts/TD-Sulog.woff2') format('woff2');
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-  }
+<div id="dev-bypass" style="display:none">
+  <span class="dev-tag">DEV</span>
+  <span class="dev-label">Bypass</span>
+  <div class="dev-divider"></div>
+  <a href="/?_view=maintenance" class="dev-link">Maintenance</a>
+  <a href="/?_view=countdown" class="dev-link">Countdown</a>
+  <a href="/login" class="dev-link">Login</a>
+</div>
 
+<style>
   body {
     margin: 0;
     overflow: hidden;
-    cursor: url('/salakot_cursor.png'), auto;
+    cursor: url("/assets/cursor.png"), auto;
     -webkit-user-select: none;
     user-select: none;
   }
@@ -133,16 +370,17 @@ const shapes = Array.from({ length: 8 }, (_, i) => ({
     height: 100svh;
     overflow: hidden;
     position: relative;
-    background: linear-gradient(180deg, #2a2a35 0%, #22222e 10%, #1c1c28 25%, #161622 40%, #0f0f1a 55%, #0a0a14 70%, #07070e 85%, #05050a 100%);
-  }
-  .mnt-bg::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
-    background-size: 24px 24px;
-    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      #2a2a35 0%,
+      #22222e 10%,
+      #1c1c28 25%,
+      #161622 40%,
+      #0f0f1a 55%,
+      #0a0a14 70%,
+      #07070e 85%,
+      #05050a 100%
+    );
   }
 
   /* ── Content ── */
@@ -161,25 +399,36 @@ const shapes = Array.from({ length: 8 }, (_, i) => ({
   }
 
   .mnt-title {
-    font-family: 'TD-Sulog', serif;
+    font-family: "TD-Sulog", serif;
     font-weight: 700;
     font-size: clamp(1.4rem, 5.5vw, 2.4rem);
     letter-spacing: 0.015em;
     line-height: 1.15;
     text-align: center;
     margin-top: -0.5rem;
-    background: linear-gradient(180deg, #fff5c4 0%, #fae185 35%, #de9a49 75%, #b07820 100%);
+    background: linear-gradient(
+      180deg,
+      #fff5c4 0%,
+      #fae185 35%,
+      #de9a49 75%,
+      #b07820 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 2px 0 rgba(80,40,10,0.4), 0 4px 24px rgba(0,0,0,0.55), 0 0 48px rgba(222,154,73,0.4), 0 0 96px rgba(250,225,133,0.2);
-    filter: drop-shadow(0 3px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 24px rgba(222,154,73,0.35));
+    text-shadow:
+      0 2px 0 rgba(80, 40, 10, 0.4),
+      0 4px 24px rgba(0, 0, 0, 0.55),
+      0 0 48px rgba(222, 154, 73, 0.4),
+      0 0 96px rgba(250, 225, 133, 0.2);
+    filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.5))
+      drop-shadow(0 0 24px rgba(222, 154, 73, 0.35));
   }
 
   .mnt-desc {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: clamp(0.85rem, 2vw, 1rem);
-    color: rgba(255,255,255,0.6);
+    color: rgba(255, 255, 255, 0.6);
     text-align: center;
     line-height: 1.5;
     margin: 0.25rem 0 0;
@@ -188,9 +437,9 @@ const shapes = Array.from({ length: 8 }, (_, i) => ({
   }
 
   .mnt-sub {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: clamp(0.8rem, 2vw, 0.95rem);
-    color: rgba(255,255,255,0.45);
+    color: rgba(255, 255, 255, 0.45);
     text-align: center;
     line-height: 1.5;
     margin: 0.25rem 0 0;
@@ -199,12 +448,19 @@ const shapes = Array.from({ length: 8 }, (_, i) => ({
 
   /* ── Entrance Animation ── */
   @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .anim-in {
     animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+    will-change: transform, opacity;
   }
 
   /* ── Landscape ── */
@@ -227,29 +483,45 @@ const shapes = Array.from({ length: 8 }, (_, i) => ({
     will-change: opacity;
     box-shadow: 0 0 6px 4px rgba(250, 225, 133, 0.5);
     pointer-events: none;
-    z-index: 3;
+    z-index: 1;
     animation: fireflyBlink 4s ease-in-out infinite;
   }
 
   @keyframes fireflyBlink {
-    0%, 100% { opacity: 0.06; }
-    50% { opacity: 0.7; }
+    0%,
+    100% {
+      opacity: 0.06;
+    }
+    50% {
+      opacity: 0.7;
+    }
   }
 
   /* ── Geometric Shapes ── */
   .geo-shape {
     position: absolute;
-    border: 1px solid rgba(255,255,255,0.06);
-    background: rgba(255,255,255,0.015);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.015);
     pointer-events: none;
     z-index: 1;
+    will-change: transform, opacity;
     animation: shapeFloat 12s ease-in-out infinite;
   }
 
   @keyframes shapeFloat {
-    0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); opacity: 0.15; }
-    33% { transform: translateY(-12px) rotate(calc(var(--r, 0deg) + 8deg)); opacity: 0.3; }
-    66% { transform: translateY(6px) rotate(calc(var(--r, 0deg) - 4deg)); opacity: 0.2; }
+    0%,
+    100% {
+      transform: translateY(0) rotate(var(--r, 0deg));
+      opacity: 0.15;
+    }
+    33% {
+      transform: translateY(-12px) rotate(calc(var(--r, 0deg) + 8deg));
+      opacity: 0.3;
+    }
+    66% {
+      transform: translateY(6px) rotate(calc(var(--r, 0deg) - 4deg));
+      opacity: 0.2;
+    }
   }
 
   /* ── Footer ── */
@@ -258,9 +530,9 @@ const shapes = Array.from({ length: 8 }, (_, i) => ({
     bottom: 1rem;
     left: 0;
     right: 0;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.68rem;
-    color: rgba(255,255,255,0.3);
+    color: rgba(255, 255, 255, 0.3);
     text-align: center;
     letter-spacing: 0.06em;
     z-index: 2;
@@ -278,8 +550,126 @@ const shapes = Array.from({ length: 8 }, (_, i) => ({
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .firefly { animation: none; opacity: 0.3; }
-    .geo-shape { display: none; }
-    .anim-in { animation: none; opacity: 1; transform: none; }
+    .firefly {
+      animation: none;
+      opacity: 0.3;
+    }
+    .geo-shape {
+      display: none;
+    }
+    .anim-in {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ── Dev Bypass (localhost only) ── */
+  #dev-bypass {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.72rem;
+    white-space: nowrap;
+    cursor: default;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .dev-tag {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.15);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  .dev-label {
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 500;
+  }
+  .dev-divider {
+    width: 1px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+  .dev-link {
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition:
+      background 0.15s,
+      color 0.15s;
+    cursor: pointer;
+  }
+  .dev-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
   }
 </style>
+
+<script>
+  // Dev bypass bar: shown only when the worker sets _dev=1 cookie (DEV_BYPASS=true in .dev.vars)
+  if (document.cookie.split(";").some((c) => c.trim() === "_dev=1")) {
+    const bar = document.getElementById("dev-bypass");
+    if (bar) bar.style.display = "flex";
+  }
+</script>
+<script>
+  function handleNewConfig(cfg: any) {
+    if (!cfg) return;
+    if (!cfg.maintenanceMode) {
+      window.location.replace("/");
+    }
+  }
+
+  // Poll config every 30s as a fallback — redirect to / when maintenance is turned off.
+  // The worker will then re-evaluate the gate and route to countdown or home.
+  setInterval(async () => {
+    try {
+      const res = await fetch("/api/config");
+      // 503 means still in maintenance — do nothing
+      if (res.status === 503) return;
+      if (!res.ok) return;
+      const json = await res.json();
+      handleNewConfig(json?.data);
+    } catch {}
+  }, 30_000);
+
+  // Real-time updates via WebSocket
+  function connectWebSocket() {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const ws = new WebSocket(
+      `${protocol}//${window.location.host}/api?type=config`,
+    );
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "config_update") {
+          handleNewConfig(msg.data);
+        }
+      } catch {}
+    };
+
+    ws.onclose = () => {
+      setTimeout(connectWebSocket, 5000);
+    };
+  }
+
+  connectWebSocket();
+</script>

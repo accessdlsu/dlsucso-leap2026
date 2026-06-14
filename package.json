@@ -7,11 +7,12 @@
 	},
 	"scripts": {
 		"dev": "astro dev",
+		"dev:worker": "astro build && wrangler dev --config wrangler.worker.jsonc",
 		"build": "astro build",
 		"preview": "astro build && astro preview",
 		"astro": "astro",
 		"generate-types": "wrangler types",
-		"deploy": "astro build && wrangler deploy",
+		"deploy": "astro build && wrangler deploy --config wrangler.worker.jsonc",
 		"cf-typegen": "wrangler types"
 	},
 	"dependencies": {
@@ -20,11 +21,13 @@
 		"@types/react": "^19.2.17",
 		"@types/react-dom": "^19.2.3",
 		"astro": "^6.4.6",
+		"leapify": "npm:@access-dlsu/leapify@latest",
 		"lucide-react": "^1.17.0",
 		"react": "^19.2.7",
 		"react-dom": "^19.2.7"
 	},
 	"devDependencies": {
+		"@types/node": "^25.9.3",
 		"wrangler": "^4.99.0"
 	},
 	"overrides": {

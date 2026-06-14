@@ -1,33 +1,59 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from "../layouts/Layout.astro";
 
 const fireflies = Array.from({ length: 16 }, (_, i) => ({
   id: i,
-  x: (i * 17.3 + (i % 3) * 29) % 94 + 3,
-  y: (i * 11.7 + (i % 5) * 13) % 55 + 5,
+  x: ((i * 17.3 + (i % 3) * 29) % 94) + 3,
+  y: ((i * 11.7 + (i % 5) * 13) % 55) + 5,
   size: 2 + (i % 3),
   delay: (i * 0.61) % 7,
   dur: 3.5 + (i % 5) * 0.6,
 }));
 ---
 
-<Layout title="Login — LEAP 2026" showNavbar={false}>
+<Layout title="Login | LEAP 2026" showNavbar={false}>
   <div class="login-bg">
-    {fireflies.map((f) => (
-      <div
-        class="firefly"
-        style={{
-          left: `${f.x}%`,
-          top: `${f.y}%`,
-          width: f.size,
-          height: f.size,
-          animationDelay: `${f.delay}s`,
-          animationDuration: `${f.dur}s`,
-        }}
-      />
-    ))}
+    {
+      fireflies.map((f) => (
+        <div
+          class="firefly"
+          style={{
+            left: `${f.x}%`,
+            top: `${f.y}%`,
+            width: f.size,
+            height: f.size,
+            animationDelay: `${f.delay}s`,
+            animationDuration: `${f.dur}s`,
+          }}
+        />
+      ))
+    }
+    <!-- Custom Premium Toast -->
+    <div class="toast-container" id="login-toast" role="alert">
+      <span class="toast-icon">
+        <svg
+          viewBox="0 0 24 24"
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </span>
+      <span class="toast-text" id="toast-message"></span>
+    </div>
+
     <div class="login-content">
-      <div class="logo-wrapper anim-in" style="opacity:0;transform:translateY(8px)">
+      <div
+        class="logo-wrapper anim-in"
+        style="opacity:0;transform:translateY(8px)"
+      >
         <img
           src="/logo/logo-hd.png"
           alt="LEAP 2026"
@@ -35,17 +61,40 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
           style="width: min(500px, 90vw); height: auto; display: block;"
         />
       </div>
-      <span class="tagline anim-in" style="opacity:0;transform:translateY(8px)">Isang Nayon, Isang Layunin</span>
-      <p id="login-error" class="error-msg" role="alert"></p>
-      <button class="gsi-material-button anim-in" id="google-signin-btn" style="opacity:0;transform:translateY(8px)">
+      <span class="tagline anim-in" style="opacity:0;transform:translateY(8px)"
+        >Isang Nayon, Isang Layunin</span
+      >
+      <button
+        class="gsi-material-button anim-in"
+        id="google-signin-btn"
+        style="opacity:0;transform:translateY(8px)"
+      >
         <div class="gsi-material-button-state"></div>
         <div class="gsi-material-button-content-wrapper">
           <div class="gsi-material-button-icon">
-            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: block;">
-              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+            <svg
+              version="1.1"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 48 48"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              style="display: block;"
+            >
+              <path
+                fill="#EA4335"
+                d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+              ></path>
+              <path
+                fill="#4285F4"
+                d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+              ></path>
+              <path
+                fill="#FBBC05"
+                d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+              ></path>
+              <path
+                fill="#34A853"
+                d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+              ></path>
               <path fill="none" d="M0 0h48v48H0z"></path>
             </svg>
           </div>
@@ -55,54 +104,85 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
         <div class="spinner" aria-hidden="true"></div>
       </button>
       <p class="terms anim-in" style="opacity:0;transform:translateY(8px)">
-        By clicking continue, you agree to our{' '}
-        <a href="#" data-dialog="tos">Terms of Service</a> and{' '}
+        By clicking continue, you agree to our{" "}
+        <a href="#" data-dialog="tos">Terms of Service</a> and{" "}
         <a href="#" data-dialog="pp">Privacy Policy</a>.
       </p>
     </div>
 
-    <footer class="login-footer" style="position:absolute">LEAP 2026 &copy; DLSUCSO</footer>
+    <footer class="login-footer" style="position:absolute">
+      &copy; LEAP 2026 &middot; CSO &middot; DLSU
+    </footer>
 
     <dialog class="legal-dialog" id="legal-dialog">
       <div class="legal-dialog-content">
-        <button class="legal-dialog-close" id="dialog-close" aria-label="Close">&times;</button>
+        <button class="legal-dialog-close" id="dialog-close" aria-label="Close"
+          >&times;</button
+        >
         <h2 id="dialog-title"></h2>
         <p id="dialog-body"></p>
       </div>
     </dialog>
 
     <div class="landscape">
-      <svg viewBox="0 0 1440 360" preserveAspectRatio="xMidYMax slice" style="display:block;width:100%;height:100%;">
+      <svg
+        viewBox="0 0 1440 360"
+        preserveAspectRatio="xMidYMax slice"
+        style="display:block;width:100%;height:100%;"
+      >
         <defs>
           <linearGradient id="vG" x1="0%" y1="0%" x2="60%" y2="100%">
-            <stop offset="0%" stop-color="#1a3520" /><stop offset="100%" stop-color="#0d1e10" />
+            <stop offset="0%" stop-color="#1a3520"></stop><stop
+              offset="100%"
+              stop-color="#0d1e10"></stop>
           </linearGradient>
           <linearGradient id="h3G" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#193825" /><stop offset="100%" stop-color="#0f2018" />
+            <stop offset="0%" stop-color="#193825"></stop><stop
+              offset="100%"
+              stop-color="#0f2018"></stop>
           </linearGradient>
           <linearGradient id="h2G" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#1e4a2c" /><stop offset="100%" stop-color="#12271a" />
+            <stop offset="0%" stop-color="#1e4a2c"></stop><stop
+              offset="100%"
+              stop-color="#12271a"></stop>
           </linearGradient>
           <linearGradient id="h1G" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#245630" /><stop offset="100%" stop-color="#152e1c" />
+            <stop offset="0%" stop-color="#245630"></stop><stop
+              offset="100%"
+              stop-color="#152e1c"></stop>
           </linearGradient>
           <linearGradient id="gG" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#2a6234" /><stop offset="100%" stop-color="#1a3a20" />
+            <stop offset="0%" stop-color="#2a6234"></stop><stop
+              offset="100%"
+              stop-color="#1a3a20"></stop>
           </linearGradient>
           <linearGradient id="fadeG" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#1a2940" stop-opacity="0" />
-            <stop offset="100%" stop-color="#3a4a35" stop-opacity="1" />
+            <stop offset="0%" stop-color="#1a2940" stop-opacity="0"></stop>
+            <stop offset="100%" stop-color="#3a4a35" stop-opacity="1"></stop>
           </linearGradient>
         </defs>
-        <path d="M900 0 L710 200 L1090 200 Z" fill="url(#vG)" />
-        <path d="M900 0 L1090 200 L1020 200 Z" fill="rgba(0,0,0,0.12)" />
-        <path d="M0 170 Q150 130 310 150 Q430 165 550 145 Q620 132 710 200 L0 200 Z" fill="url(#h3G)" />
-        <path d="M1090 200 Q1170 130 1280 122 Q1360 115 1440 140 L1440 200 Z" fill="url(#h3G)" />
-        <path d="M0 200 Q130 170 280 184 Q430 200 560 174 Q680 150 800 180 Q920 210 1060 178 Q1180 150 1310 180 Q1390 196 1440 186 L1440 360 L0 360 Z" fill="url(#h2G)" />
-        <path d="M0 250 Q130 225 300 238 Q460 252 620 228 Q760 205 900 234 Q1050 264 1200 238 Q1330 215 1440 234 L1440 360 L0 360 Z" fill="url(#h1G)" />
-        <path d="M0 280 C160 262 320 308 540 280 C760 252 960 304 1180 276 C1340 258 1420 290 1440 282 L1440 360 L0 360 Z" fill="url(#gG)" />
-        <path d="M0 300 C200 284 400 320 600 298 C800 276 1000 316 1200 294 C1340 280 1410 308 1440 300 L1440 360 L0 360 Z" fill="#1a3a20" opacity="0.55" />
-        <rect x="0" y="335" width="1440" height="25" fill="url(#fadeG)" />
+        <path d="M900 0 L710 200 L1090 200 Z" fill="url(#vG)"></path>
+        <path d="M900 0 L1090 200 L1020 200 Z" fill="rgba(0,0,0,0.12)"></path>
+        <path
+          d="M0 170 Q150 130 310 150 Q430 165 550 145 Q620 132 710 200 L0 200 Z"
+          fill="url(#h3G)"></path>
+        <path
+          d="M1090 200 Q1170 130 1280 122 Q1360 115 1440 140 L1440 200 Z"
+          fill="url(#h3G)"></path>
+        <path
+          d="M0 200 Q130 170 280 184 Q430 200 560 174 Q680 150 800 180 Q920 210 1060 178 Q1180 150 1310 180 Q1390 196 1440 186 L1440 360 L0 360 Z"
+          fill="url(#h2G)"></path>
+        <path
+          d="M0 250 Q130 225 300 238 Q460 252 620 228 Q760 205 900 234 Q1050 264 1200 238 Q1330 215 1440 234 L1440 360 L0 360 Z"
+          fill="url(#h1G)"></path>
+        <path
+          d="M0 280 C160 262 320 308 540 280 C760 252 960 304 1180 276 C1340 258 1420 290 1440 282 L1440 360 L0 360 Z"
+          fill="url(#gG)"></path>
+        <path
+          d="M0 300 C200 284 400 320 600 298 C800 276 1000 316 1200 294 C1340 280 1410 308 1440 300 L1440 360 L0 360 Z"
+          fill="#1a3a20"
+          opacity="0.55"></path>
+        <rect x="0" y="335" width="1440" height="25" fill="url(#fadeG)"></rect>
       </svg>
     </div>
   </div>
@@ -110,8 +190,8 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
 
 <style>
   @font-face {
-    font-family: 'TD-Sulog';
-    src: url('/fonts/TD-Sulog.woff2') format('woff2');
+    font-family: "TD-Sulog";
+    src: url("/fonts/TD-Sulog.woff2") format("woff2");
     font-weight: 700;
     font-style: normal;
     font-display: swap;
@@ -120,7 +200,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
   body {
     margin: 0;
     overflow: hidden;
-    cursor: url('/salakot_cursor.png'), auto;
+    cursor: url("/assets/cursor.png"), auto;
     -webkit-user-select: none;
     user-select: none;
   }
@@ -136,7 +216,21 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     height: 100svh;
     overflow: hidden;
     position: relative;
-    background: linear-gradient(180deg, #1a2940 0%, #1d3148 8%, #1f3a4c 18%, #234048 28%, #284240 38%, #2c4338 48%, #2e4632 58%, #314830 68%, #344932 78%, #3a4a35 86%, #4a4a3a 94%, #5a4838 100%);
+    background: linear-gradient(
+      180deg,
+      #1a2940 0%,
+      #1d3148 8%,
+      #1f3a4c 18%,
+      #234048 28%,
+      #284240 38%,
+      #2c4338 48%,
+      #2e4632 58%,
+      #314830 68%,
+      #344932 78%,
+      #3a4a35 86%,
+      #4a4a3a 94%,
+      #5a4838 100%
+    );
   }
 
   /* ── Content ── */
@@ -153,32 +247,55 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
   }
   .tagline {
     margin-top: -0.5rem;
-    font-family: 'TD-Sulog', serif;
+    font-family: "TD-Sulog", serif;
     font-weight: 700;
     font-size: clamp(1.4rem, 5.5vw, 2.4rem);
     letter-spacing: 0.015em;
     line-height: 1.15;
     text-align: center;
-    background: linear-gradient(180deg, #fff5c4 0%, #fae185 35%, #de9a49 75%, #b07820 100%);
+    background: linear-gradient(
+      180deg,
+      #fff5c4 0%,
+      #fae185 35%,
+      #de9a49 75%,
+      #b07820 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 2px 0 rgba(80,40,10,0.4), 0 4px 24px rgba(0,0,0,0.55), 0 0 48px rgba(222,154,73,0.4), 0 0 96px rgba(250,225,133,0.2);
-    filter: drop-shadow(0 3px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 24px rgba(222,154,73,0.35));
+    text-shadow:
+      0 2px 0 rgba(80, 40, 10, 0.4),
+      0 4px 24px rgba(0, 0, 0, 0.55),
+      0 0 48px rgba(222, 154, 73, 0.4),
+      0 0 96px rgba(250, 225, 133, 0.2);
+    filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.5))
+      drop-shadow(0 0 24px rgba(222, 154, 73, 0.35));
   }
 
   /* ── Entrance Animation ── */
   @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .anim-in {
     animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
   }
-  .anim-in:nth-child(2) { animation-delay: 0.15s; }
-  .anim-in:nth-child(4) { animation-delay: 0.2s; }
-  .anim-in:nth-child(5) { animation-delay: 0.25s; }
+  .anim-in:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .anim-in:nth-child(4) {
+    animation-delay: 0.2s;
+  }
+  .anim-in:nth-child(5) {
+    animation-delay: 0.25s;
+  }
 
   /* ── Landscape ── */
   .landscape {
@@ -205,29 +322,62 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
   }
 
   @keyframes fireflyBlink {
-    0%, 100% { opacity: 0.06; }
-    50% { opacity: 0.7; }
+    0%,
+    100% {
+      opacity: 0.06;
+    }
+    50% {
+      opacity: 0.7;
+    }
   }
 
-  /* ── Error Message ── */
-  .error-msg {
-    display: none;
-    margin: 0;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.85rem;
-    color: #fca5a5;
-    text-align: center;
-    background: rgba(220, 38, 38, 0.12);
-    border: 1px solid rgba(220, 38, 38, 0.25);
-    border-radius: 10px;
-    padding: 0.5rem 1rem;
-    max-width: 400px;
-    width: 100%;
+  /* ── Custom Premium Toast ── */
+  .toast-container {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    z-index: 10002;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    background: rgba(185, 28, 28, 0.35); /* red glassmorphism */
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(239, 68, 68, 0.4); /* soft red border */
+    border-radius: 20px; /* robust corner radius that looks clean when wrapped */
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.82rem;
+    color: #fff;
+    box-shadow:
+      0 16px 36px rgba(185, 28, 28, 0.15),
+      0 8px 16px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.3s;
     box-sizing: border-box;
-    line-height: 1.4;
+    max-width: min(600px, calc(100% - 48px));
+    width: auto;
   }
-  .error-msg.visible {
-    display: block;
+  .toast-container.visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .toast-icon {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start; /* keep aligned to top if text wraps */
+    margin-top: 2px;
+    color: #fee2e2; /* light contrast warning indicator */
+    flex-shrink: 0;
+  }
+  .toast-text {
+    line-height: 1.4;
+    white-space: normal; /* wrap text on narrow viewports */
+    word-break: break-word;
   }
 
   /* ── Google Sign-In Button ── */
@@ -247,7 +397,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     box-sizing: border-box;
     color: #1f1f1f;
     cursor: pointer;
-    font-family: 'Google Sans', arial, sans-serif;
+    font-family: "Google Sans", arial, sans-serif;
     font-size: 14px;
     height: 40px;
     letter-spacing: 0.25px;
@@ -255,8 +405,14 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     overflow: hidden;
     padding: 0 12px;
     text-align: center;
-    -webkit-transition: background-color .218s, border-color .218s, box-shadow .218s;
-    transition: background-color .218s, border-color .218s, box-shadow .218s;
+    -webkit-transition:
+      background-color 0.218s,
+      border-color 0.218s,
+      box-shadow 0.218s;
+    transition:
+      background-color 0.218s,
+      border-color 0.218s,
+      box-shadow 0.218s;
     vertical-align: middle;
     white-space: nowrap;
     width: auto;
@@ -288,7 +444,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
   .gsi-material-button .gsi-material-button-contents {
     -webkit-flex-grow: 1;
     flex-grow: 1;
-    font-family: 'Google Sans', arial, sans-serif;
+    font-family: "Google Sans", arial, sans-serif;
     font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -296,8 +452,8 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
   }
 
   .gsi-material-button .gsi-material-button-state {
-    -webkit-transition: opacity .218s;
-    transition: opacity .218s;
+    -webkit-transition: opacity 0.218s;
+    transition: opacity 0.218s;
     bottom: 0;
     left: 0;
     opacity: 0;
@@ -311,8 +467,12 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     background-color: #ffffff61;
     border-color: #1f1f1f1f;
   }
-  .gsi-material-button:disabled .gsi-material-button-contents { opacity: 38%; }
-  .gsi-material-button:disabled .gsi-material-button-icon { opacity: 38%; }
+  .gsi-material-button:disabled .gsi-material-button-contents {
+    opacity: 38%;
+  }
+  .gsi-material-button:disabled .gsi-material-button-icon {
+    opacity: 38%;
+  }
 
   .gsi-material-button:not(:disabled):active .gsi-material-button-state,
   .gsi-material-button:not(:disabled):focus .gsi-material-button-state {
@@ -321,8 +481,12 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
   }
 
   .gsi-material-button:not(:disabled):hover {
-    -webkit-box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
-    box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
+    -webkit-box-shadow:
+      0 1px 2px 0 rgba(60, 64, 67, 0.3),
+      0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    box-shadow:
+      0 1px 2px 0 rgba(60, 64, 67, 0.3),
+      0 1px 3px 1px rgba(60, 64, 67, 0.15);
   }
 
   .gsi-material-button:not(:disabled):hover .gsi-material-button-state {
@@ -354,30 +518,34 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
   }
 
   @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
   /* ── Terms Text ── */
   .terms {
     margin: 1rem 0 0;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.72rem;
-    color: rgba(255,255,255,0.55);
+    color: rgba(255, 255, 255, 0.55);
     text-align: center;
     max-width: 260px;
     line-height: 1.45;
   }
   .terms a {
-    color: rgba(255,255,255,0.8);
+    color: rgba(255, 255, 255, 0.8);
     text-decoration: underline;
     text-underline-offset: 2px;
-    text-decoration-color: rgba(255,255,255,0.3);
-    transition: color 0.2s, text-decoration-color 0.2s;
-    cursor: url('/salakot_cursor.png'), pointer;
+    text-decoration-color: rgba(255, 255, 255, 0.3);
+    transition:
+      color 0.2s,
+      text-decoration-color 0.2s;
+    cursor: url("/assets/cursor.png"), pointer;
   }
   .terms a:hover {
     color: #fff;
-    text-decoration-color: rgba(255,255,255,0.7);
+    text-decoration-color: rgba(255, 255, 255, 0.7);
   }
 
   /* ── Footer ── */
@@ -386,9 +554,9 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     bottom: 1rem;
     left: 0;
     right: 0;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.68rem;
-    color: rgba(255,255,255,0.3);
+    color: rgba(255, 255, 255, 0.3);
     text-align: center;
     letter-spacing: 0.06em;
     z-index: 2;
@@ -402,13 +570,13 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     padding: 0;
     max-width: 480px;
     width: 90vw;
-    background: rgba(255,255,255,0.97);
+    background: rgba(255, 255, 255, 0.97);
     backdrop-filter: blur(16px);
-    box-shadow: 0 24px 48px rgba(0,0,0,0.35);
-    cursor: url('/salakot_cursor.png'), auto;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
+    cursor: url("/assets/cursor.png"), auto;
   }
   .legal-dialog::backdrop {
-    background: rgba(0,0,0,0.55);
+    background: rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(4px);
   }
   .legal-dialog-content {
@@ -416,7 +584,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     position: relative;
   }
   .legal-dialog-content h2 {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 1.15rem;
     font-weight: 600;
     color: #1f1f1f;
@@ -424,7 +592,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     padding-right: 2rem;
   }
   .legal-dialog-content p {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.875rem;
     line-height: 1.6;
     color: #444;
@@ -438,14 +606,16 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     border: none;
     font-size: 1.5rem;
     color: #888;
-    cursor: url('/salakot_cursor.png'), pointer;
+    cursor: url("/assets/cursor.png"), pointer;
     width: 32px;
     height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    transition: background 0.2s, color 0.2s;
+    transition:
+      background 0.2s,
+      color 0.2s;
     padding: 0;
     line-height: 1;
   }
@@ -459,7 +629,8 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     .landscape {
       height: 35%;
     }
-    .error-msg {
+    .toast-container {
+      width: calc(100% - 48px);
       max-width: 360px;
     }
     .tagline {
@@ -468,50 +639,80 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .firefly { animation: none; opacity: 0.3; }
-    .anim-in { animation: none; opacity: 1; transform: none; }
+    .firefly {
+      animation: none;
+      opacity: 0.3;
+    }
+    .anim-in {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
   }
 </style>
 
 <script>
-  const btn = document.getElementById('google-signin-btn');
-  const errorEl = document.getElementById('login-error');
-  const dialog = document.getElementById('legal-dialog');
-  const dialogTitle = document.getElementById('dialog-title');
-  const dialogBody = document.getElementById('dialog-body');
-  const dialogClose = document.getElementById('dialog-close');
+  import {
+    createLeapifyAuthClient,
+    signInWithGoogleRedirect,
+  } from "leapify/client";
+
+  const btn = document.getElementById("google-signin-btn");
+  const toast = document.getElementById("login-toast");
+  const toastMsg = document.getElementById("toast-message");
+  const dialog = document.getElementById("legal-dialog");
+  const dialogTitle = document.getElementById("dialog-title");
+  const dialogBody = document.getElementById("dialog-body");
+  const dialogClose = document.getElementById("dialog-close");
+  let toastTimeout: any = null;
+
+  const authClient = createLeapifyAuthClient(window.location.origin);
 
   const legalCopy = {
     tos: {
-      title: 'Terms of Service',
-      body: 'By using LEAP 2026, you agree to comply with the policies and regulations set forth by the De La Salle University College Student Organization (DLSUCSO). You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. LEAP 2026 reserves the right to modify or terminate the service at any time without prior notice. Continued use of the platform constitutes acceptance of any such changes.',
+      title: "Terms of Service",
+      body: "By using LEAP 2026, you agree to comply with the policies and regulations set forth by the De La Salle University College Student Organization (DLSUCSO). You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. LEAP 2026 reserves the right to modify or terminate the service at any time without prior notice. Continued use of the platform constitutes acceptance of any such changes.",
     },
     pp: {
-      title: 'Privacy Policy',
-      body: 'LEAP 2026 collects personal information — including your name, email address, and student ID — solely for the purposes of event registration, class scheduling, and organization communication. Your data will not be shared with third parties without your explicit consent, except as required by law. We implement reasonable security measures to protect your information, though no method of electronic storage is completely secure. You may request access to or deletion of your data by contacting DLSUCSO.',
+      title: "Privacy Policy",
+      body: "LEAP 2026 collects personal information — including your name, email address, and student ID — solely for the purposes of event registration, class scheduling, and organization communication. Your data will not be shared with third parties without your explicit consent, except as required by law. We implement reasonable security measures to protect your information, though no method of electronic storage is completely secure. You may request access to or deletion of your data by contacting DLSUCSO.",
     },
   };
 
-  btn.addEventListener('click', async () => {
+  btn.addEventListener("click", async () => {
     if (btn.disabled) return;
 
-    btn.classList.add('loading');
+    btn.classList.add("loading");
     btn.disabled = true;
-    errorEl.classList.remove('visible');
-    errorEl.textContent = '';
 
-    await new Promise((r) => setTimeout(r, 2000));
+    if (toastTimeout) {
+      clearTimeout(toastTimeout);
+    }
+    toast.classList.remove("visible");
 
-    btn.classList.remove('loading');
-    btn.disabled = false;
-    errorEl.textContent = 'Sign in with Google is not yet connected. Please try again later.';
-    errorEl.classList.add('visible');
+    try {
+      // Redirect to root route (homepage) post-OAuth redirect session verification
+      await signInWithGoogleRedirect(authClient, window.location.origin + "/");
+    } catch (err) {
+      btn.classList.remove("loading");
+      btn.disabled = false;
+      toastMsg.textContent =
+        err instanceof Error
+          ? err.message
+          : "Google sign-in failed. Please try again.";
+      toast.classList.add("visible");
+
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove("visible");
+        toastTimeout = null;
+      }, 4000);
+    }
   });
 
-  document.querySelectorAll('[data-dialog]').forEach((link) => {
-    link.addEventListener('click', (e) => {
+  document.querySelectorAll("[data-dialog]").forEach((link) => {
+    link.addEventListener("click", (e) => {
       e.preventDefault();
-      const type = link.getAttribute('data-dialog');
+      const type = link.getAttribute("data-dialog");
       const copy = legalCopy[type];
       if (copy) {
         dialogTitle.textContent = copy.title;
@@ -521,9 +722,9 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     });
   });
 
-  dialogClose.addEventListener('click', () => dialog.close());
+  dialogClose.addEventListener("click", () => dialog.close());
 
-  dialog.addEventListener('click', (e) => {
+  dialog.addEventListener("click", (e) => {
     if (e.target === dialog) dialog.close();
   });
 </script>

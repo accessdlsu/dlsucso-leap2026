@@ -1,0 +1,51 @@
+/**
+ * RUNTIME — used by `wrangler dev` and `wrangler deploy`.
+ *
+ * Kept separate from wrangler.jsonc because astro build needs its own
+ * worker (@astrojs/cloudflare/entrypoints/server) to serve an internal
+ * prerender endpoint. Our custom worker doesn't implement it.
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "dlsucso-leap2026",
+	"main": "./worker/index.ts",
+	"compatibility_date": "2026-06-11",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"assets": {
+		"directory": "./dist/client",
+		"binding": "ASSETS",
+		// Worker handles every request — routes /api, /data, index routing, then falls to ASSETS.
+		"run_worker_first": true
+	},
+	"observability": {
+		"enabled": true
+	},
+	// Serve from AP Southeast (Singapore) — closest to Manila for PH users.
+	"placement": {
+		"region": "aws:ap-southeast-1"
+	},
+	"preview_urls": false,
+	"routes": [
+		{ "pattern": "dlsucso-leap.com", "custom_domain": true }
+	],
+	// Worker-to-Worker service binding — leapify-console calls stay inside Cloudflare network.
+	// LEAPIFY_API_URL secret is used as HTTP fallback when BACKEND binding is unavailable (local dev).
+	"services": [
+		{
+			"binding": "BACKEND",
+			"service": "leapify-console"
+		}
+	],
+	"env": {
+		"staging": {
+			"name": "dlsucso-leap2026-dev",
+			"upload_source_maps": true,
+			"services": [
+				{
+					"binding": "BACKEND",
+					"service": "leapify-console"
+				}
+			]
+		}
+	}
+}

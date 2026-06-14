@@ -1,11 +1,22 @@
+/**
+ * BUILD-ONLY — read by `astro build` for the CF adapter prerender server.
+ *
+ * CANNOT use ./worker/index.ts here: astro build calls a special internal
+ * endpoint on this worker that only @astrojs/cloudflare/entrypoints/server
+ * implements. Our custom worker doesn't expose it → 404 → build fails.
+ *
+ * Runtime config (wrangler dev + wrangler deploy) → wrangler.worker.jsonc
+ */
 {
-	"compatibility_date": "2026-06-11",
-	"compatibility_flags": ["global_fetch_strictly_public"],
+	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "dlsucso-leap2026",
 	"main": "@astrojs/cloudflare/entrypoints/server",
+	"compatibility_date": "2026-06-11",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
 	"assets": {
-		"directory": "./dist",
-		"binding": "ASSETS"
+		"directory": "./dist/client",
+		"binding": "ASSETS",
+		"run_worker_first": true
 	},
 	"observability": {
 		"enabled": true

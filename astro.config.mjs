@@ -11,6 +11,15 @@ export default defineConfig({
   vite: {
     server: {
       allowedHosts: ['leap.wincs.dev'],
+      // In astro dev, proxy /api/* to the backend so countdown can fetch /api/config.
+      // LEAPIFY_API_URL comes from .env (gitignored) — never exposed to the browser.
+      proxy: process.env.LEAPIFY_API_URL ? {
+        '/api': {
+          target: process.env.LEAPIFY_API_URL,
+          changeOrigin: true,
+          rewrite: (path) => path,
+        },
+      } : {},
     },
     optimizeDeps: {
       include: ['react', 'react-dom', 'lucide-react'],

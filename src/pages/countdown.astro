@@ -1,173 +1,95 @@
 ---
-import Layout from '../layouts/Layout.astro';
-
-const targetDate = "2027-01-01T00:00:00";
-const displayDate = new Date(targetDate).toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-});
-
-const fireflies = Array.from({ length: 16 }, (_, i) => ({
-  id: i,
-  x: (i * 17.3 + (i % 3) * 29) % 94 + 3,
-  y: (i * 11.7 + (i % 5) * 13) % 55 + 5,
-  size: 2 + (i % 3),
-  delay: (i * 0.61) % 7,
-  dur: 3.5 + (i % 5) * 0.6,
-}));
-
-const bubbles = Array.from({ length: 10 }, (_, i) => ({
-  id: i,
-  x: 5 + (i * 9.5 + (i % 2) * 6) % 90,
-  size: 6 + (i % 4) * 5,
-  delay: (i * 0.8 + (i % 3) * 0.3) % 6,
-  dur: 5 + (i % 3) * 2,
-}));
-
-const bioDots = Array.from({ length: 10 }, (_, i) => ({
-  id: i,
-  x: 3 + (i * 11.3 + (i % 3) * 7) % 94,
-  y: 10 + (i * 8.7 + (i % 5) * 9) % 55,
-  size: 2 + (i % 3),
-  delay: (i * 0.55) % 6,
-  dur: 3 + (i % 4) * 0.8,
-}));
+import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Countdown — LEAP 2026" showNavbar={false}>
+<Layout title="Countdown | LEAP 2026" showNavbar={false}>
   <div class="cnt-bg">
-    {fireflies.map((f) => (
-      <div
-        class="firefly"
-        style={{
-          left: `${f.x}%`,
-          top: `${f.y}%`,
-          width: f.size,
-          height: f.size,
-          animationDelay: `${f.delay}s`,
-          animationDuration: `${f.dur}s`,
-        }}
-      />
-    ))}
-    {bubbles.map((b) => (
-      <div
-        class="bubble"
-        style={{
-          left: `${b.x}%`,
-          width: b.size,
-          height: b.size,
-          animationDelay: `${b.delay}s`,
-          animationDuration: `${b.dur}s`,
-        }}
-      />
-    ))}
-    {bioDots.map((d) => (
-      <div
-        class="bio-dot"
-        style={{
-          left: `${d.x}%`,
-          top: `${d.y}%`,
-          width: d.size,
-          height: d.size,
-          animationDelay: `${d.delay}s`,
-          animationDuration: `${d.dur}s`,
-        }}
-      />
-    ))}
+    <img
+      src="/assets/background.jpeg"
+      alt=""
+      aria-hidden="true"
+      fetchpriority="high"
+      decoding="sync"
+      class="cnt-bg-img"
+    />
+
     <div class="cnt-content">
       <div class="cnt-logo anim-in" style="opacity:0;transform:translateY(8px)">
         <img
           src="/logo/logo-hd.png"
           alt="LEAP 2026"
           loading="eager"
-          style="width: min(500px, 90vw); height: auto; display: block;"
+          style="width: min(320px, 60vw); height: auto; display: block;"
         />
       </div>
-      <h1 class="cnt-title anim-in" style="opacity:0;transform:translateY(8px)">Coming Soon</h1>
-      <div class="cnt-timer anim-in" id="countdown" data-target={targetDate} style="opacity:0;transform:translateY(8px)">
+      <span class="tagline anim-in" style="opacity:0;transform:translateY(8px)"
+        >Isang Nayon, Isang Layunin</span
+      >
+      <div class="cnt-timer" id="countdown">
         <div class="cnt-unit">
-          <div class="cnt-card">
+          <div class="cnt-card-wrapper">
             <span class="cnt-num" id="cnt-days">00</span>
           </div>
-          <span class="cnt-label">Days</span>
+          <span class="cnt-label" id="label-days">Days</span>
         </div>
         <span class="cnt-sep">:</span>
         <div class="cnt-unit">
-          <div class="cnt-card">
+          <div class="cnt-card-wrapper">
             <span class="cnt-num" id="cnt-hours">00</span>
           </div>
-          <span class="cnt-label">Hours</span>
+          <span class="cnt-label" id="label-hours">Hours</span>
         </div>
         <span class="cnt-sep">:</span>
         <div class="cnt-unit">
-          <div class="cnt-card">
+          <div class="cnt-card-wrapper">
             <span class="cnt-num" id="cnt-mins">00</span>
           </div>
-          <span class="cnt-label">Minutes</span>
+          <span class="cnt-label" id="label-mins">Minutes</span>
         </div>
         <span class="cnt-sep">:</span>
         <div class="cnt-unit">
-          <div class="cnt-card">
+          <div class="cnt-card-wrapper">
             <span class="cnt-num" id="cnt-secs">00</span>
           </div>
-          <span class="cnt-label">Seconds</span>
+          <span class="cnt-label" id="label-secs">Seconds</span>
         </div>
       </div>
-      <p class="cnt-date anim-in" style="opacity:0;transform:translateY(8px)">{displayDate}</p>
-      <p class="cnt-desc anim-in" style="opacity:0;transform:translateY(8px)">Get ready for an unforgettable experience.</p>
+      <p class="cnt-desc anim-in" style="opacity:0;transform:translateY(8px)">
+        Step into a nayon built on bayanihan, shared purpose, and collective
+        growth.
+      </p>
+      <p
+        class="cnt-date anim-in"
+        id="cnt-date-line"
+        style="opacity:0;transform:translateY(8px)"
+      >
+      </p>
     </div>
 
-    <footer class="cnt-footer" style="position:absolute">LEAP 2026 &copy; DLSUCSO</footer>
-
-    <div class="landscape">
-      <svg viewBox="0 0 1440 360" preserveAspectRatio="xMidYMax slice" style="display:block;width:100%;height:100%;">
-        <defs>
-          <linearGradient id="vG" x1="0%" y1="0%" x2="60%" y2="100%">
-            <stop offset="0%" stop-color="#142040" /><stop offset="100%" stop-color="#080e1e" />
-          </linearGradient>
-          <linearGradient id="h3G" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#0f1e38" /><stop offset="100%" stop-color="#071020" />
-          </linearGradient>
-          <linearGradient id="h2G" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#132845" /><stop offset="100%" stop-color="#0a182e" />
-          </linearGradient>
-          <linearGradient id="h1G" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#183455" /><stop offset="100%" stop-color="#0e2038" />
-          </linearGradient>
-          <linearGradient id="gG" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#1e4065" /><stop offset="100%" stop-color="#122845" />
-          </linearGradient>
-          <linearGradient id="fadeG" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#1e5580" stop-opacity="0" />
-            <stop offset="100%" stop-color="#040a18" stop-opacity="1" />
-          </linearGradient>
-        </defs>
-        <path d="M0 90 Q180 120 360 100 T720 95 T1080 100 T1440 95 L1440 180 L0 180 Z" fill="url(#vG)" />
-        <path d="M0 120 Q180 160 360 130 T720 125 T1080 130 T1440 125 L1440 210 L0 210 Z" fill="url(#h3G)" />
-        <path d="M0 150 Q200 200 400 160 T800 155 T1200 160 T1440 155 L1440 360 L0 360 Z" fill="url(#h2G)" />
-        <path d="M0 190 Q220 250 440 205 T880 200 T1320 205 T1440 200 L1440 360 L0 360 Z" fill="url(#h1G)" />
-        <path d="M0 240 Q250 310 500 260 T1000 255 T1440 260 L1440 360 L0 360 Z" fill="url(#gG)" />
-        <path d="M0 310 Q200 295 400 315 T800 305 T1200 315 T1440 310 L1440 360 L0 360 Z" fill="#122845" opacity="0.3" />
-        <rect x="0" y="335" width="1440" height="25" fill="url(#fadeG)" />
-      </svg>
-    </div>
+    <footer class="cnt-footer">
+      &copy; LEAP&nbsp;2026 &middot; CSO &middot; DLSU
+      <br /><br />
+      <span style="opacity:0.5">
+        Made by Association&nbsp;of&nbsp;Computer&nbsp;Engineering&nbsp;Students
+        (ACCESS&nbsp;DLSU)
+      </span>
+    </footer>
+  </div>
+  <div id="dev-bypass" style="display:none">
+    <span class="dev-tag">DEV</span>
+    <span class="dev-label">Bypass</span>
+    <div class="dev-divider"></div>
+    <a href="/?_view=maintenance" class="dev-link">Maintenance</a>
+    <a href="/?_view=countdown" class="dev-link">Countdown</a>
+    <a href="/login" class="dev-link">Login</a>
   </div>
 </Layout>
 
 <style>
-  @font-face {
-    font-family: 'TD-Sulog';
-    src: url('/fonts/TD-Sulog.woff2') format('woff2');
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-  }
-
   body {
     margin: 0;
     overflow: hidden;
-    cursor: url('/salakot_cursor.png'), auto;
+    cursor: url("/assets/cursor.png"), auto;
     -webkit-user-select: none;
     user-select: none;
   }
@@ -175,7 +97,6 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
     padding: 0;
   }
 
-  /* ── Background ── */
   .cnt-bg {
     display: flex;
     align-items: center;
@@ -183,7 +104,31 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
     height: 100svh;
     overflow: hidden;
     position: relative;
-    background: linear-gradient(180deg, #2a6a9a 0%, #1e5580 8%, #15406a 18%, #0e2e54 28%, #091e3e 38%, #05142c 48%, #030d1e 58%, #020816 68%, #010510 78%, #01040e 86%, #00030a 94%, #000206 100%);
+    background: #1a2433;
+  }
+
+  .cnt-bg-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .cnt-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      transparent 40%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
   }
 
   /* ── Content ── */
@@ -193,35 +138,53 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(0.5rem, 1.5vw, 0.75rem);
+    gap: clamp(0.75rem, 2.5vh, 1.75rem);
+    text-align: center;
+    padding: 2rem;
   }
   .cnt-content .cnt-logo img {
     filter: drop-shadow(0 0 50px rgba(222, 154, 73, 0.18));
   }
-  .cnt-title {
-    font-family: 'TD-Sulog', serif;
+
+  /* ── Tagline ── */
+  .tagline {
+    margin-top: clamp(-0.5rem, -1.5vh, 0rem);
+    padding: 0.2em 0.5em;
+    font-family: "TD-Sulog", serif;
     font-weight: 700;
-    font-size: clamp(1.4rem, 5.5vw, 2.4rem);
+    font-size: clamp(1.2rem, 5vmin, 2.4rem);
     letter-spacing: 0.015em;
-    line-height: 1.15;
+    line-height: 1.25;
     text-align: center;
-    margin-top: -0.5rem;
-    background: linear-gradient(180deg, #fff5c4 0%, #fae185 35%, #de9a49 75%, #b07820 100%);
+    background: linear-gradient(
+      180deg,
+      #fff5c4 0%,
+      #fae185 35%,
+      #de9a49 75%,
+      #b07820 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 2px 0 rgba(80,40,10,0.4), 0 4px 24px rgba(0,0,0,0.55), 0 0 48px rgba(222,154,73,0.4), 0 0 96px rgba(250,225,133,0.2);
-    filter: drop-shadow(0 3px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 24px rgba(222,154,73,0.35));
+    text-shadow:
+      0 2px 0 rgba(80, 40, 10, 0.4),
+      0 4px 24px rgba(0, 0, 0, 0.55),
+      0 0 48px rgba(222, 154, 73, 0.4),
+      0 0 96px rgba(250, 225, 133, 0.2);
+    filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.5))
+      drop-shadow(0 0 24px rgba(222, 154, 73, 0.35));
   }
 
   .cnt-desc {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: clamp(0.85rem, 2vw, 1rem);
-    color: rgba(255,255,255,0.6);
+    color: rgba(255, 255, 255, 0.82);
     text-align: center;
     line-height: 1.5;
-    margin: 0.25rem 0 0;
+    margin: 0;
     letter-spacing: 0.04em;
+    max-width: 500px;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
   }
 
   /* ── Countdown Timer ── */
@@ -229,7 +192,7 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
     display: flex;
     align-items: center;
     gap: clamp(0.5rem, 2vw, 1rem);
-    margin: 0.75rem 0 0;
+    margin: 0;
   }
 
   .cnt-unit {
@@ -239,19 +202,22 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
     gap: 0.35rem;
   }
 
-  .cnt-card {
-    background: rgba(30, 80, 140, 0.1);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(100, 180, 255, 0.12);
-    border-radius: 14px;
+  .cnt-card-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 0.75rem 1.2rem;
     min-width: 3.6ch;
     text-align: center;
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    border-radius: 14px;
   }
 
   .cnt-num {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: clamp(2.6rem, 10vw, 4.2rem);
     font-weight: 700;
     color: #fff;
@@ -265,53 +231,84 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
   }
 
   @keyframes tickBounce {
-    0% { transform: scale(1); }
-    40% { transform: scale(1.08); }
-    100% { transform: scale(1); }
+    0% {
+      transform: scale(1);
+    }
+    40% {
+      transform: scale(1.08);
+    }
+    100% {
+      transform: scale(1);
+    }
   }
 
   .cnt-sep {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: clamp(1.8rem, 6vw, 2.8rem);
     font-weight: 300;
-    color: rgba(255,255,255,0.35);
+    color: rgba(255, 255, 255, 0.35);
     line-height: 1;
     margin-top: -1.4rem;
     animation: sepPulse 1s ease-in-out infinite;
   }
 
   @keyframes sepPulse {
-    0%, 100% { opacity: 0.35; }
-    50% { opacity: 0.7; }
+    0%,
+    100% {
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 0.7;
+    }
   }
 
   .cnt-label {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: clamp(0.6rem, 1.4vw, 0.72rem);
     font-weight: 500;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255, 255, 255, 0.4);
     text-transform: uppercase;
     letter-spacing: 0.12em;
   }
 
   /* ── Target Date ── */
   .cnt-date {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: clamp(0.78rem, 1.8vw, 0.9rem);
-    color: rgba(255,255,255,0.35);
+    color: rgba(255, 255, 255, 0.6);
     text-align: center;
     letter-spacing: 0.06em;
     margin: 0.25rem 0 0;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
   }
 
-  /* ── Entrance Animation ── */
   @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   .anim-in {
     animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+  }
+
+  /* Opacity-only variant — safe for elements that contain backdrop-filter children */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .anim-in-fade {
+    animation: fadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
   }
 
   /* ── Landscape ── */
@@ -334,13 +331,18 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
     will-change: opacity;
     box-shadow: 0 0 6px 4px rgba(250, 225, 133, 0.5);
     pointer-events: none;
-    z-index: 3;
+    z-index: 1;
     animation: fireflyBlink 4s ease-in-out infinite;
   }
 
   @keyframes fireflyBlink {
-    0%, 100% { opacity: 0.06; }
-    50% { opacity: 0.7; }
+    0%,
+    100% {
+      opacity: 0.06;
+    }
+    50% {
+      opacity: 0.7;
+    }
   }
 
   /* ── Bubbles ── */
@@ -348,7 +350,11 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
     position: absolute;
     bottom: -20px;
     border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, rgba(150, 220, 255, 0.25), rgba(100, 180, 255, 0.08));
+    background: radial-gradient(
+      circle at 35% 35%,
+      rgba(150, 220, 255, 0.25),
+      rgba(100, 180, 255, 0.08)
+    );
     border: 1px solid rgba(150, 220, 255, 0.1);
     pointer-events: none;
     z-index: 1;
@@ -356,11 +362,23 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
   }
 
   @keyframes bubbleRise {
-    0% { transform: translateY(0) scale(1); opacity: 0; }
-    10% { opacity: 0.5; }
-    50% { opacity: 0.3; }
-    90% { opacity: 0.1; }
-    100% { transform: translateY(calc(-1 * 55vh)) scale(0.6); opacity: 0; }
+    0% {
+      transform: translateY(0) scale(1);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 0.3;
+    }
+    90% {
+      opacity: 0.1;
+    }
+    100% {
+      transform: translateY(calc(-1 * 55vh)) scale(0.6);
+      opacity: 0;
+    }
   }
 
   /* ── Bioluminescent Dots ── */
@@ -371,15 +389,28 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
     will-change: opacity, transform;
     box-shadow: 0 0 8px 4px rgba(79, 209, 197, 0.35);
     pointer-events: none;
-    z-index: 3;
+    z-index: 1;
     animation: bioGlow 4s ease-in-out infinite;
   }
 
   @keyframes bioGlow {
-    0%, 100% { opacity: 0.05; transform: scale(0.8); }
-    25% { transform: translateY(-6px) scale(1.1); opacity: 0.5; }
-    50% { opacity: 0.15; transform: translateY(0) scale(0.9); }
-    75% { transform: translateY(-3px) scale(1); opacity: 0.35; }
+    0%,
+    100% {
+      opacity: 0.05;
+      transform: scale(0.8);
+    }
+    25% {
+      transform: translateY(-6px) scale(1.1);
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 0.15;
+      transform: translateY(0) scale(0.9);
+    }
+    75% {
+      transform: translateY(-3px) scale(1);
+      opacity: 0.35;
+    }
   }
 
   /* ── Footer ── */
@@ -388,13 +419,14 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
     bottom: 1rem;
     left: 0;
     right: 0;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.68rem;
-    color: rgba(255,255,255,0.3);
+    color: rgba(255, 255, 255, 0.6);
     text-align: center;
     letter-spacing: 0.06em;
     z-index: 2;
     pointer-events: none;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
   }
 
   /* ── Responsive ── */
@@ -403,97 +435,283 @@ const bioDots = Array.from({ length: 10 }, (_, i) => ({
       height: 30%;
     }
     .cnt-content {
-      gap: 0.35rem;
+      gap: clamp(0.85rem, 2.2vh, 1.35rem);
+      padding: 1rem;
     }
     .cnt-timer {
-      gap: 0.25rem;
-      margin: 0.35rem 0 0;
+      gap: clamp(0.35rem, 1.8vw, 0.6rem);
+      margin: 0;
     }
-    .cnt-card {
-      padding: 0.35rem 0.6rem;
-      border-radius: 10px;
+    .cnt-card-wrapper {
+      padding: 0.6rem 0.85rem;
+      min-width: 3.2ch;
     }
     .cnt-num {
-      font-size: clamp(1.8rem, 8vw, 2.6rem);
+      font-size: clamp(2.4rem, 8.5vw, 3rem);
     }
     .cnt-sep {
-      font-size: clamp(1.2rem, 5vw, 1.8rem);
-      margin-top: -1rem;
+      font-size: clamp(1.5rem, 5vw, 2rem);
+      margin-top: -1.2rem;
     }
     .cnt-label {
-      font-size: 0.55rem;
-    }
-    .cnt-title {
-      max-width: 85vw;
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
     }
     .cnt-date {
-      font-size: 0.7rem;
-      margin: 0.15rem 0 0;
+      font-size: 0.75rem;
+      margin: 0;
     }
     .cnt-desc {
-      max-width: 80vw;
-      font-size: clamp(0.75rem, 2vw, 0.85rem);
+      max-width: 85vw;
+      font-size: 0.82rem;
+      line-height: 1.45;
     }
   }
 
+  /* ── Dev Bypass (localhost only) ── */
+  #dev-bypass {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.72rem;
+    white-space: nowrap;
+    cursor: default;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .dev-tag {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.15);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  .dev-label {
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 500;
+  }
+  .dev-divider {
+    width: 1px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.15);
+  }
+  .dev-link {
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition:
+      background 0.15s,
+      color 0.15s;
+    cursor: pointer;
+  }
+  .dev-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .firefly { animation: none; opacity: 0.3; }
-    .bubble { display: none; }
-    .bio-dot { animation: none; opacity: 0.15; }
-    .anim-in { animation: none; opacity: 1; transform: none; }
+    .firefly {
+      animation: none;
+      opacity: 0.3;
+    }
+    .bubble {
+      display: none;
+    }
+    .bio-dot {
+      animation: none;
+      opacity: 0.15;
+    }
+    .anim-in,
+    .anim-in-fade {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
   }
 </style>
 
 <script>
-  const target = new Date(document.getElementById('countdown').dataset.target).getTime();
   const els = {
-    days: document.getElementById('cnt-days'),
-    hours: document.getElementById('cnt-hours'),
-    mins: document.getElementById('cnt-mins'),
-    secs: document.getElementById('cnt-secs'),
+    days: document.getElementById("cnt-days"),
+    hours: document.getElementById("cnt-hours"),
+    mins: document.getElementById("cnt-mins"),
+    secs: document.getElementById("cnt-secs"),
   };
-  const prev = { days: '', hours: '', mins: '', secs: '' };
+  const labels = {
+    days: document.getElementById("label-days"),
+    hours: document.getElementById("label-hours"),
+    mins: document.getElementById("label-mins"),
+    secs: document.getElementById("label-secs"),
+  };
+  const labelNames = {
+    days: { singular: "Day", plural: "Days" },
+    hours: { singular: "Hour", plural: "Hours" },
+    mins: { singular: "Minute", plural: "Minutes" },
+    secs: { singular: "Second", plural: "Seconds" }
+  };
+  const prev = { days: "", hours: "", mins: "", secs: "" };
+  let target = 0; // ms epoch, set after config fetch
+  let targetSet = false; // don't redirect on zero until config has loaded
+  let ticker = null;
 
   function pad(n) {
-    return n.toString().padStart(2, '0');
+    return n.toString().padStart(2, "0");
   }
 
   function bounce(el) {
-    el.classList.remove('bounce');
+    el.classList.remove("bounce");
     void el.offsetWidth;
-    el.classList.add('bounce');
+    el.classList.add("bounce");
   }
 
   function tick() {
-    const now = Date.now();
-    let diff = target - now;
+    let diff = target - Date.now();
     const zero = diff <= 0;
     if (zero) diff = 0;
 
     const days = Math.floor(diff / 86400000);
-    diff -= days * 86400000;
-    const hours = Math.floor(diff / 3600000);
-    diff -= hours * 3600000;
-    const mins = Math.floor(diff / 60000);
-    diff -= mins * 60000;
-    const secs = Math.floor(diff / 1000);
+    const daysRemainder = diff - days * 86400000;
+    const hours = Math.floor(daysRemainder / 3600000);
+    const hoursRemainder = daysRemainder - hours * 3600000;
+    const mins = Math.floor(hoursRemainder / 60000);
+    const minsRemainder = hoursRemainder - mins * 60000;
+    const secs = Math.floor(minsRemainder / 1000);
 
+    const rawVals = { days, hours, mins, secs };
     const vals = {
       days: pad(days),
       hours: pad(hours),
       mins: pad(mins),
       secs: pad(secs),
     };
-
-    for (const key of ['days', 'hours', 'mins', 'secs']) {
+    for (const key of ["days", "hours", "mins", "secs"]) {
       if (vals[key] !== prev[key]) {
         els[key].textContent = vals[key];
+        
+        // Update singular/plural label text if 0 or 1
+        const count = rawVals[key];
+        const labelText = (count === 0 || count === 1) ? labelNames[key].singular : labelNames[key].plural;
+        if (labels[key]) {
+          labels[key].textContent = labelText;
+        }
+
         if (!zero) bounce(els[key]);
         prev[key] = vals[key];
       }
     }
+
+    // Countdown expired — navigate to / so the worker re-evaluates the gate
+    if (zero && targetSet) {
+      clearInterval(ticker);
+      window.location.replace("/");
+    }
   }
 
-  tick();
-  setInterval(tick, 1000);
+  async function init() {
+    try {
+      const res = await fetch("/api/config");
+      if (!res.ok) throw new Error("config fetch failed");
+      const json = await res.json();
+      const comingSoonUntil = json?.data?.comingSoonUntil;
+      if (comingSoonUntil) {
+        target = comingSoonUntil * 1000; // epoch seconds → ms
+        targetSet = true;
+        const date = new Date(target);
+        const formattedDate = date.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          timeZone: "Asia/Manila",
+        });
+        const formattedTime = date.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+          timeZone: "Asia/Manila",
+        });
+        const dateLine = document.getElementById("cnt-date-line");
+        if (dateLine) dateLine.textContent = `Launch Date: ${formattedDate}, ${formattedTime}`;
+      }
+    } catch {
+      // Config unavailable — ticker stays at zeros, date line stays empty
+    }
+    tick();
+    ticker = setInterval(tick, 1000);
+  }
+
+  init();
+
+  function handleNewConfig(cfg: any) {
+    if (!cfg) return;
+    if (cfg.maintenanceMode) {
+      window.location.replace("/");
+      return;
+    }
+    const serverNow = cfg.now * 1000;
+    if (!cfg.comingSoonUntil || cfg.comingSoonUntil * 1000 <= serverNow) {
+      window.location.replace("/");
+    }
+  }
+
+  // Poll config every 30s as a fallback — redirect to / if the gate state changes
+  // (maintenance turns on, countdown date updated, or countdown expires early)
+  setInterval(async () => {
+    try {
+      const res = await fetch("/api/config");
+      if (res.status === 503) {
+        window.location.replace("/");
+        return;
+      }
+      if (!res.ok) return;
+      const json = await res.json();
+      handleNewConfig(json?.data);
+    } catch {}
+  }, 30_000);
+
+  // Real-time updates via WebSocket
+  function connectWebSocket() {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const ws = new WebSocket(
+      `${protocol}//${window.location.host}/api?type=config`,
+    );
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "config_update") {
+          handleNewConfig(msg.data);
+        }
+      } catch {}
+    };
+
+    ws.onclose = () => {
+      setTimeout(connectWebSocket, 5000);
+    };
+  }
+
+  connectWebSocket();
+</script>
+
+<script>
+  // Dev bypass bar: shown only when the worker sets _dev=1 cookie (DEV_BYPASS=true in .dev.vars)
+  if (document.cookie.split(";").some((c) => c.trim() === "_dev=1")) {
+    const bar = document.getElementById("dev-bypass");
+    if (bar) bar.style.display = "flex";
+  }
 </script>

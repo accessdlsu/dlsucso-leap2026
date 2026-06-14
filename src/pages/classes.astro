@@ -1,17 +1,24 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import ClassesFilter from '../components/ClassesFilter';
+import Layout from "../layouts/Layout.astro";
+import ClassesFilter from "../components/ClassesFilter";
 ---
 
-<Layout title="Classes — LEAP 2026" description="Browse classes and workshops at LEAP 2026.">
+<Layout
+  title="Classes | LEAP 2026"
+  description="Browse classes and workshops at LEAP 2026."
+>
   <div class="classes-bg">
     <div class="classes-content">
       <h1 class="classes-title">Classes</h1>
-      <p class="classes-desc">Discover workshops and sessions across all subthemes of LEAP 2026.</p>
+      <p class="classes-desc">
+        Discover workshops and sessions across all subthemes of LEAP 2026.
+      </p>
       <ClassesFilter client:only="react" />
     </div>
 
-    <footer class="classes-footer">LEAP 2026 &copy; DLSUCSO</footer>
+    <footer class="classes-footer">
+      &copy; LEAP 2026 &middot; CSO &middot; DLSU
+    </footer>
   </div>
 </Layout>
 
@@ -29,9 +36,25 @@ import ClassesFilter from '../components/ClassesFilter';
     overflow-x: clip;
     position: relative;
     scrollbar-width: none;
-    background: linear-gradient(180deg, #1a2940 0%, #1d3148 8%, #1f3a4c 18%, #234048 28%, #284240 38%, #2c4338 48%, #2e4632 58%, #314830 68%, #344932 78%, #3a4a35 86%, #4a4a3a 94%, #5a4838 100%);
+    background: linear-gradient(
+      180deg,
+      #1a2940 0%,
+      #1d3148 8%,
+      #1f3a4c 18%,
+      #234048 28%,
+      #284240 38%,
+      #2c4338 48%,
+      #2e4632 58%,
+      #314830 68%,
+      #344932 78%,
+      #3a4a35 86%,
+      #4a4a3a 94%,
+      #5a4838 100%
+    );
   }
-  .classes-bg::-webkit-scrollbar { display: none; }
+  .classes-bg::-webkit-scrollbar {
+    display: none;
+  }
 
   .classes-content {
     position: relative;
@@ -39,30 +62,37 @@ import ClassesFilter from '../components/ClassesFilter';
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem calc(2rem + var(--nav-space-bottom));
+    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem
+      calc(2rem + var(--nav-space-bottom));
     min-height: 100svh;
     box-sizing: border-box;
   }
 
   .classes-title {
-    font-family: 'TD-Sulog', serif;
+    font-family: "TD-Sulog", serif;
     font-weight: 700;
     font-size: clamp(2.5rem, 7vh, 4.5rem);
     letter-spacing: 0.015em;
     line-height: 1.15;
     margin: 0 0 0.25rem;
     padding-left: 0.15em;
-    background: linear-gradient(180deg, #fff5c4 0%, #fae185 35%, #de9a49 75%, #b07820 100%);
+    background: linear-gradient(
+      180deg,
+      #fff5c4 0%,
+      #fae185 35%,
+      #de9a49 75%,
+      #b07820 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 3px 12px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.5));
   }
 
   .classes-desc {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: clamp(0.9rem, 2vh, 1.2rem);
-    color: rgba(255,255,255,0.65);
+    color: rgba(255, 255, 255, 0.65);
     text-align: center;
     line-height: 1.6;
     margin: 0 0 2rem;
@@ -73,16 +103,17 @@ import ClassesFilter from '../components/ClassesFilter';
     position: relative;
     z-index: 2;
     padding: 2rem 0 1.5rem;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.68rem;
-    color: rgba(255,255,255,0.3);
+    color: rgba(255, 255, 255, 0.3);
     text-align: center;
     letter-spacing: 0.06em;
   }
 
   @media (max-width: 768px) {
     .classes-content {
-      padding: calc(1rem + var(--nav-space-top)) 1rem calc(2rem + var(--nav-space-bottom));
+      padding: calc(1rem + var(--nav-space-top)) 1rem
+        calc(2rem + var(--nav-space-bottom));
     }
   }
 </style>
@@ -114,31 +145,31 @@ import ClassesFilter from '../components/ClassesFilter';
     gap: 0.6rem;
     width: 100%;
     padding: 0.6rem 1rem;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.78rem;
     font-weight: 500;
     border-radius: 9999px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.25);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    color: rgba(255,255,255,0.7);
+    color: rgba(255, 255, 255, 0.7);
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     text-align: left;
     line-height: 1.3;
   }
 
   .filter-dropdown-trigger:hover {
-    border-color: rgba(255,255,255,0.2);
+    border-color: rgba(255, 255, 255, 0.2);
     color: #fff;
   }
 
   .filter-dropdown-label {
     font-size: 0.65rem;
     font-weight: 600;
-    color: rgba(255,255,255,0.35);
+    color: rgba(255, 255, 255, 0.35);
     letter-spacing: 0.06em;
     text-transform: uppercase;
     white-space: nowrap;
@@ -153,8 +184,8 @@ import ClassesFilter from '../components/ClassesFilter';
 
   .dropdown-arrow {
     flex-shrink: 0;
-    color: rgba(255,255,255,0.4);
-    transition: transform 0.25s cubic-bezier(0.22,1,0.36,1);
+    color: rgba(255, 255, 255, 0.4);
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .dropdown-arrow.open {
@@ -167,31 +198,37 @@ import ClassesFilter from '../components/ClassesFilter';
     left: 0;
     right: 0;
     z-index: 100;
-    background: rgba(0,0,0,0.35);
+    background: rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
     padding: 0.35rem;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    animation: menuIn 0.15s cubic-bezier(0.22,1,0.36,1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    animation: menuIn 0.15s cubic-bezier(0.22, 1, 0.36, 1);
     max-height: 280px;
     overflow-y: auto;
   }
 
   @keyframes menuIn {
-    from { opacity: 0; transform: translateY(-4px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .filter-dropdown-item {
     display: block;
     width: 100%;
     padding: 0.5rem 0.85rem;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.78rem;
     font-weight: 500;
-    color: rgba(255,255,255,0.65);
+    color: rgba(255, 255, 255, 0.65);
     background: transparent;
     border: none;
     border-radius: 10px;
@@ -201,7 +238,7 @@ import ClassesFilter from '../components/ClassesFilter';
   }
 
   .filter-dropdown-item:hover {
-    background: rgba(255,255,255,0.06);
+    background: rgba(255, 255, 255, 0.06);
     color: #fff;
   }
 
@@ -211,24 +248,24 @@ import ClassesFilter from '../components/ClassesFilter';
   }
 
   .clear-btn {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.7rem;
     font-weight: 600;
     padding: 0.4rem 0.85rem;
     border-radius: 9999px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.25);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    color: rgba(255,255,255,0.5);
+    color: rgba(255, 255, 255, 0.5);
     cursor: pointer;
     align-self: center;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   }
 
   .clear-btn:hover {
-    border-color: rgba(250,225,133,0.3);
+    border-color: rgba(250, 225, 133, 0.3);
     color: #fae185;
   }
 
@@ -238,16 +275,16 @@ import ClassesFilter from '../components/ClassesFilter';
   }
 
   .results-count {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.82rem;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255, 255, 255, 0.4);
     margin: 0 0 1rem;
   }
 
   .no-results {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 1rem;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255, 255, 255, 0.4);
     text-align: center;
     padding: 3rem 0;
   }
@@ -259,28 +296,30 @@ import ClassesFilter from '../components/ClassesFilter';
   }
 
   .class-card {
-    background: rgba(0,0,0,0.25);
+    background: rgba(0, 0, 0, 0.25);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   }
 
   .class-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   }
 
   .class-card-img {
     width: 100%;
     aspect-ratio: 16 / 9;
     overflow: hidden;
-    background: rgba(255,255,255,0.02);
+    background: rgba(255, 255, 255, 0.02);
   }
 
   .class-card-img img {
@@ -306,31 +345,31 @@ import ClassesFilter from '../components/ClassesFilter';
   }
 
   .class-theme-tag {
-    font-family: 'Poppins', sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 0.6rem;
     font-weight: 700;
     letter-spacing: 0.05em;
     padding: 0.25rem 0.6rem;
     border-radius: 6px;
-    background: rgba(222,154,73,0.15);
+    background: rgba(222, 154, 73, 0.15);
     color: #fae185;
-    border: 1px solid rgba(222,154,73,0.2);
+    border: 1px solid rgba(222, 154, 73, 0.2);
   }
 
   .class-day-tag {
-    font-family: 'Poppins', sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 0.6rem;
     font-weight: 700;
     letter-spacing: 0.05em;
     padding: 0.25rem 0.6rem;
     border-radius: 6px;
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.6);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .class-title {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 1rem;
     font-weight: 700;
     color: #fff;
@@ -348,18 +387,18 @@ import ClassesFilter from '../components/ClassesFilter';
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.72rem;
   }
 
   .meta-label {
-    color: rgba(255,255,255,0.35);
+    color: rgba(255, 255, 255, 0.35);
     font-weight: 600;
     letter-spacing: 0.05em;
   }
 
   .meta-val {
-    color: rgba(255,255,255,0.7);
+    color: rgba(255, 255, 255, 0.7);
     font-weight: 500;
   }
 
@@ -368,11 +407,11 @@ import ClassesFilter from '../components/ClassesFilter';
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 1.25rem;
-    border-top: 1px solid rgba(255,255,255,0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .slots-badge {
-    font-family: 'Poppins', sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 0.62rem;
     font-weight: 700;
     padding: 0.25rem 0.55rem;
@@ -384,7 +423,7 @@ import ClassesFilter from '../components/ClassesFilter';
 
   .enroll-btn,
   .viewmore-btn {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.72rem;
     font-weight: 700;
     padding: 0.4rem 1rem;
@@ -403,10 +442,10 @@ import ClassesFilter from '../components/ClassesFilter';
   }
 
   .viewmore-btn {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
   }
   .viewmore-btn:hover {
-    background: rgba(255,255,255,0.18);
+    background: rgba(255, 255, 255, 0.18);
   }
 
   /* ── Drawer ── */
@@ -414,7 +453,7 @@ import ClassesFilter from '../components/ClassesFilter';
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     display: flex;
@@ -424,8 +463,12 @@ import ClassesFilter from '../components/ClassesFilter';
   }
 
   @keyframes overlayIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   .drawer {
@@ -433,19 +476,23 @@ import ClassesFilter from '../components/ClassesFilter';
     max-width: 100%;
     max-height: 85svh;
     overflow-y: auto;
-    background: rgba(0,0,0,0.25);
+    background: rgba(0, 0, 0, 0.25);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-radius: 24px 24px 0 0;
-    box-shadow: 0 -8px 32px rgba(0,0,0,0.2);
-    animation: drawerUp 0.35s cubic-bezier(0.22,1,0.36,1);
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
+    animation: drawerUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
     position: relative;
     margin: 0 1rem;
   }
 
   @keyframes drawerUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
   }
 
   @media (min-width: 769px) {
@@ -456,11 +503,17 @@ import ClassesFilter from '../components/ClassesFilter';
       max-width: 560px;
       border-radius: 24px;
       margin: 0;
-      animation: modalIn 0.3s cubic-bezier(0.22,1,0.36,1);
+      animation: modalIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     }
     @keyframes modalIn {
-      from { transform: scale(0.92) translateY(20px); opacity: 0; }
-      to { transform: scale(1) translateY(0); opacity: 1; }
+      from {
+        transform: scale(0.92) translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
     }
   }
 
@@ -473,7 +526,7 @@ import ClassesFilter from '../components/ClassesFilter';
     height: 36px;
     border-radius: 50%;
     border: none;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0, 0, 0, 0.4);
     color: #fff;
     font-size: 1.4rem;
     line-height: 1;
@@ -483,7 +536,9 @@ import ClassesFilter from '../components/ClassesFilter';
     justify-content: center;
     transition: background 0.2s;
   }
-  .drawer-close:hover { background: rgba(0,0,0,0.6); }
+  .drawer-close:hover {
+    background: rgba(0, 0, 0, 0.6);
+  }
 
   .drawer-img {
     width: 100%;
@@ -510,7 +565,7 @@ import ClassesFilter from '../components/ClassesFilter';
   }
 
   .drawer-title {
-    font-family: 'TD-Sulog', serif;
+    font-family: "TD-Sulog", serif;
     font-size: 1.6rem;
     font-weight: 700;
     color: #fff;
@@ -523,7 +578,7 @@ import ClassesFilter from '../components/ClassesFilter';
     flex-direction: column;
     gap: 0.5rem;
     padding: 1rem;
-    background: rgba(255,255,255,0.04);
+    background: rgba(255, 255, 255, 0.04);
     border-radius: 12px;
   }
 
@@ -531,31 +586,31 @@ import ClassesFilter from '../components/ClassesFilter';
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.82rem;
   }
 
   .drawer-meta-label {
-    color: rgba(255,255,255,0.35);
+    color: rgba(255, 255, 255, 0.35);
     font-weight: 600;
     letter-spacing: 0.05em;
   }
 
   .drawer-meta-val {
-    color: rgba(255,255,255,0.75);
+    color: rgba(255, 255, 255, 0.75);
     font-weight: 500;
   }
 
   .drawer-desc {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.85rem;
-    color: rgba(255,255,255,0.55);
+    color: rgba(255, 255, 255, 0.55);
     line-height: 1.6;
     margin: 0;
   }
 
   .drawer-enroll {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.85rem;
     font-weight: 700;
     padding: 0.75rem 1.5rem;
