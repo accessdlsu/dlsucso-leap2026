@@ -11,7 +11,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
 }));
 ---
 
-<Layout title="Login | LEAP 2026" showNavbar={false}>
+<Layout title="Login | LEAP 2026" showNavbar={false} noSession={true}>
   <div class="login-bg">
     {
       fireflies.map((f) => (
@@ -696,8 +696,11 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     } catch (err) {
       btn.classList.remove("loading");
       btn.disabled = false;
-      toastMsg.textContent =
-        err instanceof Error
+      const isGated =
+        err instanceof Error && err.message.includes("GATE_ACTIVE");
+      toastMsg.textContent = isGated
+        ? "Sign-in is not available yet. The site isn't open to students yet."
+        : err instanceof Error
           ? err.message
           : "Google sign-in failed. Please try again.";
       toast.classList.add("visible");
@@ -727,4 +730,5 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
   dialog.addEventListener("click", (e) => {
     if (e.target === dialog) dialog.close();
   });
+
 </script>

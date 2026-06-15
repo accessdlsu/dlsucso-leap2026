@@ -7,30 +7,20 @@ let turnstileSolved = false;
 let turnstilePromise: Promise<boolean> | null = null;
 let turnstileToken: string | null = null;
 let turnstileErrorCallback: ((message: string) => void) | null = null;
-let turnstileContainerResolve: ((el: HTMLElement) => void) | null = null;
-
-const turnstileContainerReady = new Promise<HTMLElement>((resolve) => {
-  turnstileContainerResolve = resolve;
-});
 
 export function onTurnstileError(callback: (message: string) => void): void {
   turnstileErrorCallback = callback;
 }
 
-/**
- * Signal that the Turnstile container element is mounted in the DOM.
- * Call this when the loading screen / app shell renders.
- */
-export function signalTurnstileContainer(el: HTMLElement): void {
-  turnstileContainerResolve?.(el);
-}
+/** No-op kept for backward compat — container is now looked up by ID at render time. */
+export function signalTurnstileContainer(_el: HTMLElement): void {}
 
 declare global {
   interface Window {
     turnstile: {
       render: (
         container: string | HTMLElement,
-        opts: { sitekey: string; callback: (token: string) => void },
+        opts: { sitekey: string; appearance?: string; callback: (token: string) => void },
       ) => string;
       remove: (widgetId: string) => void;
     };
@@ -50,12 +40,24 @@ function loadTurnstileScript(): Promise<void> {
   });
 }
 
-async function executeTurnstile(siteKey: string): Promise<string> {
-  const container = await turnstileContainerReady;
+async function executeTurnstile(siteKey: string): Promise<string | null> {
+  const container = document.getElementById("turnstile-widget");
+  if (!container) return null;
   return new Promise((resolve) => {
-    window.turnstile.render(container, {
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (!settled) { settled = true; try { window.turnstile.remove(widgetId); } catch {} resolve(null); }
+    }, 14_000);
+    const widgetId = window.turnstile.render(container, {
       sitekey: siteKey,
-      callback: (token: string) => resolve(token),
+      appearance: "interaction-only",
+      callback: (token: string) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        try { window.turnstile.remove(widgetId); } catch {}
+        resolve(token);
+      },
     });
   });
 }
@@ -75,7 +77,7 @@ async function solveTurnstileChallenge(): Promise<boolean> {
       }
       return false;
     } catch (error) {
-      console.error("[leapify] Turnstile error:", error);
+      console.warn("[leapify] Turnstile unavailable (blocked?):", error);
       return false;
     } finally {
       turnstilePromise = null;
@@ -96,16 +98,43 @@ export interface SiteConfig {
   now: number;
 }
 
+export interface LeapEventOrg {
+  id: string;
+  name: string;
+  acronym: string;
+  logoUrl: string | null;
+  link: string | null;
+}
+
+export interface LeapEventTheme {
+  id: string;
+  name: string;
+  path: string;
+  imageUrl: string | null;
+  descriptionEn: string | null;
+  sortOrder: number;
+}
+
 export interface LeapEvent {
   id: string;
   slug: string;
+  themeId: string;
+  organizationId: string;
   title: string;
-  description?: string;
-  imageUrl?: string;
-  maxSlots?: number;
-  registeredSlots?: number;
-  status: "draft" | "queued" | "published";
-  [key: string]: unknown;
+  description: string;
+  venue: string;
+  price: string;
+  backgroundImageUrl: string | null;
+  classCode: string;
+  startTime: string;
+  endTime: string;
+  registrationClosesAt: number;
+  isSpotlight: boolean;
+  maxSlots: number;
+  gformsUrl: string | null;
+  theme: LeapEventTheme;
+  organization: LeapEventOrg;
+  date: string;
 }
 
 export interface Faq {
@@ -224,6 +253,9 @@ class WsApiClient {
       this.ws.onopen = () => {
         console.log("[leapify] WebSocket connected");
         this.connecting = null;
+        // Turnstile tokens are one-time use — reset so any reconnect gets a fresh token
+        turnstileSolved = false;
+        turnstileToken = null;
         resolve();
       };
 
@@ -242,7 +274,8 @@ class WsApiClient {
             let message: string;
             if (typeof body === "object" && body !== null && "error" in body) {
               const errObj = (body as { error?: { message?: string } }).error;
-              message = errObj?.message ?? `API error ${res.status}`;
+              const rawMsg = errObj?.message ?? `API error ${res.status}`;
+              message = typeof rawMsg === 'string' ? rawMsg.slice(0, 200) : `API error ${res.status}`;
             } else if (typeof body === "string") {
               message = body || `API error ${res.status}`;
             } else {
@@ -362,6 +395,10 @@ export const leapifyApi = {
   getOrganizations: () => wsClient.request<Organization[]>("GET", "/organizations"),
   getFaqs: () => wsClient.request<Faq[]>("GET", "/faqs"),
   getHealth: () => fetchHealth(),
+
+  // Admin
+  checkFormAccess: (slug: string) =>
+    wsClient.request<{ hasAccess: boolean; reason?: string }>("GET", `/classes/${encodeURIComponent(slug)}/check-form-access`),
 
   // Authenticated
   getMe: () =>

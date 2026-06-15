@@ -17,7 +17,10 @@ import {
   CircleUser,
   Bookmark,
   LogOut,
+  User,
 } from "lucide-react";
+import type { UserProfile } from "leapify/types";
+import { getCachedProfile, restoreSession, signOutUser } from "../../services/auth";
 
 const links = [
   { href: "/", label: "Home", icon: House },
@@ -29,10 +32,21 @@ const links = [
 
 const cubicBezier = "cubic-bezier(0.22, 1, 0.36, 1)";
 
+function pillIndicatorStyle(index: number): CSSProperties {
+  // index 0→left:calc(0%+4px), 1→calc(20%+4px), 2→calc(40%+4px), 3→calc(60%+4px), 4→calc(80%+4px)
+  return {
+    left: `calc(${index * 20}% + 4px)`,
+    top: 4,
+    width: `calc(20% - 8px)`,
+    height: 50,
+  };
+}
+
 export default function Navbar() {
-  const [currentPath, setCurrentPath] = useState("/");
+  const [currentPath, setCurrentPath] = useState(() =>
+    typeof window !== "undefined" ? window.location.pathname : "/"
+  );
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [indicatorStyle, setIndicatorStyle] = useState<CSSProperties>({});
   const [hoverIndicatorStyle, setHoverIndicatorStyle] = useState<CSSProperties>(
     {},
   );
@@ -50,6 +64,8 @@ export default function Navbar() {
     }
     return false;
   });
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [userLoading, setUserLoading] = useState(true);
   const isMobile = windowWidth <= 968;
 
   useEffect(() => {
@@ -94,6 +110,21 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    const cached = getCachedProfile();
+    if (cached) {
+      setUser(cached);
+      setUserLoading(false);
+    }
+    restoreSession().then((profile) => {
+      if (cancelled) return;
+      if (profile) setUser(profile);
+      setUserLoading(false);
+    }).catch(() => { if (!cancelled) setUserLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (mq.matches) { setMounted(true); return; }
     requestAnimationFrame(() => {
@@ -128,31 +159,11 @@ export default function Navbar() {
 
 
 
-  const getIndicatorStyle = useCallback((index: number) => {
-    const targetHeight = 50; // Centered height (58 - 8)
-    const targetTop = 4;
-    
-    // Stretch to the full width allocated for the item (20%) minus a small inset margin (4px on each side)
-    const targetLeft = `calc(${index * 20}% + 4px)`;
-    const targetWidth = `calc(20% - 8px)`;
-    
-    return {
-      left: targetLeft,
-      top: targetTop,
-      width: targetWidth,
-      height: targetHeight,
-    } as CSSProperties;
-  }, []);
+  const indicatorStyle = pillIndicatorStyle(activeIndex >= 0 ? activeIndex : 0);
 
   useEffect(() => {
-    setIndicatorStyle(getIndicatorStyle(activeIndex));
-  }, [activeIndex, getIndicatorStyle]);
-
-  useEffect(() => {
-    if (hoveredIndex !== null) {
-      setHoverIndicatorStyle(getIndicatorStyle(hoveredIndex));
-    }
-  }, [hoveredIndex, getIndicatorStyle]);
+    if (hoveredIndex !== null) setHoverIndicatorStyle(pillIndicatorStyle(hoveredIndex));
+  }, [hoveredIndex]);
 
   const glassStyle: CSSProperties = {
     background: "rgba(0, 0, 0, 0.25)",
@@ -206,6 +217,8 @@ export default function Navbar() {
 
   const profileMenuStyle: CSSProperties = {
     minWidth: 200,
+    width: "max-content",
+    maxWidth: 320,
     borderRadius: 16,
     padding: 6,
     background: "rgba(0, 0, 0, 0.25)",
@@ -386,14 +399,50 @@ export default function Navbar() {
               width: "100%",
               height: "100%",
               borderRadius: 9999,
+              overflow: "hidden",
               WebkitTapHighlightColor: "transparent",
             }}
           >
-            <CircleUser
-              size={isMobile ? 28 : 40}
-              strokeWidth={1.5}
-              color="rgba(255, 255, 255, 0.7)"
-            />
+            {user?.image ? (
+              <img
+                src={user.image}
+                alt={String(user.name ?? "")}
+                width={isMobile ? 28 : 40}
+                height={isMobile ? 28 : 40}
+                style={{
+                  display: "block",
+                  objectFit: "cover",
+                  width: isMobile ? 28 : 40,
+                  height: isMobile ? 28 : 40,
+                  borderRadius: 9999,
+                  flexShrink: 0,
+                }}
+              />
+            ) : (
+              user ? (
+                <div style={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 9999,
+                  background: "rgba(255, 255, 255, 0.12)",
+                }}>
+                  <User
+                    size={isMobile ? 24 : 34}
+                    strokeWidth={1.5}
+                    color="rgba(255, 255, 255, 0.7)"
+                  />
+                </div>
+              ) : (
+                <CircleUser
+                  size={isMobile ? 28 : 40}
+                  strokeWidth={1.5}
+                  color="rgba(255, 255, 255, 0.7)"
+                />
+              )
+            )}
           </button>
         </div>
       </div>
@@ -408,6 +457,38 @@ export default function Navbar() {
             right: popupPos.right,
           }}
         >
+          {user && (
+            <div style={{
+              padding: "10px 14px 8px",
+              borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+              marginBottom: 4,
+            }}>
+              <div style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "0.85rem",
+                fontWeight: 600,
+                color: "rgba(255, 255, 255, 0.95)",
+                lineHeight: 1.3,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}>
+                {user.name}
+              </div>
+              <div style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "0.72rem",
+                fontWeight: 400,
+                color: "rgba(255, 255, 255, 0.5)",
+                lineHeight: 1.3,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}>
+                {user.email}
+              </div>
+            </div>
+          )}
           <a
             href="/saved"
             style={menuItemStyle}
@@ -423,7 +504,7 @@ export default function Navbar() {
           </a>
           <button
             style={menuItemStyle}
-            onClick={() => {}}
+            onClick={() => { signOutUser(); }}
             onMouseEnter={(e) =>
               (e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)")
             }

@@ -2,7 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Countdown | LEAP 2026" showNavbar={false}>
+<Layout title="Countdown | LEAP 2026" showNavbar={false} noSession={true}>
   <div class="cnt-bg">
     <img
       src="/assets/background.jpeg"
@@ -73,15 +73,32 @@ import Layout from "../layouts/Layout.astro";
         Made by Association&nbsp;of&nbsp;Computer&nbsp;Engineering&nbsp;Students
         (ACCESS&nbsp;DLSU)
       </span>
+      <br /><br />
     </footer>
   </div>
   <div id="dev-bypass" style="display:none">
-    <span class="dev-tag">DEV</span>
-    <span class="dev-label">Bypass</span>
-    <div class="dev-divider"></div>
-    <a href="/?_view=maintenance" class="dev-link">Maintenance</a>
-    <a href="/?_view=countdown" class="dev-link">Countdown</a>
-    <a href="/login" class="dev-link">Login</a>
+    <span class="bp-tag bp-tag-dev">DEV</span>
+    <span class="bp-label">Bypass</span>
+    <div class="bp-divider"></div>
+    <a href="/?_view=maintenance" class="bp-link">Maintenance</a>
+    <a href="/?_view=countdown" class="bp-link">Countdown</a>
+    <a href="/login" class="bp-link">Login</a>
+  </div>
+  <div id="admin-bypass" style="display:none">
+    <span class="bp-tag bp-tag-admin">ADMIN</span>
+    <span class="bp-label">You're an admin</span>
+    <div class="bp-divider"></div>
+    <a href="/?_enter" class="bp-link" data-astro-reload>Enter Site</a>
+  </div>
+  <div id="non-admin-notice" style="display:none">
+    <span class="bp-tag bp-tag-non-admin">DENIED</span>
+    <span class="bp-label">Admins only. Public access is coming soon.</span>
+  </div>
+  <div id="auth-bar" style="display:none">
+    <span class="bp-tag bp-tag-auth">AUTHENTICATION</span>
+    <span class="bp-label">Admin? Sign in to check access</span>
+    <div class="bp-divider"></div>
+    <button id="auth-google-btn" class="bp-link" style="cursor:pointer">Sign in with Google</button>
   </div>
 </Layout>
 
@@ -413,6 +430,7 @@ import Layout from "../layouts/Layout.astro";
     }
   }
 
+
   /* ── Footer ── */
   .cnt-footer {
     position: absolute;
@@ -468,8 +486,11 @@ import Layout from "../layouts/Layout.astro";
     }
   }
 
-  /* ── Dev Bypass (localhost only) ── */
-  #dev-bypass {
+  /* ── Bypass bars (shared) ── */
+  #dev-bypass,
+  #admin-bypass,
+  #non-admin-notice,
+  #auth-bar {
     position: fixed;
     top: 16px;
     left: 50%;
@@ -490,26 +511,46 @@ import Layout from "../layouts/Layout.astro";
     -webkit-user-select: none;
     user-select: none;
   }
-  .dev-tag {
+  .bp-tag {
     font-size: 0.6rem;
     font-weight: 700;
     letter-spacing: 0.1em;
-    color: #fbbf24;
-    background: rgba(251, 191, 36, 0.15);
-    border: 1px solid rgba(251, 191, 36, 0.3);
     border-radius: 4px;
     padding: 1px 5px;
   }
-  .dev-label {
+  .bp-tag-dev {
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.15);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+  }
+  .bp-tag-admin {
+    color: #34d399;
+    background: rgba(52, 211, 153, 0.15);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+  }
+  .bp-tag-non-admin {
+    color: #94a3b8;
+    background: rgba(148, 163, 184, 0.15);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
+  .bp-tag-auth {
+    color: #60a5fa;
+    background: rgba(96, 165, 250, 0.15);
+    border: 1px solid rgba(96, 165, 250, 0.3);
+  }
+  #non-admin-notice {
+    pointer-events: none;
+  }
+  .bp-label {
     color: rgba(255, 255, 255, 0.5);
     font-weight: 500;
   }
-  .dev-divider {
+  .bp-divider {
     width: 1px;
     height: 12px;
     background: rgba(255, 255, 255, 0.15);
   }
-  .dev-link {
+  .bp-link {
     color: rgba(255, 255, 255, 0.75);
     text-decoration: none;
     font-weight: 500;
@@ -519,8 +560,12 @@ import Layout from "../layouts/Layout.astro";
       background 0.15s,
       color 0.15s;
     cursor: pointer;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: inherit;
   }
-  .dev-link:hover {
+  .bp-link:hover {
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
   }
@@ -671,7 +716,7 @@ import Layout from "../layouts/Layout.astro";
 
   // Poll config every 30s as a fallback — redirect to / if the gate state changes
   // (maintenance turns on, countdown date updated, or countdown expires early)
-  setInterval(async () => {
+  const pollInterval = setInterval(async () => {
     try {
       const res = await fetch("/api/config");
       if (res.status === 503) {
@@ -684,12 +729,15 @@ import Layout from "../layouts/Layout.astro";
     } catch {}
   }, 30_000);
 
-  // Real-time updates via WebSocket
+  // Real-time updates via WebSocket (exponential backoff on reconnect)
+  let wsRetryDelay = 5000;
   function connectWebSocket() {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const ws = new WebSocket(
       `${protocol}//${window.location.host}/api?type=config`,
     );
+
+    ws.onopen = () => { wsRetryDelay = 5000; };
 
     ws.onmessage = (event) => {
       try {
@@ -701,17 +749,72 @@ import Layout from "../layouts/Layout.astro";
     };
 
     ws.onclose = () => {
-      setTimeout(connectWebSocket, 5000);
+      setTimeout(connectWebSocket, wsRetryDelay);
+      wsRetryDelay = Math.min(wsRetryDelay * 2, 60_000);
     };
   }
 
   connectWebSocket();
+
+  window.addEventListener("pagehide", () => {
+    clearInterval(pollInterval);
+    clearInterval(ticker);
+  }, { once: true });
 </script>
 
 <script>
-  // Dev bypass bar: shown only when the worker sets _dev=1 cookie (DEV_BYPASS=true in .dev.vars)
-  if (document.cookie.split(";").some((c) => c.trim() === "_dev=1")) {
+  // Dev bypass bar: shown when the worker sets _dev=1 cookie (local dev only)
+  const isDev = document.cookie.indexOf("_dev=1") !== -1;
+  if (isDev) {
     const bar = document.getElementById("dev-bypass");
     if (bar) bar.style.display = "flex";
+
+  }
+
+  // Admin bypass bar: shown when worker sets _admin_gate=1 cookie (admin user, gate active)
+  if (document.cookie.indexOf("_admin_gate=1") !== -1) {
+    const bar = document.getElementById("admin-bypass");
+    if (bar) bar.style.display = "flex";
+  }
+
+  // Non-admin notice: shown when worker sets _non_admin=1 cookie (logged in but not admin)
+  if (document.cookie.indexOf("_non_admin=1") !== -1) {
+    const bar = document.getElementById("non-admin-notice");
+    if (bar) bar.style.display = "flex";
+  }
+
+  // Auth bar: shown when not logged in (no admin/non-admin cookie) and not in dev mode
+  const hasAdminCookie = document.cookie.indexOf("_admin_gate=1") !== -1;
+  const hasNonAdminCookie = document.cookie.indexOf("_non_admin=1") !== -1;
+  if (!isDev && !hasAdminCookie && !hasNonAdminCookie) {
+    const bar = document.getElementById("auth-bar");
+    if (bar) bar.style.display = "flex";
+  }
+
+  // Google sign-in button — triggers OAuth directly without going through /login
+  const googleBtn = document.getElementById("auth-google-btn");
+  if (googleBtn) {
+    googleBtn.addEventListener("click", async () => {
+      googleBtn.textContent = "Redirecting…";
+      googleBtn.style.opacity = "0.6";
+      googleBtn.style.pointerEvents = "none";
+      try {
+        const res = await fetch("/api/auth/sign-in/social", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ provider: "google", callbackURL: "/" }),
+        });
+        const data = await res.json();
+        if (data?.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error("No redirect URL returned");
+        }
+      } catch {
+        googleBtn.textContent = "Sign in with Google";
+        googleBtn.style.opacity = "";
+        googleBtn.style.pointerEvents = "";
+      }
+    });
   }
 </script>

@@ -16,8 +16,20 @@ export default defineConfig({
       proxy: process.env.LEAPIFY_API_URL ? {
         '/api': {
           target: process.env.LEAPIFY_API_URL,
-          changeOrigin: true,
           rewrite: (path) => path,
+          configure: (proxy) => {
+            proxy.on('proxyReq', (proxyReq, req) => {
+              // Set X-Forwarded-Host so Better Auth can resolve the dynamic base URL.
+              // Without it, Better Auth falls back to BETTER_AUTH_URL and the OAuth
+              // state cookie gets scoped to the wrong domain → state_mismatch.
+              if (req.headers.host) {
+                proxyReq.setHeader('X-Forwarded-Host', req.headers.host);
+              }
+              const proto = req.headers['x-forwarded-proto'] ||
+                (req.socket?.encrypted ? 'https' : 'http');
+              proxyReq.setHeader('X-Forwarded-Proto', proto);
+            });
+          },
         },
       } : {},
     },

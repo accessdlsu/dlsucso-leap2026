@@ -7,6 +7,7 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
+	"account_id": "97322d2f321b54b64f6fdf13854b765b",
 	"name": "dlsucso-leap2026",
 	"main": "./worker/index.ts",
 	"compatibility_date": "2026-06-11",
@@ -36,6 +37,20 @@
 			"service": "leapify-console"
 		}
 	],
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "BROADCASTER",
+				"class_name": "ConfigBroadcaster"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_sqlite_classes": ["ConfigBroadcaster"]
+		}
+	],
 	"env": {
 		"staging": {
 			"name": "dlsucso-leap2026-dev",
@@ -45,7 +60,15 @@
 					"binding": "BACKEND",
 					"service": "leapify-console"
 				}
-			]
+			],
+			"durable_objects": {
+				"bindings": [
+					{
+						"name": "BROADCASTER",
+						"class_name": "ConfigBroadcaster"
+					}
+				]
+			}
 		}
 	}
 }

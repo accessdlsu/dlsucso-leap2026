@@ -1,5 +1,125 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import FaqAccordion from "../components/FaqAccordion";
 ---
 
-<Layout title="FAQs | LEAP 2026" />
+<Layout title="FAQs | LEAP 2026" description="Frequently asked questions about LEAP 2026.">
+  <div class="faq-bg">
+    <div class="faq-content">
+      <h1 class="faq-title">FAQs</h1>
+      <p class="faq-desc">
+        Got questions? We&rsquo;ve got answers. Browse common inquiries about
+        LEAP 2026.
+      </p>
+      <FaqAccordion client:only="react" />
+    </div>
+
+    <footer class="faq-footer">
+      &copy; LEAP 2026 &middot; CSO &middot; DLSU
+    </footer>
+  </div>
+</Layout>
+
+<style>
+  body {
+    margin: 0;
+  }
+  main {
+    padding: 0;
+  }
+
+  .faq-bg {
+    min-height: 100svh;
+    overflow-y: auto;
+    overflow-x: clip;
+    position: relative;
+    scrollbar-width: none;
+    background: linear-gradient(
+      180deg,
+      #1a2940 0%,
+      #1d3148 8%,
+      #1f3a4c 18%,
+      #234048 28%,
+      #284240 38%,
+      #2c4338 48%,
+      #2e4632 58%,
+      #314830 68%,
+      #344932 78%,
+      #3a4a35 86%,
+      #4a4a3a 94%,
+      #5a4838 100%
+    );
+  }
+  .faq-bg::-webkit-scrollbar {
+    display: none;
+  }
+
+  .faq-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem
+      calc(2rem + var(--nav-space-bottom));
+    min-height: 100svh;
+    box-sizing: border-box;
+  }
+
+  .faq-title {
+    font-family: "TD-Sulog", serif;
+    font-weight: 700;
+    font-size: clamp(2.5rem, 7vh, 4.5rem);
+    letter-spacing: 0.015em;
+    line-height: 1.15;
+    margin: 0 0 0.25rem;
+    padding-left: 0.15em;
+    background: linear-gradient(
+      180deg,
+      #fff5c4 0%,
+      #fae185 35%,
+      #de9a49 75%,
+      #b07820 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.5));
+  }
+
+  .faq-desc {
+    font-family: "DM Sans", sans-serif;
+    font-size: clamp(0.9rem, 2vh, 1.2rem);
+    color: rgba(255, 255, 255, 0.65);
+    text-align: center;
+    line-height: 1.6;
+    margin: 0 0 2rem;
+    max-width: 600px;
+  }
+
+  .faq-footer {
+    position: relative;
+    z-index: 2;
+    padding: 2rem 0 1.5rem;
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.3);
+    text-align: center;
+    letter-spacing: 0.06em;
+  }
+
+  @media (max-width: 768px) {
+    .faq-content {
+      padding: calc(1rem + var(--nav-space-top)) 1rem
+        calc(2rem + var(--nav-space-bottom));
+    }
+  }
+</style>
+
+<style is:global>
+  @keyframes faqSpin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>
