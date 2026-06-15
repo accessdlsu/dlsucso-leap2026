@@ -21,16 +21,20 @@ import {
 } from "lucide-react";
 import type { UserProfile } from "leapify/types";
 import { getCachedProfile, restoreSession, signOutUser } from "../../services/auth";
+import { leapifyApi } from "../../services/leapify";
+import SearchOverlay from "../SearchOverlay";
+import SavedClassesOverlay from "../SavedClassesOverlay";
 
 const links = [
   { href: "/", label: "Home", icon: House },
-  { href: "/about", label: "Overview", icon: BookOpen },
-  { href: "/events", label: "Featured", icon: Star },
+  { href: "/about", label: "About Us", icon: BookOpen },
+  { href: "/main-events", label: "Main Events", icon: Star },
   { href: "/classes", label: "Classes", icon: GraduationCap },
   { href: "/faq", label: "FAQs", icon: MessageCircleQuestion },
 ];
 
 const cubicBezier = "cubic-bezier(0.22, 1, 0.36, 1)";
+const LOGO_HIDDEN_PATHS = new Set(["/", "/about"]);
 
 function pillIndicatorStyle(index: number): CSSProperties {
   // index 0→left:calc(0%+4px), 1→calc(20%+4px), 2→calc(40%+4px), 3→calc(60%+4px), 4→calc(80%+4px)
@@ -60,16 +64,21 @@ export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showNavLogo, setShowNavLogo] = useState(() => {
     if (typeof window !== "undefined") {
-      return window.location.pathname !== "/";
+      const norm = window.location.pathname.replace(/\/$/, "") || "/";
+      return !LOGO_HIDDEN_PATHS.has(norm);
     }
     return false;
   });
   const [user, setUser] = useState<UserProfile | null>(null);
   const [userLoading, setUserLoading] = useState(true);
+  const [atBottom, setAtBottom] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [savedOpen, setSavedOpen] = useState(false);
   const isMobile = windowWidth <= 968;
 
   useEffect(() => {
-    if (currentPath !== "/") {
+    const normalizedPath = currentPath.replace(/\/$/, "") || "/";
+    if (!LOGO_HIDDEN_PATHS.has(normalizedPath)) {
       setShowNavLogo(true);
       return;
     }
@@ -110,6 +119,38 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    const THRESHOLD = 80;
+    const checkBottom = () => {
+      const bg = document.querySelector(".home-bg");
+      if (bg) {
+        // snap scroll container on home page
+        setAtBottom(bg.scrollHeight - bg.scrollTop - bg.clientHeight < THRESHOLD);
+      } else {
+        // normal page scroll
+        setAtBottom(
+          document.documentElement.scrollHeight - window.scrollY - window.innerHeight < THRESHOLD
+        );
+      }
+    };
+    // Delay initial check so footer doesn't falsely trigger on page load
+    const initTimer = setTimeout(checkBottom, 1500);
+    const bg = document.querySelector(".home-bg");
+    if (bg) {
+      bg.addEventListener("scroll", checkBottom, { passive: true });
+    } else {
+      window.addEventListener("scroll", checkBottom, { passive: true });
+    }
+    return () => {
+      clearTimeout(initTimer);
+      if (bg) {
+        bg.removeEventListener("scroll", checkBottom);
+      } else {
+        window.removeEventListener("scroll", checkBottom);
+      }
+    };
+  }, [currentPath]);
+
+  useEffect(() => {
     let cancelled = false;
     const cached = getCachedProfile();
     if (cached) {
@@ -148,7 +189,11 @@ export default function Navbar() {
     return () => document.removeEventListener("astro:after-swap", onSwap);
   }, []);
 
-  const activeIndex = links.findIndex((l) => l.href === currentPath);
+  const normalizedPath = currentPath.replace(/\/$/, "") || "/";
+  const activeIndex = links.findIndex((l) => {
+    const norm = l.href.replace(/\/$/, "") || "/";
+    return norm === normalizedPath;
+  });
 
   const clamp = (min: number, val: number, max: number) =>
     Math.max(min, Math.min(val, max));
@@ -171,6 +216,8 @@ export default function Navbar() {
     WebkitBackdropFilter: "blur(20px)",
     borderRadius: 9999,
     boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    transition: "border-color 0.25s ease, box-shadow 0.25s ease, opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
   };
 
   const pillContainer: CSSProperties = {
@@ -220,7 +267,7 @@ export default function Navbar() {
     width: "max-content",
     maxWidth: 320,
     borderRadius: 16,
-    padding: 6,
+    padding: 8,
     background: "rgba(0, 0, 0, 0.25)",
     backdropFilter: "blur(20px)",
     WebkitBackdropFilter: "blur(20px)",
@@ -228,7 +275,7 @@ export default function Navbar() {
     border: "1px solid rgba(255, 255, 255, 0.06)",
     display: "flex",
     flexDirection: "column",
-    gap: 2,
+    gap: 6,
     zIndex: 1000,
   };
 
@@ -236,17 +283,28 @@ export default function Navbar() {
     display: "flex",
     alignItems: "center",
     gap: 10,
-    padding: "10px 14px",
+    padding: "9px 14px",
     borderRadius: 12,
     fontFamily: "'DM Sans', sans-serif",
     fontSize: "0.9rem",
     fontWeight: 500,
     color: "rgba(255, 255, 255, 0.85)",
     cursor: "pointer",
-    background: "none",
-    border: "none",
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.08)",
     textDecoration: "none",
-    transition: "background 0.15s",
+    transition: "background 0.15s, border-color 0.15s",
+    width: "100%",
+    boxSizing: "border-box" as const,
+    textAlign: "left" as const,
+  };
+
+  const signOutStyle: CSSProperties = {
+    ...menuItemStyle,
+    background: "rgba(180,40,40,0.18)",
+    border: "1px solid rgba(220,60,60,0.3)",
+    color: "rgba(255,140,140,0.95)",
+    marginTop: 4,
   };
 
   useEffect(() => {
@@ -276,9 +334,11 @@ export default function Navbar() {
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
+      const isPopup = (e.target as HTMLElement).closest('.profile-popup');
       if (
         profileRef.current &&
-        !profileRef.current.contains(e.target as Node)
+        !profileRef.current.contains(e.target as Node) &&
+        !isPopup
       ) {
         setMenuClosing(true);
         setProfileOpen(false);
@@ -300,21 +360,35 @@ export default function Navbar() {
 
   const topPills = (
     <>
-      <div style={{
-        position: "fixed",
-        top: isMobile ? 12 : 24,
-        left: isMobile ? 12 : 24,
-        zIndex: 1001,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: isMobile ? "9px 16px" : "9px 24px",
-        ...glassStyle,
-        opacity: (mounted && showNavLogo) ? 1 : 0,
-        pointerEvents: showNavLogo ? "auto" : "none",
-        transform: (mounted && showNavLogo) ? "translateY(0) scale(1)" : "translateY(-15px) scale(0.9)",
-        transition: "opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)",
-      } as CSSProperties}>
+      <style dangerouslySetInnerHTML={{ __html: `
+        .nav-glass-pill {
+          transition: border-color 0.25s ease, box-shadow 0.25s ease, opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) !important;
+        }
+        .nav-glass-pill:hover {
+          border-color: rgba(255, 255, 255, 0.3) !important;
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25) !important;
+        }
+      `}} />
+      <div
+        className="nav-glass-pill"
+        style={{
+          position: "fixed",
+          top: isMobile ? 12 : 24,
+          left: isMobile ? 12 : 24,
+          zIndex: 1001,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: 58,
+          boxSizing: "border-box",
+          padding: isMobile ? "0 16px" : "0 24px",
+          ...glassStyle,
+          opacity: (mounted && showNavLogo && (!isMobile || !atBottom)) ? 1 : 0,
+          pointerEvents: (showNavLogo && (!isMobile || !atBottom)) ? "auto" : "none",
+          transform: (mounted && showNavLogo && (!isMobile || !atBottom)) ? "translateY(0) scale(1)" : "translateY(-15px) scale(0.9)",
+          transition: "opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)",
+        } as CSSProperties}
+      >
         <a
           href="/"
           style={{
@@ -333,6 +407,7 @@ export default function Navbar() {
       </div>
 
       <div
+        className="nav-right-cluster"
         style={{
           position: "fixed",
           top: isMobile ? 12 : 24,
@@ -343,13 +418,14 @@ export default function Navbar() {
         }}
       >
         <div
+          className="nav-glass-pill"
           style={{
             ...pillContainer,
             position: "relative",
             top: "auto",
             left: "auto",
-            width: isMobile ? 44 : 58,
-            height: isMobile ? 44 : 58,
+            width: 58,
+            height: 58,
             padding: 0,
             opacity: mounted ? 1 : 0,
             transform: mounted ? "translateY(0) scale(1)" : "translateY(-20px) scale(0.9)",
@@ -357,6 +433,7 @@ export default function Navbar() {
           }}
         >
               <button
+                onClick={() => setSearchOpen(true)}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -366,21 +443,25 @@ export default function Navbar() {
                   cursor: "pointer",
                   color: "rgba(255, 255, 255, 0.7)",
                   WebkitTapHighlightColor: "transparent",
+                  width: "100%",
+                  height: "100%",
+                  borderRadius: 9999,
                 }}
               >
-                <Search size={isMobile ? 18 : 24} strokeWidth={1.75} />
+                <Search size={isMobile ? 22 : 24} strokeWidth={1.75} />
           </button>
         </div>
 
         <div
           ref={profileRef}
+          className="nav-glass-pill"
           style={{
             ...pillContainer,
             position: "relative",
             top: "auto",
             left: "auto",
-            width: isMobile ? 44 : 58,
-            height: isMobile ? 44 : 58,
+            width: 58,
+            height: 58,
             padding: 0,
             opacity: mounted ? 1 : 0,
             marginTop: mounted ? 0 : -20,
@@ -407,13 +488,13 @@ export default function Navbar() {
               <img
                 src={user.image}
                 alt={String(user.name ?? "")}
-                width={isMobile ? 28 : 40}
-                height={isMobile ? 28 : 40}
+                width={isMobile ? 38 : 46}
+                height={isMobile ? 38 : 46}
                 style={{
                   display: "block",
                   objectFit: "cover",
-                  width: isMobile ? 28 : 40,
-                  height: isMobile ? 28 : 40,
+                  width: isMobile ? 38 : 46,
+                  height: isMobile ? 38 : 46,
                   borderRadius: 9999,
                   flexShrink: 0,
                 }}
@@ -430,14 +511,14 @@ export default function Navbar() {
                   background: "rgba(255, 255, 255, 0.12)",
                 }}>
                   <User
-                    size={isMobile ? 24 : 34}
+                    size={isMobile ? 32 : 38}
                     strokeWidth={1.5}
                     color="rgba(255, 255, 255, 0.7)"
                   />
                 </div>
               ) : (
                 <CircleUser
-                  size={isMobile ? 28 : 40}
+                  size={isMobile ? 38 : 46}
                   strokeWidth={1.5}
                   color="rgba(255, 255, 255, 0.7)"
                 />
@@ -447,6 +528,8 @@ export default function Navbar() {
         </div>
       </div>
 
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <SavedClassesOverlay open={savedOpen} onClose={() => setSavedOpen(false)} />
       {menuRendered && popupPos && createPortal(
         <div 
           className={`profile-popup ${menuClosing ? 'closing' : ''}`}
@@ -490,30 +573,58 @@ export default function Navbar() {
             </div>
           )}
           <a
-            href="/saved"
+            href="/access"
+            onClick={toggleProfile}
             style={menuItemStyle}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.background = "none")
-            }
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.1)";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.16)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+            }}
           >
-            <Bookmark size={18} strokeWidth={1.75} />
-            Saved Classes
+            <img
+              src="/logo/access/access-logo.png"
+              alt="ACCESS DLSU Logo"
+              loading="eager"
+              fetchPriority="high"
+              style={{ width: 18, height: 18, objectFit: "contain", flexShrink: 0 }}
+            />
+            ACCESS DLSU
           </a>
+          {user && (
+            <button
+              style={menuItemStyle}
+              onClick={() => { toggleProfile(); setSavedOpen(true); }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = "rgba(255,255,255,0.1)";
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.16)";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+              }}
+            >
+              <Bookmark size={18} strokeWidth={1.75} />
+              Saved Classes
+            </button>
+          )}
           <button
-            style={menuItemStyle}
-            onClick={() => { signOutUser(); }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.background = "none")
-            }
+            style={signOutStyle}
+            onClick={() => { signOutUser(); toggleProfile(); }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(200,40,40,0.32)";
+              e.currentTarget.style.borderColor = "rgba(220,60,60,0.5)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(180,40,40,0.18)";
+              e.currentTarget.style.borderColor = "rgba(220,60,60,0.3)";
+            }}
           >
             <LogOut size={18} strokeWidth={1.75} />
-            Signout
+            Sign Out
           </button>
         </div>,
         document.body
@@ -529,6 +640,7 @@ export default function Navbar() {
         {topPills}
 
         <nav
+          className="nav-bottom-bar"
           style={{
             position: "fixed",
             bottom: 12,
@@ -543,6 +655,7 @@ export default function Navbar() {
           }}
         >
           <div
+            className="nav-glass-pill"
             style={{
               position: "relative",
               display: "flex",
@@ -557,9 +670,11 @@ export default function Navbar() {
               backdropFilter: "blur(20px)",
               WebkitBackdropFilter: "blur(20px)",
               boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
-              opacity: mounted ? 1 : 0,
-              transform: mounted ? "translateY(0) scale(1)" : "translateY(20px) scale(0.95)",
-              transition: "opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              opacity: (mounted && !atBottom) ? 1 : 0,
+              pointerEvents: (mounted && !atBottom) ? "auto" : "none",
+              transform: (mounted && !atBottom) ? "translateY(0) scale(1)" : "translateY(20px) scale(0.95)",
+              transition: "border-color 0.25s ease, box-shadow 0.25s ease, opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s",
             }}
             onMouseLeave={() => setHoveredIndex(null)}
           >
@@ -582,7 +697,8 @@ export default function Navbar() {
             />
 
             {links.map((link, i) => {
-              const isActive = link.href === currentPath;
+              const normHref = link.href.replace(/\/$/, "") || "/";
+              const isActive = normHref === normalizedPath;
               const Icon = link.icon;
               return (
                 <a
@@ -644,11 +760,12 @@ export default function Navbar() {
         }}
       >
         <div 
+          className="nav-glass-pill"
           style={{ 
             ...pillStyle, 
             opacity: mounted ? 1 : 0, 
             transform: mounted ? "translateY(0) scale(1)" : "translateY(-20px) scale(0.95)",
-            transition: "opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s" 
+            transition: "border-color 0.25s ease, box-shadow 0.25s ease, opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s" 
           }} 
           onMouseLeave={() => setHoveredIndex(null)}
         >
@@ -671,7 +788,8 @@ export default function Navbar() {
           />
 
           {links.map((link, i) => {
-            const isActive = link.href === currentPath;
+            const normHref = link.href.replace(/\/$/, "") || "/";
+            const isActive = normHref === normalizedPath;
             const Icon = link.icon;
             return (
               <a

@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import GalleryCarousel from '../components/GalleryCarousel';
+import Footer from '../components/navigation/Footer.astro';
 
 const fireflies = Array.from({ length: 16 }, (_, i) => ({
   id: i,
@@ -21,12 +22,12 @@ const days = [
 ];
 
 const themes = [
-  { slug: 'palayan', name: 'Palayan ng Karunungan', img: '/images/themes/palay.png', color: '#c8e6a0' },
-  { slug: 'pamilihan', name: 'Pamilihan ng Kakayahan', img: '/images/themes/pamilihan.png', color: '#ffb68c' },
-  { slug: 'plaza', name: 'Plaza ng Malikhaing Diwa', img: '/images/themes/plaza.png', color: '#a0d4f0' },
-  { slug: 'dambana', name: 'Dambana ng Pagkakaisa', img: '/images/themes/dambana.png', color: '#d4a0e8' },
-  { slug: 'palaisdaan', name: 'Palaisdaan ng Kalusugan', img: '/images/themes/palaisdaan.png', color: '#80d4b0' },
-  { slug: 'bahay', name: 'Bahay ng Bayanihan', img: '/images/themes/bahay.png', color: '#f0c080' },
+  { slug: 'palayan-ng-karunungan', name: 'Palayan ng Karunungan', img: '/images/themes/palay.png', color: '#c8e6a0' },
+  { slug: 'pamilihan-ng-kakayahan', name: 'Pamilihan ng Kakayahan', img: '/images/themes/pamilihan.png', color: '#ffb68c' },
+  { slug: 'plaza-ng-malikhaing-diwa', name: 'Plaza ng Malikhaing Diwa', img: '/images/themes/plaza.png', color: '#a0d4f0' },
+  { slug: 'dambana-ng-pagkakaisa', name: 'Dambana ng Pagkakaisa', img: '/images/themes/dambana.png', color: '#d4a0e8' },
+  { slug: 'palaisdaan-ng-kalusugan', name: 'Palaisdaan ng Kalusugan', img: '/images/themes/palaisdaan.png', color: '#80d4b0' },
+  { slug: 'bahay-ng-bayanihan', name: 'Bahay ng Bayanihan', img: '/images/themes/bahay.png', color: '#f0c080' },
 ];
 ---
 
@@ -111,24 +112,8 @@ const themes = [
           </a>
         ))}
       </div>
+      <Footer />
     </section>
-
-    <footer class="home-footer">
-      <div class="footer-links">
-        <a href="/" class="footer-link">Home</a>
-        <a href="/classes" class="footer-link">Classes</a>
-        <a href="/events" class="footer-link">Events</a>
-        <a href="/faq" class="footer-link">FAQ</a>
-      </div>
-      <div class="footer-copy">
-        &copy; LEAP 2026 &middot;
-        CSO &middot;
-        DLSU
-      </div>
-      <div class="footer-cso">
-        Made by Association of Computer Engineering Students (ACCESS DLSU)
-      </div>
-    </footer>
 
     <div class="landscape">
       <svg viewBox="0 0 1440 360" preserveAspectRatio="xMidYMax slice" style="display:block;width:100%;height:100%;">
@@ -181,6 +166,7 @@ const themes = [
     overflow: hidden;
     -webkit-user-select: none;
     user-select: none;
+    background-color: #0d1e10;
   }
   main {
     padding: 0;
@@ -188,7 +174,7 @@ const themes = [
 
   /* ── Background ── */
   .home-bg {
-    height: 100svh;
+    height: 100dvh;
     overflow-y: auto;
     overflow-x: clip;
     position: relative;
@@ -206,7 +192,7 @@ const themes = [
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 100svh;
+    min-height: 100dvh;
     position: relative;
     z-index: 2;
     scroll-snap-align: start;
@@ -385,7 +371,7 @@ const themes = [
     justify-content: center;
     padding: calc(1.5rem + var(--nav-space-top)) 1.5rem calc(1.5rem + var(--nav-space-bottom));
     text-align: center;
-    min-height: 100svh;
+    min-height: 100dvh;
     box-sizing: border-box;
     scroll-snap-align: start;
   }
@@ -513,7 +499,7 @@ const themes = [
     justify-content: center;
     padding: calc(1.5rem + var(--nav-space-top)) 1.5rem calc(1.5rem + var(--nav-space-bottom));
     text-align: center;
-    min-height: 100svh;
+    min-height: 100dvh;
     box-sizing: border-box;
     scroll-snap-align: start;
   }
@@ -592,24 +578,13 @@ const themes = [
     align-items: center;
     padding: calc(1.5rem + var(--nav-space-top)) 1.5rem calc(1.5rem + var(--nav-space-bottom));
     text-align: center;
-    min-height: 100svh;
+    min-height: 100dvh;
     justify-content: center;
     box-sizing: border-box;
     scroll-snap-align: start;
   }
 
-  /* ── Footer ── */
-  .home-footer {
-    position: relative;
-    z-index: 2;
-    padding: 2rem 0 1.5rem;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.68rem;
-    color: rgba(255,255,255,0.3);
-    text-align: center;
-    letter-spacing: 0.06em;
-    pointer-events: none;
-  }
+
 
   /* ── Responsive ── */
   @media (max-width: 968px) {
@@ -690,7 +665,7 @@ const themes = [
     z-index: 1001;
     transition: opacity 0.4s ease, transform 0.4s ease;
   }
-  @media (max-width: 768px) {
+  @media (max-width: 968px) {
     .scroll-cue {
       bottom: 5.5rem;
     }
@@ -777,45 +752,7 @@ const themes = [
     box-shadow: 0 0 24px rgba(250, 225, 133, 0.25), 0 0 48px rgba(250, 225, 133, 0.1);
   }
   
-  /* ── Enriched Footer ── */
-  .home-footer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.25rem;
-    padding: 3rem 1.5rem 2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    background: rgba(0, 0, 0, 0.15);
-  }
-  .footer-links {
-    display: flex;
-    gap: 2rem;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  .footer-link {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.55);
-    text-decoration: none;
-    transition: color 0.2s ease;
-  }
-  .footer-link:hover {
-    color: #fae185;
-  }
-  .footer-cso {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.35);
-    letter-spacing: 0.04em;
-  }
-  .footer-copy {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.25);
-    letter-spacing: 0.02em;
-  }
+
 
   @media (prefers-reduced-motion: reduce) {
     .firefly { animation: none; opacity: 0.3; }
@@ -849,28 +786,35 @@ const themes = [
     });
   });
 
-  /* ── Hero scroll listener ── */
+  // Section IntersectionObserver for active dot (root = scroll container)
+  const sectionIds = ['hero-section', 'featured-section', 'subthemes', 'leapdays'];
+  const sectionRatios = new Map<string, number>(sectionIds.map(id => [id, 0]));
+  const sectionObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        sectionRatios.set(entry.target.id, entry.intersectionRatio);
+      });
+      // Pick the section with the highest intersection ratio
+      let bestId = '';
+      let bestRatio = 0;
+      sectionRatios.forEach((ratio, id) => {
+        if (ratio > bestRatio) { bestRatio = ratio; bestId = id; }
+      });
+      if (bestId && bestRatio > 0) {
+        const idx = sectionIds.indexOf(bestId);
+        if (idx !== -1) dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      }
+    },
+    { root: bg, threshold: [0, 0.25, 0.5, 0.75, 1] }
+  );
+  sectionIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) sectionObserver.observe(el);
+  });
+
+  /* ── Hero scroll listener (hide/show hero elements only) ── */
   bg.addEventListener('scroll', () => {
     const st = bg.scrollTop;
-    const h = window.innerHeight;
-    
-    // 1. Update active progress dots
-    let activeIdx = 0;
-    if (st >= h * 2.8) {
-      activeIdx = 3; // LEAP Days
-    } else if (st >= h * 1.8) {
-      activeIdx = 2; // Subthemes
-    } else if (st >= h * 0.8) {
-      activeIdx = 1; // Featured / Main Events
-    } else {
-      activeIdx = 0; // Hero
-    }
-    
-    dots.forEach((d, i) => {
-      d.classList.toggle('active', i === activeIdx);
-    });
-
-    // 2. Hide hero elements & landscape on scroll
     if (!reduced) {
       if (st > 80) {
         if (content) content.classList.add('scroll-hide');
@@ -1040,7 +984,7 @@ const themes = [
     width: 68px;
     height: 68px;
     padding: 6px;
-    border-radius: 10px;
+    border-radius: 22.37%;
     background: rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -1054,6 +998,7 @@ const themes = [
     width: 100%;
     height: 100%;
     object-fit: contain;
+    border-radius: 22.37%;
     user-select: none;
     -webkit-user-select: none;
     -webkit-user-drag: none;
@@ -1090,6 +1035,35 @@ const themes = [
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
     box-sizing: border-box;
+  }
+
+  .card-tags-row {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.15rem;
+  }
+
+  .card-code-tag {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    text-transform: uppercase;
+  }
+
+  .card-theme-tag {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
   }
 
   .gallery-card-title {
@@ -1357,7 +1331,7 @@ const themes = [
     }
     .home-featured, .home-subthemes, .home-leapdays {
       padding: calc(0.5rem + var(--nav-space-top)) 1rem calc(0.5rem + var(--nav-space-bottom)) !important;
-      min-height: 100svh;
+      min-height: 100dvh;
       justify-content: center;
     }
     .subthemes-scroll {
@@ -1375,5 +1349,108 @@ const themes = [
     .leapday-card {
       padding: 0.4rem 0.25rem;
     }
+  }
+
+  /* ── Carousel Drawer ── */
+  .drawer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    animation: overlayIn 0.25s ease;
+  }
+  @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+  .drawer {
+    width: 100%;
+    max-width: 100%;
+    max-height: 85svh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.12) transparent;
+    background: rgba(10, 18, 30, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3);
+    animation: drawerUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    position: relative;
+    margin: 0;
+    border-radius: 20px 20px 0 0;
+  }
+  @keyframes drawerUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  @media (min-width: 769px) {
+    .drawer-overlay { align-items: center; }
+    .drawer { max-width: 560px; border-radius: 24px; margin: 0 1rem; animation: modalIn 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+    @keyframes modalIn { from { transform: scale(0.92) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+  }
+  .drawer-close {
+    position: absolute; top: 0.75rem; right: 0.75rem; z-index: 2;
+    width: 36px; height: 36px; border-radius: 50%; border: none;
+    background: rgba(0,0,0,0.4); color: #fff; font-size: 1.4rem; line-height: 1;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .drawer-close:hover { background: rgba(0,0,0,0.6); }
+  .drawer-hero { flex-shrink: 0; display: flex; flex-direction: row; min-height: 200px; max-height: 52vh; }
+  .drawer-poster { flex: 0 0 42%; max-width: 42%; padding: 10px 0 10px 10px; background: transparent; display: flex; align-items: stretch; box-sizing: border-box; min-height: 0; }
+  .drawer-poster img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; border-radius: 14px; }
+  .drawer-header { flex: 1 1 0; min-width: 0; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; overflow: hidden; }
+  .drawer-body {
+    flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
+    padding: 1.25rem 1.5rem;
+    display: flex; flex-direction: column; gap: 1rem;
+    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent;
+  }
+  .drawer-body::-webkit-scrollbar { width: 4px; }
+  .drawer-body::-webkit-scrollbar-track { background: transparent; }
+  .drawer-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 9999px; }
+  .drawer-body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+  .drawer-footer { flex-shrink: 0; padding: 0.85rem 1.5rem 1.25rem; }
+  .drawer-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .drawer-title { font-family: 'TD-Sulog', serif; font-size: 1.4rem; font-weight: 700; color: #fff; margin: 0; line-height: 1.2; }
+  .drawer-meta { display: flex; flex-direction: column; gap: 0.5rem; padding: 1rem; background: rgba(255,255,255,0.04); border-radius: 12px; }
+  .drawer-meta-row { display: flex; justify-content: space-between; align-items: flex-start; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; }
+  .drawer-meta-label { color: rgba(255,255,255,0.35); font-weight: 600; letter-spacing: 0.05em; flex-shrink: 0; }
+  .drawer-meta-val { color: rgba(255,255,255,0.75); font-weight: 500; text-align: right; word-break: break-word; }
+  .drawer-desc { font-family: 'DM Sans', sans-serif; font-size: 0.85rem; color: rgba(255,255,255,0.55); line-height: 1.6; margin: 0; }
+  .drawer-bookmark-btn {
+    flex-shrink: 0; width: 44px; height: 44px; border-radius: 9999px;
+    border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.65); cursor: pointer; display: flex;
+    align-items: center; justify-content: center; transition: background 0.2s, color 0.2s; padding: 0;
+  }
+  .drawer-bookmark-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .drawer-bookmark-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .drawer-enroll {
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 700;
+    padding: 0.75rem 1.5rem; border-radius: 9999px; border: none;
+    background: linear-gradient(135deg, #4a7a5a 0%, #2a5a3a 100%);
+    color: #fff; cursor: pointer; transition: all 0.2s; width: 100%;
+    box-sizing: border-box; display: block; text-align: center; text-decoration: none;
+  }
+  .drawer-enroll:hover { background: linear-gradient(135deg, #568c68 0%, #346e44 100%); transform: translateY(-1px); }
+
+  @media (max-width: 540px) {
+    .drawer-poster { flex: 0 0 38%; max-width: 38%; }
+    .drawer-header { padding: 0.75rem 2rem 0.75rem 0.75rem; }
+    .drawer-title { font-size: 1rem; }
+  }
+  .class-theme-tag {
+    font-family: 'Poppins', sans-serif; font-size: 0.6rem; font-weight: 700;
+    letter-spacing: 0.05em; padding: 0.25rem 0.6rem; border-radius: 6px;
+    background: rgba(222,154,73,0.15); color: #fae185; border: 1px solid rgba(222,154,73,0.2);
+  }
+  .class-day-tag {
+    font-family: 'Poppins', sans-serif; font-size: 0.6rem; font-weight: 700;
+    letter-spacing: 0.05em; padding: 0.25rem 0.6rem; border-radius: 6px;
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.1);
   }
 </style>

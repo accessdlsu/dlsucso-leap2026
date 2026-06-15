@@ -1,0 +1,568 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { Globe } from "lucide-react";
+import Footer from "../components/navigation/Footer.astro";
+---
+
+<Layout title="ACCESS DLSU | LEAP 2026" description="Association of Computer Engineering Students (ACCESS) DLSU — Developers of the LEAP 2026 Website.">
+  <div class="access-bg">
+    <div class="access-content">
+      <div class="access-logo-wrap">
+        <img
+          src="/logo/access/access-wordmark.png"
+          alt="ACCESS DLSU"
+          class="access-main-logo"
+        />
+      </div>
+
+      <!-- General Info (Full Width) -->
+      <div class="access-card intro-card">
+        <p class="access-card-text">
+          The Association of Computer Engineering Students (ACCESS) is a professional organization of Computer Engineering students who strive to be Lasallian achievers. Essentially, the organization mainly offers academic and career-related activities in order for students to develop their skills and hone their abilities in engineering.
+        </p>
+      </div>
+
+      <!-- Vision & Mission (Grid on Desktop) -->
+      <div class="access-grid">
+        <div class="access-card">
+          <h2 class="access-card-title">Vision</h2>
+          <p class="access-card-text">
+            The association strives to enhance technological knowledge and engineering skills in the domain of Computer Engineering to prepare the students for the competitive industry. The organization also intends to instill social awareness and understanding simultaneously promoting camaraderie of Computer Engineering to nurture true Lasallian achievers.
+          </p>
+        </div>
+
+        <div class="access-card">
+          <h2 class="access-card-title">Mission</h2>
+          <p class="access-card-text">
+            The Association of Computer Engineering Students (ACCESS) envisions it to be an organization that caters to the needs of its members. It aims to be a breeding ground for students who aim to become professionals and pioneers in the field of Computer Engineering, while upholding Lasallian values in their daily actions.
+          </p>
+        </div>
+      </div>
+
+      <!-- Social Media & Website Links -->
+      <div class="access-socials">
+        <a href="https://accessdlsu.com/" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Website">
+          <Globe size={20} strokeWidth={1.75} />
+        </a>
+        <a href="https://www.instagram.com/dlsu_access/" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Instagram">
+          <img src="/assets/instagram.svg" alt="Instagram" class="social-icon" />
+        </a>
+        <a href="https://www.linkedin.com/company/accessdlsu" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="LinkedIn">
+          <img src="/assets/linkedin-in.svg" alt="LinkedIn" class="social-icon" />
+        </a>
+        <a href="https://www.facebook.com/accessdlsu" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Facebook">
+          <img src="/assets/facebook-f.svg" alt="Facebook" class="social-icon" />
+        </a>
+        <a href="https://github.com/accessdlsu" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="GitHub">
+          <img src="/assets/github.svg" alt="GitHub" class="social-icon" />
+        </a>
+      </div>
+
+      <!-- Meet the Team Section -->
+      <section class="team-section">
+        <h2 class="team-title">Meet the Team</h2>
+        <p class="team-subtitle">Meet the developers of the LEAP 2026 website</p>
+
+        <!-- Heads Category -->
+        <div class="team-category">
+          <h3 class="category-title">Heads</h3>
+          <div class="team-grid heads-grid">
+            <div class="member-card main-member">
+              <div class="avatar-wrap">
+                <img src="/assets/team/sy.png" alt="Win Clarence Sy" />
+              </div>
+              <div class="member-info">
+                <h4 class="member-name">WIN CLARENCE SY</h4>
+                <p class="member-role">Lead Developer, Full-Stack Developer, UI/UX Design</p>
+              </div>
+            </div>
+            <div class="member-card main-member">
+              <div class="avatar-wrap">
+                <img src="/assets/team/guanzon.png" alt="Lawrence Guanzon" />
+              </div>
+              <div class="member-info">
+                <h4 class="member-name">LAWRENCE GUANZON</h4>
+                <p class="member-role">Full-Stack Developer</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Developers Category -->
+        <div class="team-category">
+          <h3 class="category-title">Developers</h3>
+          
+          <div class="devs-sub-layout">
+            <!-- Frontend Subcategory -->
+            <div class="subcat-block">
+              <span class="subcat-title">Frontend</span>
+              <div class="frontend-names-list">
+                <div class="frontend-name-item">
+                  <span class="frontend-name">Andrei Gyles Lim</span>
+                </div>
+                <div class="frontend-name-item">
+                  <span class="frontend-name">Angelica Gregorio</span>
+                </div>
+                <div class="frontend-name-item">
+                  <span class="frontend-name">Brendan Millares</span>
+                </div>
+                <div class="frontend-name-item">
+                  <span class="frontend-name">Christian John Alado</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Powered by Leapify Card -->
+        <div class="access-card powered-card">
+          <p class="powered-text">
+            The website is powered by{' '}
+            <a href="https://github.com/access-dlsu/leapify" target="_blank" rel="noopener noreferrer" class="powered-link">Leapify</a>
+            {' '}(<a href="https://www.npmjs.com/package/@access-dlsu/leapify" target="_blank" rel="noopener noreferrer" class="powered-link">npm</a>)
+          </p>
+        </div>
+      </section>
+ 
+      <Footer />
+    </div>
+  </div>
+</Layout>
+
+<style>
+  body {
+    margin: 0;
+  }
+  main {
+    padding: 0;
+  }
+
+  .access-bg {
+    min-height: 100dvh;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 50%, #080f1e 0%, #030305 100%);
+  }
+
+  /* Seamless, Hardware-Accelerated Space Travel Animations */
+  @keyframes travel-stars {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-320px);
+    }
+  }
+
+  @keyframes travel-stars-slow {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-400px);
+    }
+  }
+
+  /* Starfield Layers */
+  .access-bg::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% + 320px);
+    pointer-events: none;
+    z-index: 1;
+    background-image: 
+      radial-gradient(1.5px 1.5px at 20px 30px, #fff, rgba(0,0,0,0)),
+      radial-gradient(1px 1px at 40px 70px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+      radial-gradient(2px 2px at 50px 160px, #fff, rgba(0,0,0,0)),
+      radial-gradient(1.5px 1.5px at 80px 120px, rgba(255,255,255,0.7), rgba(0,0,0,0)),
+      radial-gradient(1px 1px at 110px 40px, #fff, rgba(0,0,0,0)),
+      radial-gradient(2px 2px at 150px 90px, rgba(255,255,255,0.9), rgba(0,0,0,0)),
+      radial-gradient(1.5px 1.5px at 190px 150px, #fff, rgba(0,0,0,0)),
+      radial-gradient(1px 1px at 220px 60px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+      radial-gradient(2px 2px at 260px 110px, #fff, rgba(0,0,0,0)),
+      radial-gradient(1.5px 1.5px at 300px 180px, rgba(255,255,255,0.7), rgba(0,0,0,0));
+    background-repeat: repeat;
+    background-size: 320px 320px;
+    opacity: 0.75;
+    animation: travel-stars 18s linear infinite;
+    will-change: transform;
+  }
+
+  .access-bg::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% + 400px);
+    pointer-events: none;
+    z-index: 1;
+    background-image: 
+      radial-gradient(2px 2px at 30px 80px, #fff, rgba(0,0,0,0)),
+      radial-gradient(1.5px 1.5px at 70px 240px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+      radial-gradient(1px 1px at 120px 180px, #fff, rgba(0,0,0,0)),
+      radial-gradient(2px 2px at 170px 300px, rgba(255,255,255,0.9), rgba(0,0,0,0)),
+      radial-gradient(1.5px 1.5px at 230px 100px, #fff, rgba(0,0,0,0)),
+      radial-gradient(1px 1px at 280px 220px, rgba(255,255,255,0.7), rgba(0,0,0,0));
+    background-repeat: repeat;
+    background-size: 400px 400px;
+    opacity: 0.5;
+    animation: travel-stars-slow 30s linear infinite;
+    will-change: transform;
+  }
+
+  .access-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem
+      calc(2rem + var(--nav-space-bottom));
+    min-height: 100dvh;
+    box-sizing: border-box;
+  }
+
+  .access-logo-wrap {
+    margin-bottom: 2.5rem;
+    filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.4));
+  }
+
+  .access-main-logo {
+    max-width: 420px;
+    width: 80vw;
+    height: auto;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* ── Cards ── */
+  .access-card {
+    width: 100%;
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.25rem;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transition:
+      border-color 0.25s ease,
+      box-shadow 0.25s ease;
+    box-sizing: border-box;
+  }
+  .access-card:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  .intro-card {
+    max-width: 900px;
+  }
+
+  .access-card-title {
+    font-family: "TD-Sulog", serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.75rem;
+    line-height: 1.2;
+  }
+
+  .access-card-text {
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  /* ── Grid Layout for Desktop ── */
+  .access-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    width: 100%;
+    max-width: 900px;
+  }
+
+  /* ── Socials Row ── */
+  .access-socials {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    width: 100%;
+    max-width: 900px;
+  }
+
+  .social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.75);
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+  }
+  .social-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #fff;
+    transform: scale(1.05);
+  }
+
+  .social-icon {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) invert(1);
+    display: block;
+    opacity: 0.75;
+    transition: opacity 0.25s ease;
+  }
+  .social-btn:hover .social-icon {
+    opacity: 1;
+  }
+
+
+
+  .powered-card {
+    max-width: 450px;
+    margin: 3.5rem auto 0;
+    text-align: center;
+    padding: 1.25rem 1.75rem;
+  }
+
+  .powered-text {
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .powered-link {
+    color: #fae185;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+
+  .powered-link:hover {
+    color: #fff;
+  }
+
+
+
+  @media (max-width: 768px) {
+    .access-content {
+      padding: calc(1rem + var(--nav-space-top)) 1rem
+        calc(2rem + var(--nav-space-bottom));
+    }
+    .access-card {
+      padding: 1.25rem 1.5rem;
+    }
+    .access-grid {
+      grid-template-columns: 1fr;
+    }
+    .devs-sub-layout {
+      grid-template-columns: 1fr;
+      gap: 1.75rem;
+    }
+    .frontend-names-list {
+      grid-template-columns: 1fr;
+    }
+
+    .team-section {
+      margin-top: 2.5rem;
+    }
+  }
+
+  /* ── Meet the Team Section ── */
+  .team-section {
+    width: 100%;
+    max-width: 900px;
+    margin-top: 3.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .team-title {
+    font-family: "TD-Sulog", serif;
+    font-size: clamp(1.8rem, 4vh, 2.4rem);
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 0.5rem;
+    text-align: center;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+  }
+
+  .team-subtitle {
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+    margin: 0 0 2.5rem;
+  }
+
+  .team-category {
+    width: 100%;
+    margin-bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .category-title {
+    font-family: "TD-Sulog", serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fae185;
+    margin: 0 0 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid rgba(250, 225, 133, 0.15);
+    padding-bottom: 0.4rem;
+    width: 100%;
+    max-width: 180px;
+    text-align: center;
+  }
+
+  .team-grid {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.75rem;
+    width: 100%;
+  }
+
+  .member-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    padding: 1.75rem;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
+
+  .member-card:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  }
+
+  .main-member {
+    max-width: 380px;
+  }
+
+  .avatar-wrap {
+    width: 105px;
+    height: 105px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  }
+
+  .avatar-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .member-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .member-name {
+    font-family: "Poppins", sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    letter-spacing: 0.03em;
+  }
+
+  .member-role {
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.55);
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  /* Developers Sub-layout Grid */
+  .devs-sub-layout {
+    width: 100%;
+    max-width: 900px;
+  }
+
+  .subcat-block {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .subcat-title {
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.25rem;
+  }
+
+  .frontend-names-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .frontend-name-item {
+    display: flex;
+    align-items: center;
+    padding: 0.85rem 1.5rem;
+    background: rgba(255, 255, 255, 0.01);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+    transition: border-color 0.25s, background 0.25s;
+  }
+
+  .frontend-name-item:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .frontend-name {
+    font-family: "Poppins", sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+  }
+</style>

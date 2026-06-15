@@ -1,91 +1,111 @@
-import { useRef, useEffect } from 'react';
-import { ArrowRight } from 'lucide-react';
-
-const slides = [
-  {
-    title: 'LEAP 2026',
-    tag: 'Featured Event',
-    date: 'May 20, 2026',
-    time: '8:00 AM - 6:00 PM',
-    venue: 'De La Salle University',
-    img: '/tmp/691188401_1293035212930460_4591157215005585726_n.jpg',
-    accent: '#de9a49',
-    desc: 'Isang Nayon, Isang Layunin — a week-long celebration of community, culture, and shared purpose.',
-    slots: { remaining: 200, total: 500 }
-  },
-  { 
-    title: 'The Awakening',          
-    tag: 'Opening Ceremony', 
-    date: 'May 20, 2026', 
-    time: '8:00 AM - 12:00 PM',
-    venue: 'Henry Lee Irwin Theater', 
-    img: '/tmp/691188401_1293035212930460_4591157215005585726_n.jpg', 
-    accent: '#de9a49', 
-    desc: 'The grand opening of LEAP 2026 — a celebration of community and shared purpose.',
-    slots: { remaining: 15, total: 150 }
-  },
-  { 
-    title: 'Palayan ng Karunungan',   
-    tag: 'Academic Track',   
-    date: 'May 21, 2026', 
-    time: '1:00 PM - 5:00 PM',
-    venue: 'LS Building',             
-    img: '/tmp/691188401_1293035212930460_4591157215005585726_n.jpg', 
-    accent: '#5ca0a8', 
-    desc: 'Expand your mind through academic and intellectual pursuits.',
-    slots: { remaining: 48, total: 200 }
-  },
-  { 
-    title: 'Bayanihan Festival',      
-    tag: 'Community Day',    
-    date: 'May 22, 2026', 
-    time: '9:00 AM - 4:00 PM',
-    venue: 'Gonzaga Field',           
-    img: '/tmp/691188401_1293035212930460_4591157215005585726_n.jpg', 
-    accent: '#4ab09a', 
-    desc: 'Experience community service and collective action rooted in Filipino bayanihan spirit.',
-    slots: { remaining: 0, total: 120 }
-  },
-  { 
-    title: 'Palaisdaan ng Kalusugan', 
-    tag: 'Wellness Day',     
-    date: 'May 23, 2026', 
-    time: '8:00 AM - 5:00 PM',
-    venue: 'Sports Complex',          
-    img: '/tmp/691188401_1293035212930460_4591157215005585726_n.jpg', 
-    accent: '#99d9eb', 
-    desc: 'Nurture physical, mental, and emotional well-being through holistic health practices.',
-    slots: { remaining: 82, total: 250 }
-  },
-  { 
-    title: 'Plaza ng Malikhaing Diwa',
-    tag: 'Arts & Culture',   
-    date: 'May 24, 2026', 
-    time: '2:00 PM - 6:00 PM',
-    venue: 'Henry Lee Irwin Theater', 
-    img: '/tmp/691188401_1293035212930460_4591157215005585726_n.jpg', 
-    accent: '#b05a32', 
-    desc: 'Unleash creativity through arts, design, performance, and free expression.',
-    slots: { remaining: 12, total: 100 }
-  },
-  { 
-    title: 'Pamilihan ng Kakayahan',  
-    tag: 'Skills Fair',      
-    date: 'May 25, 2026', 
-    time: '10:00 AM - 3:00 PM',
-    venue: 'Yuchengco Hall',          
-    img: '/tmp/691188401_1293035212930460_4591157215005585726_n.jpg', 
-    accent: '#fae185', 
-    desc: 'Sharpen practical skills and professional competencies.',
-    slots: { remaining: 110, total: 300 }
-  },
-];
+import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
+import { Loader2, Bookmark } from 'lucide-react';
+import { leapifyApi } from '../services/leapify';
+import type { LeapEvent, SlotInfo } from '../services/leapify';
+import ClassCard, { computeSlotStatus } from './ClassCard';
+import { formatTime } from '../services/utils';
+import { getCachedProfile } from '../services/auth';
 
 export default function GalleryCarousel() {
+  const [events, setEvents] = useState<LeapEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [drawerClass, setDrawerClass] = useState<LeapEvent | null>(null);
+  const [drawerSlot, setDrawerSlot] = useState<SlotInfo | null | undefined>(undefined);
+  const [slotsMap, setSlotsMap] = useState<Map<string, SlotInfo>>(new Map());
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
+  const [bookmarkPending, setBookmarkPending] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => getCachedProfile() !== null);
+
+  useEffect(() => {
+    const check = () => setIsLoggedIn(getCachedProfile() !== null);
+    window.addEventListener('storage', check);
+    return () => window.removeEventListener('storage', check);
+  }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    leapifyApi.getBookmarks().then(bms => {
+      setBookmarkedIds(new Set(bms.map(b => b.eventId)));
+    }).catch(() => {});
+  }, [isLoggedIn]);
+
+  const handleBookmarkToggle = useCallback(async (eventId: string) => {
+    if (!isLoggedIn || bookmarkPending) return;
+    const wasBookmarked = bookmarkedIds.has(eventId);
+    setBookmarkedIds(prev => { const n = new Set(prev); wasBookmarked ? n.delete(eventId) : n.add(eventId); return n; });
+    setBookmarkPending(eventId);
+    try {
+      const result = await leapifyApi.toggleBookmark(eventId);
+      setBookmarkedIds(prev => { const n = new Set(prev); result.bookmarked ? n.add(eventId) : n.delete(eventId); return n; });
+    } catch {
+      setBookmarkedIds(prev => { const n = new Set(prev); wasBookmarked ? n.add(eventId) : n.delete(eventId); return n; });
+    } finally {
+      setBookmarkPending(null);
+    }
+  }, [isLoggedIn, bookmarkedIds, bookmarkPending]);
+
+  const openDrawer = useCallback((event: LeapEvent) => {
+    setDrawerClass(event);
+    setDrawerSlot(undefined);
+    document.body.classList.add('drawer-open');
+    leapifyApi.reconcileSlots(event.slug).then((si) => {
+      if (si) setDrawerSlot(si);
+    }).catch(() => {});
+    leapifyApi.getSlots(event.slug).then(setDrawerSlot).catch(() => setDrawerSlot(null));
+  }, []);
+
+  const closeDrawer = useCallback(() => {
+    setDrawerClass(null);
+    setDrawerSlot(undefined);
+    document.body.classList.remove('drawer-open');
+  }, []);
+
   const trackRef = useRef<HTMLDivElement>(null);
   const dotRef   = useRef<HTMLDivElement>(null);
   const scrollToCardRef = useRef<(idx: number) => void>(() => {});
-  const N = slides.length;
+  // Refs so the native click listener always sees current values
+  const eventsRef = useRef<LeapEvent[]>(events);
+  const openDrawerRef = useRef<(e: LeapEvent) => void>(openDrawer);
+  useEffect(() => { eventsRef.current = events; }, [events]);
+  useEffect(() => { openDrawerRef.current = openDrawer; }, [openDrawer]);
+
+  const N = events.length;
+
+  useEffect(() => {
+    leapifyApi.getEvents()
+      .then(async (data) => {
+        const spotlightEvents = (data ?? []).filter((e) => e.isSpotlight);
+        setEvents(spotlightEvents);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : 'Failed to load events');
+        setLoading(false);
+      });
+  }, []);
+
+  // Poll slots for all spotlight events
+  useEffect(() => {
+    if (events.length === 0) return;
+    let cancelled = false;
+    const fetchSlots = async () => {
+      const results = await Promise.allSettled(events.map(e => leapifyApi.getSlots(e.slug)));
+      if (cancelled) return;
+      const map = new Map<string, SlotInfo>();
+      results.forEach((r, i) => { if (r.status === 'fulfilled' && r.value) map.set(events[i].id, r.value); });
+      setSlotsMap(map);
+    };
+    fetchSlots();
+    const timer = setInterval(fetchSlots, 5_000);
+    return () => { cancelled = true; clearInterval(timer); };
+  }, [events]);
+
+  const dayMap = useMemo(() => {
+    const sorted = Array.from(new Set(events.map(e => e.date))).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+    return new Map(sorted.map((d, i) => [d, i + 1]));
+  }, [events]);
 
   // Update indicator dots directly (avoids React re-render during scroll)
   const updateDots = (idx: number) => {
@@ -97,23 +117,18 @@ export default function GalleryCarousel() {
   };
 
   useEffect(() => {
+    if (loading || N === 0) return;
+
     const track = trackRef.current;
     if (!track) return;
 
-    // Snapshot the 6 real card nodes (before we inject any clones)
+    // Snapshot the real card nodes (before we inject any clones)
     const realCards = Array.from(track.children) as HTMLElement[];
     if (realCards.length !== N) return;
 
-    // ── Inject BUF=N sentinel clones on each side ────────────────────────────
-    // Using N clones guarantees that for any viewport width ≤ N×cardStep,
-    // no two copies of the same card are simultaneously visible.
-    //
-    // Layout after injection:
-    //  [c1'][c2'][c3'][c4'][c5'][c6']  [card1…card6]  [c1''][c2''][c3''][c4''][c5''][c6'']
-    //
-    // Scrolling left from card1 → c6', c5'…c1' → teleport → real card6
-    // Scrolling right from card6 → c1'', c2''…c6'' → teleport → real card1
-    const BUF = N;
+    // ── Inject BUF=N sentinel clones on each side if N > 3 ───────────────────
+    const shouldLoop = N > 3;
+    const BUF = shouldLoop ? N : 0;
     const clones: HTMLElement[] = [];
 
     const makeClone = (source: HTMLElement) => {
@@ -124,20 +139,19 @@ export default function GalleryCarousel() {
       return cl;
     };
 
-    // Prepend clones of the LAST N cards (reversed so DOM order is preserved)
-    realCards.slice(-BUF).reverse().forEach(c => track.prepend(makeClone(c)));
+    if (shouldLoop) {
+      // Prepend clones of the LAST N cards (reversed so DOM order is preserved)
+      realCards.slice(-BUF).reverse().forEach(c => track.prepend(makeClone(c)));
 
-    // Append clones of the FIRST N cards
-    realCards.slice(0, BUF).forEach(c => track.append(makeClone(c)));
+      // Append clones of the FIRST N cards
+      realCards.slice(0, BUF).forEach(c => track.append(makeClone(c)));
+    }
 
     // ── Measurements ─────────────────────────────────────────────────────────
     const getStep = () =>
       realCards[0].offsetWidth + (parseFloat(getComputedStyle(track).gap) || 20);
 
     // ── Init: position real card1 in view ────────────────────────────────────
-    // BUF prepended clones × step puts us exactly at card1.
-    // The CSS padding (calc(50vw - cardW/2)) ensures card1 is horizontally
-    // centred in the viewport regardless of breakpoint.
     const init = () => {
       const s = getStep();
       if (s > 0) track.scrollLeft = BUF * s;
@@ -148,7 +162,7 @@ export default function GalleryCarousel() {
     init();
     const t = setTimeout(init, 80);
 
-    // Expose scrollToCard so dot buttons (rendered in JSX) can call it
+    // Expose scrollToCard so dot buttons can call it
     scrollToCardRef.current = (idx: number) => {
       const s = getStep();
       if (s <= 0) return;
@@ -156,8 +170,10 @@ export default function GalleryCarousel() {
       const realStart = BUF * s;
       // Normalise current position before smooth scroll
       let sl = track.scrollLeft;
-      if (sl < realStart) { track.scrollLeft = sl + loopW; }
-      else if (sl >= realStart + loopW) { track.scrollLeft = sl - loopW; }
+      if (shouldLoop) {
+        if (sl < realStart) { track.scrollLeft = sl + loopW; }
+        else if (sl >= realStart + loopW) { track.scrollLeft = sl - loopW; }
+      }
       track.scrollTo({ left: realStart + idx * s, behavior: 'smooth' });
       updateDots(idx);
     };
@@ -166,7 +182,7 @@ export default function GalleryCarousel() {
     let jumping = false;
 
     const teleport = () => {
-      if (jumping) return;
+      if (!shouldLoop || jumping) return;
       const s = getStep();
       const loopW  = N   * s;          // width of one full lap
       const realStart = BUF * s;       // scrollLeft of real card1
@@ -188,7 +204,9 @@ export default function GalleryCarousel() {
       updateDots(Math.max(0, Math.min(N - 1, dotIdx)));
     };
 
-    track.addEventListener('scroll', teleport, { passive: true });
+    if (shouldLoop) {
+      track.addEventListener('scroll', teleport, { passive: true });
+    }
 
     // ── Pointer drag + velocity-aware elegant snap ────────────────────────────
     let dragX = 0, dragSL = 0, dragging = false;
@@ -201,7 +219,7 @@ export default function GalleryCarousel() {
       dragSL = track.scrollLeft;
       velX = 0;
       dragDistance = 0;
-      jumping = true; // disable teleport during drag (prevents onMove ↔ teleport tug-of-war)
+      jumping = true; // disable teleport during drag
       track.setPointerCapture(e.pointerId);
       track.style.cursor = 'grabbing';
       track.style.scrollSnapType = 'none';
@@ -211,7 +229,7 @@ export default function GalleryCarousel() {
       if (!dragging) return;
       const now = performance.now();
       const dt = now - lastMoveT || 1;
-      velX = (e.clientX - lastMoveX) / dt; // px/ms, positive = dragging right
+      velX = (e.clientX - lastMoveX) / dt;
       dragDistance += Math.abs(e.clientX - lastMoveX);
       lastMoveX = e.clientX;
       lastMoveT = now;
@@ -226,49 +244,35 @@ export default function GalleryCarousel() {
       const s = getStep();
       const loopW = N * s;
       const realStart = BUF * s;
-      const realEnd = realStart + loopW;
 
       const sl = track.scrollLeft;
 
-      // Determine snap target using velocity:
-      //   velX > 0  → finger moved right → scroll went left → snap to PREVIOUS card
-      //   velX < 0  → finger moved left  → scroll went right → snap to NEXT card
-      //
-      // We compute idx in the *extended* space (allowing negative or ≥N values)
-      // so that a drag that only reaches a clone but doesn't pass its centre
-      // snaps back to the real card on the same side, not across the loop.
       const offset = sl - realStart;
-      const FLICK = 0.25; // px/ms threshold
+      const FLICK = 0.25;
       let idx: number;
-      if (velX > FLICK)       idx = Math.floor(offset / s); // previous card
-      else if (velX < -FLICK) idx = Math.ceil(offset / s);  // next card
-      else                    idx = Math.round(offset / s);  // nearest card
+      if (velX > FLICK)       idx = Math.floor(offset / s);
+      else if (velX < -FLICK) idx = Math.ceil(offset / s);
+      else                    idx = Math.round(offset / s);
 
-      // Wrap idx into [0, N-1] via modulo, then compute the canonical target
-      // scrollLeft in the real zone. If idx fell outside [0, N-1] we teleport
-      // the track invisibly first so the smooth scroll stays short.
-      const wrappedIdx = ((idx % N) + N) % N;
+      const wrappedIdx = shouldLoop ? (((idx % N) + N) % N) : Math.max(0, Math.min(N - 1, idx));
       let normalised = sl;
-      if (idx < 0) {
-        // Dragged left past card 0 clone — teleport forward one lap
-        jumping = true;
-        normalised = sl + loopW;
-        track.scrollLeft = normalised;
-        jumping = false;
-      } else if (idx >= N) {
-        // Dragged right past card N-1 clone — teleport back one lap
-        jumping = true;
-        normalised = sl - loopW;
-        track.scrollLeft = normalised;
-        jumping = false;
+      if (shouldLoop) {
+        if (idx < 0) {
+          jumping = true;
+          normalised = sl + loopW;
+          track.scrollLeft = normalised;
+          jumping = false;
+        } else if (idx >= N) {
+          jumping = true;
+          normalised = sl - loopW;
+          track.scrollLeft = normalised;
+          jumping = false;
+        }
       }
 
       const target = realStart + wrappedIdx * s;
       updateDots(wrappedIdx);
 
-      // Keep jumping=true so the teleport listener cannot fire during the
-      // smooth scroll animation (which may start in clone territory).
-      // Both jumping and scrollSnapType are restored once the scroll settles.
       const onAnimDone = () => {
         jumping = false;
         track.style.scrollSnapType = 'x mandatory';
@@ -279,12 +283,10 @@ export default function GalleryCarousel() {
         setTimeout(onAnimDone, 400);
       }
 
-      // Smooth scroll to the computed card center
       track.scrollTo({ left: target, behavior: 'smooth' });
     };
 
     const onClick = (e: MouseEvent) => {
-      // If the user dragged, don't trigger click behavior
       if (dragDistance > 10) return;
 
       const card = (e.target as HTMLElement).closest('.gallery-card') as HTMLElement;
@@ -294,14 +296,18 @@ export default function GalleryCarousel() {
       const k = children.indexOf(card);
       if (k === -1) return;
 
-      const slideIdx = k % N;
+      const slideIdx = ((k % N) + N) % N;
+
+      // "See Details" button — open drawer for this event
+      if ((e.target as HTMLElement).closest('.gallery-card-view-more')) {
+        const ev = eventsRef.current[slideIdx];
+        if (ev) openDrawerRef.current(ev);
+        return;
+      }
+
       scrollToCardRef.current(slideIdx);
     };
 
-    // pointercancel fires when the browser takes over the gesture (e.g. a
-    // system dialog, low-priority event, or—before touch-action:pan-y—native
-    // scroll). We must NOT call onUp here because scrollTo would fight native
-    // momentum. Instead, just reset drag state cleanly.
     const onCancel = () => {
       if (!dragging) return;
       dragging = false;
@@ -316,13 +322,9 @@ export default function GalleryCarousel() {
     track.addEventListener('pointercancel', onCancel);
     track.addEventListener('click', onClick);
 
-    // ── ResizeObserver: re-init on viewport/orientation change ───────────────
-    // This fixes landscape mode where card dimensions change via CSS media
-    // queries AFTER the first useEffect run.
     const ro = new ResizeObserver(() => init());
     ro.observe(track);
 
-    // ── Cleanup ───────────────────────────────────────────────────────────────
     return () => {
       clearTimeout(t);
       clones.forEach(cl => cl.parentNode?.removeChild(cl));
@@ -334,76 +336,73 @@ export default function GalleryCarousel() {
       track.removeEventListener('click', onClick);
       ro.disconnect();
     };
-  }, []);
+  }, [loading, N]);
+
+  if (loading) {
+    return (
+      <>
+        <style>{`
+          @keyframes carousel-spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '4rem 0', fontFamily: "'DM Sans', sans-serif", fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>
+          <Loader2 size={20} strokeWidth={1.75} style={{ animation: 'carousel-spin 0.8s linear infinite' }} />
+          Loading events...
+        </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ textAlign: 'center', padding: '4rem 0', fontFamily: "'DM Sans', sans-serif" }}>
+        <p style={{ color: 'rgba(255,100,100,0.7)', fontSize: '0.9rem', margin: '0 0 1rem' }}>{error}</p>
+        <button
+          onClick={() => {
+            setLoading(true);
+            setError(null);
+            leapifyApi.getEvents()
+              .then((d) => {
+                setEvents((d ?? []).filter(e => e.isSpotlight));
+                setLoading(false);
+              })
+              .catch((e) => {
+                setError(e.message);
+                setLoading(false);
+              });
+          }}
+          style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.8rem', fontWeight: 600, padding: '0.5rem 1.25rem', borderRadius: 9999, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)', cursor: 'pointer' }}
+        >Retry</button>
+      </div>
+    );
+  }
+
+  if (events.length === 0) {
+    return (
+      <div style={{ textAlign: 'center', padding: '4rem 0', fontFamily: "'DM Sans', sans-serif", fontSize: '0.9rem', color: 'rgba(255,255,255,0.4)' }}>
+        No featured events yet.
+      </div>
+    );
+  }
 
   return (
     <div className="gallery-outer">
       <div className="gallery-track" ref={trackRef}>
-        {slides.map((card, i) => {
-          const [month, dayStr] = card.date.split(' ');
-          const day = dayStr ? dayStr.replace(',', '') : '';
-          const dayOfWeek = new Date(card.date).toLocaleDateString('en-US', { weekday: 'short' });
-          return (
-            <article
-              key={i}
-              className="gallery-card"
-              style={{ '--accent': card.accent } as React.CSSProperties}
-            >
-              <div className="gallery-card-date-badge">
-                <span className="badge-week">{dayOfWeek.toUpperCase()}</span>
-                <hr className="badge-divider" />
-                <span className="badge-month">{month.toUpperCase()}</span>
-                <span className="badge-day">{day}</span>
-              </div>
-              <div className="gallery-card-org-logo">
-                <img src="/logo/cso-green.png" alt="CSO" draggable="false" />
-              </div>
-              <img
-                src={card.img}
-                alt={card.title}
-                className="gallery-card-img"
-                loading={i < 4 ? 'eager' : 'lazy'}
-                draggable="false"
-              />
-              <div className="gallery-card-body">
-                <h3 className="gallery-card-title">{card.title}</h3>
-                
-                <div className="gallery-card-info-row">
-                  <div className="info-item">
-                    <span className="info-label">TIME</span>
-                    <span className="info-val">{card.time}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">VENUE</span>
-                    <span className="info-val">{card.venue}</span>
-                  </div>
-                </div>
-                <div className="gallery-card-footer-row">
-                  <div className="gallery-card-slots">
-                    {(() => {
-                      const { remaining, total } = card.slots;
-                      const limit = Math.floor(total * 0.2);
-                      if (remaining === 0) {
-                        return <span className="slots-badge red">Fully Booked</span>;
-                      } else if (remaining <= limit) {
-                        return <span className="slots-badge yellow">{remaining} / {total} Slots Left</span>;
-                      } else {
-                        return <span className="slots-badge green">{remaining} / {total} Slots Left</span>;
-                      }
-                    })()}
-                  </div>
-                  <a href={`/classes?search=${encodeURIComponent(card.title)}`} className="gallery-card-view-more" aria-label={`View details for ${card.title}`}>
-                    <span>See Details</span>
-                    <ArrowRight size={12} strokeWidth={2.5} />
-                  </a>
-                </div>
-              </div>
-            </article>
-          );
-        })}
+        {events.map((card, i) => (
+          <ClassCard
+            key={card.id}
+            event={card}
+            slotInfo={slotsMap.get(card.id)}
+            dayNumber={dayMap.get(card.date)}
+            imageLoading={i < 4 ? 'eager' : 'lazy'}
+            onAction={() => openDrawer(card)}
+            actionLabel="See Details"
+          />
+        ))}
       </div>
       <div className="gallery-dots" ref={dotRef}>
-        {slides.map((_, i) => (
+        {events.map((_, i) => (
           <button
             key={i}
             className="gallery-dot"
@@ -412,6 +411,127 @@ export default function GalleryCarousel() {
           />
         ))}
       </div>
+
+      {drawerClass && createPortal(
+        <div
+          className="drawer-overlay"
+          onClick={(e) => { if (e.target === e.currentTarget) closeDrawer(); }}
+        >
+          <div className="drawer">
+            <button className="drawer-close" onClick={closeDrawer} aria-label="Close">&times;</button>
+            <div className="drawer-hero">
+              <div className="drawer-poster">
+                {drawerClass.backgroundImageUrl
+                  ? <img src={drawerClass.backgroundImageUrl} alt={drawerClass.title} />
+                  : <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.03)' }} />}
+              </div>
+              <div className="drawer-header">
+                <div className="drawer-tags">
+                  <span className="class-theme-tag">{drawerClass.theme.name}</span>
+                  <span className="class-day-tag">{drawerClass.date}</span>
+                  {drawerClass.isSpotlight && (
+                    <span className="class-theme-tag" style={{ background: 'rgba(250,225,133,0.15)', color: '#fae185', borderColor: 'rgba(250,225,133,0.3)' }}>
+                      ★ Main Event
+                    </span>
+                  )}
+                </div>
+                <h2 className="drawer-title">{drawerClass.title}</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '22.37%', background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+                    <img src={drawerClass.organization.logoUrl || '/logo/cso-green.png'} alt={drawerClass.organization.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  </div>
+                  <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>
+                    {drawerClass.organization.name}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="drawer-body">
+              <div className="drawer-meta">
+                {drawerClass.classCode && (
+                  <div className="drawer-meta-row">
+                    <span className="drawer-meta-label">Code</span>
+                    <span className="drawer-meta-val">{drawerClass.classCode}</span>
+                  </div>
+                )}
+                <div className="drawer-meta-row">
+                  <span className="drawer-meta-label">Theme</span>
+                  <span className="drawer-meta-val">{drawerClass.theme.name}</span>
+                </div>
+                <div className="drawer-meta-row">
+                  <span className="drawer-meta-label">Date</span>
+                  <span className="drawer-meta-val">{drawerClass.date}</span>
+                </div>
+                <div className="drawer-meta-row">
+                  <span className="drawer-meta-label">Time</span>
+                  <span className="drawer-meta-val">{formatTime(drawerClass.startTime)} – {formatTime(drawerClass.endTime)}</span>
+                </div>
+                <div className="drawer-meta-row">
+                  <span className="drawer-meta-label">Venue</span>
+                  <span className="drawer-meta-val">{drawerClass.venue}</span>
+                </div>
+                <div className="drawer-meta-row">
+                  <span className="drawer-meta-label">Slots</span>
+                  <span className="drawer-meta-val">
+                    {drawerSlot === undefined ? 'Loading…'
+                      : drawerSlot === null ? (drawerClass.maxSlots === 0 ? 'Unlimited' : `${drawerClass.maxSlots} Slots`)
+                      : drawerSlot.total === 0 ? 'Unlimited'
+                      : `${drawerSlot.total - drawerSlot.registered}/${drawerSlot.total} Slots Left`}
+                  </span>
+                </div>
+              </div>
+              <p className="drawer-desc">{drawerClass.description}</p>
+            </div>
+            <div className="drawer-footer">
+              <div style={{ display: 'flex', gap: 8, alignItems: 'stretch' }}>
+                {isLoggedIn && (
+                  <button
+                    className="drawer-bookmark-btn"
+                    onClick={() => handleBookmarkToggle(drawerClass.id)}
+                    disabled={bookmarkPending === drawerClass.id}
+                    aria-label={bookmarkedIds.has(drawerClass.id) ? 'Unsave class' : 'Save class'}
+                    title={bookmarkedIds.has(drawerClass.id) ? 'Unsave class' : 'Save class'}
+                  >
+                    <Bookmark
+                      size={18}
+                      strokeWidth={1.75}
+                      fill={bookmarkedIds.has(drawerClass.id) ? 'currentColor' : 'none'}
+                    />
+                  </button>
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  {(() => {
+                    const status = computeSlotStatus(drawerClass, drawerSlot ?? undefined);
+                    if (status === 'full') {
+                      return (
+                        <button className="drawer-enroll" disabled style={{ opacity: 0.6, cursor: 'not-allowed', background: 'rgba(180,40,40,0.35)', border: '1px solid rgba(255,136,136,0.25)' }}>
+                          Class Full
+                        </button>
+                      );
+                    }
+                    if (drawerClass.gformsUrl) {
+                      return (
+                        <a href={drawerClass.gformsUrl} target="_blank" rel="noopener noreferrer" className="drawer-enroll">
+                          Register Now
+                          {status === 'limited' && drawerSlot && (
+                            <span style={{ marginLeft: 8, fontSize: '0.72rem', opacity: 0.75 }}>({drawerSlot.total - drawerSlot.registered} left)</span>
+                          )}
+                        </a>
+                      );
+                    }
+                    return (
+                      <button className="drawer-enroll" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>
+                        Registration Unavailable
+                      </button>
+                    );
+                  })()}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }

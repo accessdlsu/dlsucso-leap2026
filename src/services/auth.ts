@@ -16,6 +16,7 @@ import {
   signOut as betterAuthSignOut,
 } from "leapify/client";
 import type { UserProfile } from "leapify/types";
+import { leapifyApi } from "./leapify";
 
 const CACHE_KEY = "leapify_user_profile";
 
@@ -91,12 +92,21 @@ export async function fetchProfile(): Promise<UserProfile | null> {
  * Sign out — invalidates the session server-side and clears local cache.
  */
 export async function signOutUser(): Promise<void> {
+  // Invalidate server-side session (clears HTTP-only cookie)
   try {
     await betterAuthSignOut(getClient());
-  } catch {
-    // Proceed with local cleanup regardless
-  }
+  } catch {}
+  // Belt-and-suspenders: also hit the endpoint directly so the cookie is cleared
+  try {
+    await fetch("/api/auth/sign-out", { method: "POST", credentials: "include" });
+  } catch {}
+  // Clear API token so any in-flight WS requests stop using the old session
+  leapifyApi.setToken(null);
+  // Wipe all auth-related localStorage keys
   localStorage.removeItem(CACHE_KEY);
-  localStorage.removeItem("better-auth.session_token");
-  window.location.href = "/login";
+  for (const key of Object.keys(localStorage)) {
+    if (key.startsWith("better-auth")) localStorage.removeItem(key);
+  }
+  // Hard navigate so the page re-initialises completely (no Astro client-router)
+  window.location.replace("/login");
 }

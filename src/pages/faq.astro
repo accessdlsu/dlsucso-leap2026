@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import FaqAccordion from "../components/FaqAccordion";
+import Footer from "../components/navigation/Footer.astro";
 ---
 
 <Layout title="FAQs | LEAP 2026" description="Frequently asked questions about LEAP 2026.">
@@ -12,11 +13,8 @@ import FaqAccordion from "../components/FaqAccordion";
         LEAP 2026.
       </p>
       <FaqAccordion client:only="react" />
+      <Footer />
     </div>
-
-    <footer class="faq-footer">
-      &copy; LEAP 2026 &middot; CSO &middot; DLSU
-    </footer>
   </div>
 </Layout>
 
@@ -97,16 +95,7 @@ import FaqAccordion from "../components/FaqAccordion";
     max-width: 600px;
   }
 
-  .faq-footer {
-    position: relative;
-    z-index: 2;
-    padding: 2rem 0 1.5rem;
-    font-family: "DM Sans", sans-serif;
-    font-size: 0.68rem;
-    color: rgba(255, 255, 255, 0.3);
-    text-align: center;
-    letter-spacing: 0.06em;
-  }
+
 
   @media (max-width: 768px) {
     .faq-content {

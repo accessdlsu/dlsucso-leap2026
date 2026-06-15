@@ -1,0 +1,118 @@
+---
+---
+
+<button id="back-to-top" aria-label="Back to top" title="Back to top">
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="18 15 12 9 6 15"></polyline>
+  </svg>
+</button>
+
+<style>
+  #back-to-top {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 1002;
+    width: 58px;
+    height: 58px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px) scale(0.9);
+    transition:
+      opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      color 0.2s ease;
+  }
+
+  #back-to-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+
+  #back-to-top:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    color: #fff;
+  }
+
+  /* Above mobile bottom navbar (58px height + 12px bottom + 12px gap) */
+  @media (max-width: 968px) {
+    #back-to-top {
+      bottom: 94px;
+      right: 12px;
+      width: 50px;
+      height: 50px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #back-to-top {
+      transition: opacity 0.2s;
+      transform: none;
+    }
+    #back-to-top.visible {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  function initBackToTop() {
+    const btn = document.getElementById('back-to-top');
+    if (!btn) return;
+
+    // Find the page's scroll container (custom overflow containers or window)
+    const scrollEl: Element | null =
+      document.querySelector('.home-bg') ||
+      document.querySelector('.faq-bg') ||
+      document.querySelector('.classes-bg') ||
+      document.querySelector('.events-bg') ||
+      null;
+
+    const THRESHOLD = 200;
+
+    const onScroll = () => {
+      const scrollTop = scrollEl ? scrollEl.scrollTop : window.scrollY;
+      btn.classList.toggle('visible', scrollTop > THRESHOLD);
+    };
+
+    btn.onclick = () => {
+      if (scrollEl) {
+        scrollEl.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+
+    if (scrollEl) {
+      scrollEl.addEventListener('scroll', onScroll, { passive: true });
+    } else {
+      window.addEventListener('scroll', onScroll, { passive: true });
+    }
+
+    onScroll();
+
+    // Cleanup handled by astro:before-swap
+    document.addEventListener('astro:before-swap', () => {
+      if (scrollEl) scrollEl.removeEventListener('scroll', onScroll);
+      else window.removeEventListener('scroll', onScroll);
+    }, { once: true });
+  }
+
+  initBackToTop();
+  document.addEventListener('astro:page-load', initBackToTop);
+</script>

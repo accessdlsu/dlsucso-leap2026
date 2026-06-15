@@ -77,7 +77,7 @@ async function solveTurnstileChallenge(): Promise<boolean> {
       }
       return false;
     } catch (error) {
-      console.warn("[leapify] Turnstile unavailable (blocked?):", error);
+      void error;
       return false;
     } finally {
       turnstilePromise = null;
@@ -144,10 +144,8 @@ export interface Faq {
 }
 
 export interface SlotInfo {
-  eventId: string;
-  maxSlots: number;
-  registeredSlots: number;
-  availableSlots: number;
+  total: number;
+  registered: number;
 }
 
 export interface Theme {
@@ -232,7 +230,6 @@ class WsApiClient {
       if (!turnstileSolved && SITE_KEY) {
         const solved = await solveTurnstileChallenge().catch(() => false);
         if (!solved) {
-          console.warn("[leapify] Turnstile failed, proceeding without token");
           turnstileErrorCallback?.("Security verification failed, attempting connection anyway");
         }
       }
@@ -244,14 +241,12 @@ class WsApiClient {
       try {
         this.ws = new WebSocket(wsUrl.toString());
       } catch (err) {
-        console.error("[leapify] WebSocket creation failed:", err);
         this.connecting = null;
         reject(err);
         return;
       }
 
       this.ws.onopen = () => {
-        console.log("[leapify] WebSocket connected");
         this.connecting = null;
         // Turnstile tokens are one-time use — reset so any reconnect gets a fresh token
         turnstileSolved = false;
@@ -284,12 +279,10 @@ class WsApiClient {
             p.reject(new Error(message));
           }
         } catch (err) {
-          console.error("[leapify] Failed to parse WebSocket message:", err);
         }
       };
 
       this.ws.onclose = (event) => {
-        console.log("[leapify] WebSocket closed:", event.code, event.reason);
         this.ws = null;
         this.connecting = null;
         for (const [id, p] of this.pending) {
@@ -300,7 +293,6 @@ class WsApiClient {
       };
 
       this.ws.onerror = (event) => {
-        console.error("[leapify] WebSocket error:", event);
         this.connecting = null;
         reject(new Error("WebSocket connection failed"));
       };
@@ -375,25 +367,64 @@ function rewriteUploadUrls(value: unknown): unknown {
 
 const wsClient = new WsApiClient();
 
+// Module-level slot cache: all components on the same page share one result per slug
+// within the TTL window, and concurrent requests for the same slug share one inflight request.
+const _slotCache = new Map<string, { data: SlotInfo; ts: number }>();
+const _slotInflight = new Map<string, Promise<SlotInfo>>();
+
+function getSlotsShared(slug: string, ttlMs = 5_000): Promise<SlotInfo> {
+  const hit = _slotCache.get(slug);
+  if (hit && Date.now() - hit.ts < ttlMs) return Promise.resolve(hit.data);
+
+  const inflight = _slotInflight.get(slug);
+  if (inflight) return inflight;
+
+  const p = wsClient
+    .request<SlotInfo>("GET", `/classes/${encodeURIComponent(slug)}/slots`)
+    .then(data => {
+      _slotCache.set(slug, { data, ts: Date.now() });
+      _slotInflight.delete(slug);
+      return data;
+    })
+    .catch(err => {
+      _slotInflight.delete(slug);
+      throw err;
+    });
+
+  _slotInflight.set(slug, p);
+  return p;
+}
+
 async function fetchHealth(): Promise<HealthResponse> {
   const res = await fetch("/api/health");
   if (!res.ok) throw new Error(`Health check failed: ${res.status}`);
   return res.json();
 }
 
+async function fetchHttpFirst<T>(path: string, fallback: () => Promise<T>): Promise<T> {
+  try {
+    const res = await fetch(path);
+    if (res.ok) {
+      const body = await res.json() as any;
+      return rewriteUploadUrls(body.data ?? body) as T;
+    }
+  } catch (e) {
+  }
+  return fallback();
+}
+
 export const leapifyApi = {
   setToken: (token: string | null) => wsClient.setToken(token),
 
   // Public
-  getConfig: () => wsClient.request<SiteConfig>("GET", "/config"),
-  getEvents: () => wsClient.request<LeapEvent[]>("GET", "/classes"),
+  getConfig: () => fetchHttpFirst<SiteConfig>("/api/config", () => wsClient.request<SiteConfig>("GET", "/config")),
+  getEvents: () => fetchHttpFirst<LeapEvent[]>("/api/classes", () => wsClient.request<LeapEvent[]>("GET", "/classes")),
   getEvent: (slug: string) =>
     wsClient.request<LeapEvent>("GET", `/classes/${encodeURIComponent(slug)}`),
-  getSlots: (slug: string) =>
-    wsClient.request<SlotInfo>("GET", `/classes/${encodeURIComponent(slug)}/slots`),
-  getThemes: () => wsClient.request<Theme[]>("GET", "/themes"),
-  getOrganizations: () => wsClient.request<Organization[]>("GET", "/organizations"),
-  getFaqs: () => wsClient.request<Faq[]>("GET", "/faqs"),
+  getSlots: (slug: string) => getSlotsShared(slug),
+  getThemes: () => fetchHttpFirst<Theme[]>("/api/themes", () => wsClient.request<Theme[]>("GET", "/themes")),
+  getOrganizations: () => fetchHttpFirst<Organization[]>("/api/organizations", () => wsClient.request<Organization[]>("GET", "/organizations")),
+  getFaqs: () => fetchHttpFirst<Faq[]>("/api/faqs", () => wsClient.request<Faq[]>("GET", "/faqs")),
   getHealth: () => fetchHealth(),
 
   // Admin
@@ -416,4 +447,6 @@ export const leapifyApi = {
       "DELETE",
       `/users/me/bookmarks/${encodeURIComponent(eventId)}`,
     ),
+  reconcileSlots: (slug: string) =>
+    wsClient.request<SlotInfo>("POST", `/classes/${encodeURIComponent(slug)}/reconcile`),
 };

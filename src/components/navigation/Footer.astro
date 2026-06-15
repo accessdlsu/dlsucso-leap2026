@@ -1,0 +1,148 @@
+---
+---
+
+<footer class="app-footer">
+  <div class="footer-left">
+    <img src="/favicon.png" alt="ACCESS DLSU" class="footer-logo" />
+    <span class="footer-copyright">&copy; LEAP 2026 &middot; CSO &middot; DLSU</span>
+  </div>
+  <div class="footer-right">
+    <a href="https://www.facebook.com/DLSULEAP" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Facebook">
+      <img src="/assets/facebook-f.svg" alt="Facebook" class="social-icon" />
+    </a>
+    <a href="https://www.instagram.com/dlsu_leap/" target="_blank" rel="noopener noreferrer" class="social-btn" aria-label="Instagram">
+      <img src="/assets/instagram.svg" alt="Instagram" class="social-icon" />
+    </a>
+  </div>
+</footer>
+
+<style>
+  .app-footer {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 900px;
+    padding: 1rem 1.5rem;
+    margin-top: 3.5rem;
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    box-sizing: border-box;
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px) scale(0.98);
+    transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .app-footer.footer-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+  }
+
+  .footer-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .footer-logo {
+    height: 32px;
+    width: auto;
+    opacity: 0.8;
+  }
+
+  .footer-copyright {
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+  }
+
+  .footer-right {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .footer-right .social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.75);
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+  }
+
+  .footer-right .social-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #fff;
+    transform: scale(1.05);
+  }
+
+  .footer-right .social-icon {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(1);
+    display: block;
+    opacity: 0.75;
+    transition: opacity 0.25s ease;
+  }
+
+  .footer-right .social-btn:hover .social-icon {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .app-footer {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .app-footer {
+      flex-direction: column;
+      gap: 1.25rem;
+      text-align: center;
+      padding: 1.5rem;
+    }
+  }
+</style>
+
+<script>
+  function initFooter() {
+    const footer = document.querySelector('.app-footer');
+    if (!footer) return;
+    footer.classList.remove('footer-visible');
+    // Use the scroll container as root if page uses one (e.g. home-bg)
+    const scrollRoot = document.querySelector('.home-bg') || null;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          footer.classList.add('footer-visible');
+          io.disconnect();
+        }
+      },
+      { root: scrollRoot, threshold: 0 }
+    );
+    io.observe(footer);
+  }
+
+  initFooter();
+  document.addEventListener('astro:page-load', initFooter);
+</script>

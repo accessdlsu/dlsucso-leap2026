@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from "astro:transitions";
 import Navbar from "../components/navigation/Navbar";
+import BackToTop from "../components/navigation/BackToTop.astro";
 
 interface Props {
   title?: string;
@@ -35,6 +36,7 @@ const {
       rel="stylesheet"
       media="print" onload="this.media='all'"
     />
+    <link rel="preload" as="image" href="/logo/access/access-logo.png" fetchpriority="high" />
     <ClientRouter persist-fonts />{/* scroll-behavior: instant avoids transition lag */}
     <style is:global>
       :root {
@@ -46,6 +48,13 @@ const {
           --nav-space-top: 68px;
           --nav-space-bottom: 82px;
         }
+      }
+
+      html, body {
+        background-color: #1a2940;
+        margin: 0;
+        padding: 0;
+        overscroll-behavior: none;
       }
 
       * { -webkit-tap-highlight-color: transparent; }
@@ -98,6 +107,28 @@ const {
       .poppins-extrabold-italic { font-family: "Poppins", sans-serif; font-weight: 800; font-style: italic; }
       .poppins-black-italic { font-family: "Poppins", sans-serif; font-weight: 900; font-style: italic; }
       ::view-transition-group(*) { animation-duration: 200ms; }
+
+      /* ── Hide navbar when drawer / search overlay is open ── */
+      body.drawer-open .nav-glass-pill,
+      body.drawer-open .nav-right-cluster,
+      body.drawer-open .nav-bottom-bar,
+      body.search-open .nav-glass-pill,
+      body.search-open .nav-right-cluster,
+      body.search-open .nav-bottom-bar {
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transform: translateY(-8px) scale(0.97) !important;
+        transition: opacity 0.2s ease, transform 0.2s ease !important;
+      }
+      body.drawer-open .nav-bottom-bar,
+      body.search-open .nav-bottom-bar {
+        transform: translateY(8px) scale(0.97) !important;
+      }
+
+      @keyframes searchSlideIn {
+        from { transform: translateY(-16px); opacity: 0; }
+        to   { transform: translateY(0);     opacity: 1; }
+      }
 
       /* ── Profile Dropdown Animation ── */
       .profile-popup {
@@ -208,6 +239,7 @@ const {
   </head>
   <body>
     {showNavbar && <Navbar client:only="react" />}
+    {showNavbar && <BackToTop />}
     {!noSession && (
       <div id="turnstile-widget" style="position:fixed;bottom:-120px;left:0;pointer-events:none;z-index:-1" aria-hidden="true"></div>
     )}

@@ -1,96 +1,32 @@
 ---
 import Layout from "../layouts/Layout.astro";
-
-const milestones = [
-  { year: "2018", label: "LEAP began as a one-day event under CSO." },
-  { year: "2020", label: "Evolved into a week-long celebration of culture and community." },
-  { year: "2022", label: "First hybrid edition combining onsite and online experiences." },
-  { year: "2024", label: "Expanded to include off-campus activities and outreach." },
-  { year: "2026", label: "Isang Nayon, Isang Layunin — the biggest LEAP yet." },
-];
-
-const values = [
-  { title: "Community", desc: "Building a strong, inclusive community where every voice matters and every member feels at home." },
-  { title: "Growth", desc: "Fostering personal and collective growth through workshops, mentorship, and hands-on experiences." },
-  { title: "Culture", desc: "Celebrating Filipino culture and heritage while embracing innovation and modern learning." },
-  { title: "Unity", desc: "Bringing together students, organizations, and the wider DLSU community under one shared vision." },
-];
+import Footer from "../components/navigation/Footer.astro";
 ---
 
+<link rel="preload" as="image" href="/assets/background.jpeg" fetchpriority="high" />
 <Layout title="Overview | LEAP 2026" description="Learn about LEAP 2026 — a week-long celebration of community, culture, and shared purpose at De La Salle University.">
   <div class="about-bg">
     <div class="about-content">
-      <h1 class="about-title">Overview</h1>
+      <div class="about-logo-wrapper">
+        <img
+          src="/logo/logo-hd.png"
+          alt="LEAP 2026"
+          loading="eager"
+          style="width: min(420px, 80vw); height: auto; display: block;"
+        />
+      </div>
+      <span class="about-tagline">Isang Nayon, Isang Layunin</span>
+      <h1 class="about-title">About Us</h1>
+      <p class="about-desc" style="margin-bottom: 1.25rem;">
+        LEAP 2026: Isang Nayon, Isang Layunin is derived from the Lasallian value of service, emphasizing that growth and success are achieved through collaboration, empathy, and a shared commitment to the common good. LEAP 2026 encourages Lasallians to contribute their strengths, support one another, and recognize that meaningful learning happens when individuals work together toward a common purpose.
+      </p>
       <p class="about-desc">
-        LEAP 2026 is a week-long celebration organized by the
-        De La Salle University College Student Organization (DLSU&nbsp;CSO),
-        bringing together students, orgs, and the community under the theme
-        <em>&ldquo;Isang Nayon, Isang Layunin.&rdquo;</em>
+        Guided by the value of service, LEAP 2026 reminds students that leadership is about uplifting others, education is a gift meant to be shared, and true development comes from choosing community over competition. Through active participation and cooperation, Lasallians are called to build a stronger, more united community that reflects the values of bayanihan and collective growth.
       </p>
 
-      <!-- Mission -->
-      <div class="about-card">
-        <h2 class="about-card-title">Mission</h2>
-        <p class="about-card-text">
-          To create an immersive and inclusive experience that fosters
-          collaboration, showcases talent, and strengthens the bonds within
-          the DLSU community — empowering every participant to learn, grow, and
-          contribute to a shared purpose.
-        </p>
-      </div>
 
-      <!-- Vision -->
-      <div class="about-card">
-        <h2 class="about-card-title">Vision</h2>
-        <p class="about-card-text">
-          A campus where every student, organization, and community member comes
-          together as one village — nurturing knowledge, creativity, and unity
-          that extends beyond the university and into the wider world.
-        </p>
-      </div>
-
-      <!-- Core Values -->
-      <h2 class="about-section-title">Core Values</h2>
-      <div class="about-values">
-        {values.map((v) => (
-          <div class="about-value-card">
-            <div class="about-value-label">{v.title}</div>
-            <p class="about-value-desc">{v.desc}</p>
-          </div>
-        ))}
-      </div>
-
-      <!-- Timeline -->
-      <h2 class="about-section-title">Our Journey</h2>
-      <div class="about-timeline">
-        {milestones.map((m, i) => (
-          <div class="timeline-item">
-            <div class="timeline-marker">
-              <span class="timeline-year">{m.year}</span>
-              {i < milestones.length - 1 && <div class="timeline-line" />}
-            </div>
-            <div class="timeline-content">
-              <p class="timeline-text">{m.label}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <!-- CTA -->
-      <div class="about-cta">
-        <p class="about-cta-text">
-          Want to be part of the village? Explore classes and events.
-        </p>
-        <div class="about-cta-btns">
-          <a href="/classes" class="about-btn-primary">Browse Classes</a>
-          <a href="/events" class="about-btn-secondary">View Events</a>
-        </div>
-      </div>
+      <Footer />
     </div>
-
-    <footer class="about-footer">
-      &copy; LEAP 2026 &middot; CSO &middot; DLSU
-    </footer>
   </div>
 </Layout>
 
@@ -103,31 +39,12 @@ const values = [
   }
 
   .about-bg {
-    min-height: 100svh;
-    overflow-y: auto;
-    overflow-x: clip;
+    min-height: 100dvh;
     position: relative;
-    scrollbar-width: none;
-    background: linear-gradient(
-      180deg,
-      #1a2940 0%,
-      #1d3148 8%,
-      #1f3a4c 18%,
-      #234048 28%,
-      #284240 38%,
-      #2c4338 48%,
-      #2e4632 58%,
-      #314830 68%,
-      #344932 78%,
-      #3a4a35 86%,
-      #4a4a3a 94%,
-      #5a4838 100%
-    );
+    background: linear-gradient(rgba(10, 18, 30, 0.75), rgba(10, 18, 30, 0.75)), url('/assets/background.jpeg') no-repeat center center;
+    background-size: cover;
   }
-  .about-bg::-webkit-scrollbar {
-    display: none;
-  }
-
+ 
   .about-content {
     position: relative;
     z-index: 2;
@@ -135,19 +52,32 @@ const values = [
     flex-direction: column;
     align-items: center;
     padding: calc(1.5rem + var(--nav-space-top)) 1.5rem
-      calc(2rem + var(--nav-space-bottom));
-    min-height: 100svh;
+      calc(1rem + var(--nav-space-bottom));
+    min-height: 100dvh;
     box-sizing: border-box;
   }
 
-  .about-title {
+  @font-face {
+    font-family: "TD-Sulog";
+    src: url("/fonts/TD-Sulog.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  .about-logo-wrapper {
+    margin-bottom: 0.25rem;
+    filter: drop-shadow(0 0 50px rgba(222, 154, 73, 0.18));
+  }
+
+  .about-tagline {
     font-family: "TD-Sulog", serif;
     font-weight: 700;
-    font-size: clamp(2.5rem, 7vh, 4.5rem);
+    font-size: clamp(1.4rem, 5.5vw, 2.4rem);
     letter-spacing: 0.015em;
     line-height: 1.15;
-    margin: 0 0 0.25rem;
-    padding-left: 0.15em;
+    text-align: center;
+    margin-bottom: 1rem;
     background: linear-gradient(
       180deg,
       #fff5c4 0%,
@@ -158,6 +88,18 @@ const values = [
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.5))
+      drop-shadow(0 0 24px rgba(222, 154, 73, 0.35));
+  }
+
+  .about-title {
+    font-family: "TD-Sulog", serif;
+    font-weight: 700;
+    font-size: clamp(2.5rem, 7vh, 4.5rem);
+    color: #fff;
+    margin: 0 0 1.5rem;
+    line-height: 1.1;
+    text-align: center;
     filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.5));
   }
 
@@ -214,228 +156,20 @@ const values = [
     margin: 0;
   }
 
-  /* ── Section Title ── */
-  .about-section-title {
-    font-family: "TD-Sulog", serif;
-    font-size: clamp(1.6rem, 4vh, 2.2rem);
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.9);
-    margin: 2.5rem 0 1.25rem;
-    text-align: center;
-    line-height: 1.2;
-    letter-spacing: 0.01em;
-  }
 
-  /* ── Core Values Grid ── */
-  .about-values {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-    width: 100%;
-    max-width: 700px;
-  }
 
-  .about-value-card {
-    padding: 1.5rem;
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 14px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    transition:
-      transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .about-value-card:hover {
-    transform: translateY(-2px);
-  }
+  /* ── Core Values / Lists Grid ── */
 
-  .about-value-label {
-    font-family: "Poppins", sans-serif;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #fae185;
-    margin-bottom: 0.5rem;
-  }
 
-  .about-value-desc {
-    font-family: "DM Sans", sans-serif;
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.6);
-    line-height: 1.6;
-    margin: 0;
-  }
 
-  /* ── Timeline ── */
-  .about-timeline {
-    width: 100%;
-    max-width: 560px;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .timeline-item {
-    display: flex;
-    gap: 1.25rem;
-  }
-
-  .timeline-marker {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 60px;
-    flex-shrink: 0;
-    position: relative;
-  }
-
-  .timeline-year {
-    font-family: "Poppins", sans-serif;
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: #fae185;
-    background: rgba(0, 0, 0, 0.25);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(250, 225, 133, 0.15);
-    border-radius: 9999px;
-    padding: 0.3rem 0.6rem;
-    white-space: nowrap;
-    z-index: 1;
-  }
-
-  .timeline-line {
-    width: 1px;
-    flex: 1;
-    background: rgba(255, 255, 255, 0.08);
-    margin: 4px 0;
-  }
-
-  .timeline-content {
-    padding-bottom: 1.25rem;
-    display: flex;
-    align-items: center;
-  }
-
-  .timeline-text {
-    font-family: "DM Sans", sans-serif;
-    font-size: 0.88rem;
-    color: rgba(255, 255, 255, 0.55);
-    line-height: 1.5;
-    margin: 0;
-  }
-
-  /* ── CTA ── */
-  .about-cta {
-    width: 100%;
-    max-width: 640px;
-    margin-top: 3rem;
-    padding: 2rem;
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.25rem;
-    text-align: center;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-    box-sizing: border-box;
-  }
-
-  .about-cta-text {
-    font-family: "DM Sans", sans-serif;
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.6);
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  .about-cta-btns {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .about-btn-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.65rem 2rem;
-    font-family: "DM Sans", sans-serif;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #fff;
-    background: linear-gradient(135deg, #4a7a5a 0%, #2a5a3a 100%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 9999px;
-    text-decoration: none;
-    cursor: pointer;
-    transition:
-      transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 0.2s ease,
-      background 0.2s ease;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  }
-  .about-btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(135deg, #568c68 0%, #346e44 100%);
-  }
-
-  .about-btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.65rem 2rem;
-    font-family: "DM Sans", sans-serif;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.85);
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 9999px;
-    text-decoration: none;
-    cursor: pointer;
-    transition:
-      transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 0.2s ease,
-      background 0.2s ease;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  }
-  .about-btn-secondary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
-    background: rgba(255, 255, 255, 0.14);
-    color: #fff;
-  }
-
-  .about-footer {
-    position: relative;
-    z-index: 2;
-    padding: 2rem 0 1.5rem;
-    font-family: "DM Sans", sans-serif;
-    font-size: 0.68rem;
-    color: rgba(255, 255, 255, 0.3);
-    text-align: center;
-    letter-spacing: 0.06em;
-  }
 
   @media (max-width: 768px) {
     .about-content {
       padding: calc(1rem + var(--nav-space-top)) 1rem
-        calc(2rem + var(--nav-space-bottom));
+        calc(1rem + var(--nav-space-bottom));
     }
     .about-card {
       padding: 1.25rem 1.5rem;
-    }
-    .about-values {
-      grid-template-columns: 1fr;
     }
   }
 </style>
