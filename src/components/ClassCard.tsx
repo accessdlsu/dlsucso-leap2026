@@ -3,22 +3,34 @@ import type { LeapEvent, SlotInfo } from '../services/leapify';
 import { shortenVenue, formatTime } from '../services/utils';
 
 export const THEME_ACCENTS: Record<string, string> = {
-  palayan: '#c8e6a0',
-  pamilihan: '#ffb68c',
-  plaza: '#a0d4f0',
-  dambana: '#d4a0e8',
-  palaisdaan: '#80d4b0',
-  bahay: '#f0c080',
+  'palayan': '#c8e6a0',
+  'palayan-ng-karunungan': '#c8e6a0',
+  'pamilihan': '#ffb68c',
+  'pamilihan-ng-kakayahan': '#ffb68c',
+  'plaza': '#a0d4f0',
+  'plaza-ng-malikhaing-diwa': '#a0d4f0',
+  'dambana': '#d4a0e8',
+  'dambana-ng-pagkakaisa': '#d4a0e8',
+  'palaisdaan': '#80d4b0',
+  'palaisdaan-ng-kalusugan': '#80d4b0',
+  'bahay': '#f0c080',
+  'bahay-ng-bayanihan': '#f0c080',
 };
 
 // Pre-computed rgba triplets for dynamic tag colors (avoids color-mix compat issues)
 const THEME_RGB: Record<string, string> = {
-  palayan: '200,230,160',
-  pamilihan: '255,182,140',
-  plaza: '160,212,240',
-  dambana: '212,160,232',
-  palaisdaan: '128,212,176',
-  bahay: '240,192,128',
+  'palayan': '200,230,160',
+  'palayan-ng-karunungan': '200,230,160',
+  'pamilihan': '255,182,140',
+  'pamilihan-ng-kakayahan': '255,182,140',
+  'plaza': '160,212,240',
+  'plaza-ng-malikhaing-diwa': '160,212,240',
+  'dambana': '212,160,232',
+  'dambana-ng-pagkakaisa': '212,160,232',
+  'palaisdaan': '128,212,176',
+  'palaisdaan-ng-kalusugan': '128,212,176',
+  'bahay': '240,192,128',
+  'bahay-ng-bayanihan': '240,192,128',
 };
 
 export type SlotStatus = 'available' | 'limited' | 'full' | 'unlimited';

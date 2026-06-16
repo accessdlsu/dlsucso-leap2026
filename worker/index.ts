@@ -139,13 +139,13 @@ function isLocalDev(request: Request, env?: Env): boolean {
  *
  * Throws if neither is configured.
  */
-async function backendFetch(env: Env, path: string, init?: RequestInit): Promise<Response> {
+async function backendFetch(env: Env, path: string, init?: RequestInit, baseOrigin?: string): Promise<Response> {
   if (env.LEAPIFY_API_URL) {
     return fetch(`${env.LEAPIFY_API_URL}${path}`, init);
   }
   if (env.BACKEND) {
-    // Placeholder hostname — binding ignores it, only the path is used for routing.
-    return env.BACKEND.fetch(new Request(`https://worker${path}`, init));
+    const origin = baseOrigin || "https://worker";
+    return env.BACKEND.fetch(new Request(`${origin}${path}`, init));
   }
   throw new Error("Backend not configured: set LEAPIFY_API_URL in .dev.vars or bind BACKEND service");
 }
@@ -244,9 +244,13 @@ async function handleWsMessage(
       return;
     }
 
+    const handshakeOrigin = new URL(request.url).origin;
     const headers: Record<string, string> = {
       "X-Forwarded-For": request.headers.get("CF-Connecting-IP") || "",
+      "Referer": request.headers.get("Referer") || request.headers.get("Origin") || handshakeOrigin,
+      "Origin": request.headers.get("Origin") || handshakeOrigin,
     };
+
     if (req.token) headers["Authorization"] = `Bearer ${req.token}`;
     if (req.body && req.method !== "GET" && req.method !== "HEAD") {
       headers["Content-Type"] = "application/json";
@@ -264,7 +268,8 @@ async function handleWsMessage(
     const targetPath = `/api${req.path}`;
     console.log(`[worker] WS proxy: ${req.method} ${req.path}`);
 
-    const upstream = await backendFetch(env, targetPath, fetchInit);
+    const baseOrigin = new URL(request.url).origin;
+    const upstream = await backendFetch(env, targetPath, fetchInit, baseOrigin);
 
     const contentType = upstream.headers.get("content-type") || "";
     let body: unknown;
@@ -342,7 +347,10 @@ async function handleWebSocketUpgrade(
   }
 
   // Validate Turnstile only for full-access client WebSocket connections
-  if (!isConfigOnly && env.TURNSTILE_SECRET_KEY) {
+  const cookie = request.headers.get("Cookie") ?? "";
+  const hasSession = !!getSessionToken(cookie);
+
+  if (!isConfigOnly && env.TURNSTILE_SECRET_KEY && !hasSession) {
     const turnstileToken = url.searchParams.get("turnstile_token");
     if (!turnstileToken) {
       server.close(1008, "Turnstile token required");
@@ -393,6 +401,8 @@ async function handleApiRequest(
   pathname: string,
   ctx: ExecutionContext,
 ): Promise<Response | null> {
+  const baseOrigin = new URL(request.url).origin;
+
   // GET /api/health — uptime check
   if (pathname === "/api/health" && request.method === "GET") {
     return jsonResponse({
@@ -420,7 +430,7 @@ async function handleApiRequest(
 
     let upstream: Response;
     try {
-      upstream = await backendFetch(env, backendPath, { method: "GET", signal: AbortSignal.timeout(15_000) });
+      upstream = await backendFetch(env, backendPath, { method: "GET", signal: AbortSignal.timeout(15_000) }, baseOrigin);
     } catch {
       return jsonResponse({ error: "Backend not configured" }, 500);
     }
@@ -442,7 +452,7 @@ async function handleApiRequest(
     if (!env.BACKEND && !env.LEAPIFY_API_URL) return jsonResponse({ error: "Backend not configured" }, 500);
     let upstream: Response;
     try {
-      upstream = await backendFetch(env, "/api/config", { signal: AbortSignal.timeout(5_000) });
+      upstream = await backendFetch(env, "/api/config", { signal: AbortSignal.timeout(5_000) }, baseOrigin);
     } catch {
       return jsonResponse({ error: "Backend not configured" }, 500);
     }
@@ -481,14 +491,14 @@ function getSessionToken(cookie: string): string | null {
  * Calls backend GET /api/users/me with the session token as Bearer token.
  * This is called on every request during gated mode — no client-side caching.
  */
-async function isAdminUser(env: Env, cookie: string): Promise<boolean> {
+async function isAdminUser(env: Env, cookie: string, baseOrigin?: string): Promise<boolean> {
   const token = getSessionToken(cookie);
   if (!token) return false;
   try {
     const res = await backendFetch(env, "/api/users/me", {
       headers: { Authorization: `Bearer ${token}` },
       signal: AbortSignal.timeout(5_000),
-    });
+    }, baseOrigin);
     if (!res.ok) {
       console.warn("[worker] Admin check: /api/users/me returned", res.status);
       return false;
@@ -525,6 +535,7 @@ async function routeIndex(
 ): Promise<Response | null> {
   const dev = isLocalDev(request, env);
   const cookie = request.headers.get("Cookie") ?? "";
+  const baseOrigin = new URL(request.url).origin;
 
   // Dev override: ?_view=maintenance|countdown|home|login forces a specific view
   if (dev) {
@@ -543,7 +554,7 @@ async function routeIndex(
   let config: SiteConfig | null = null;
 
   try {
-    const configRes = await backendFetch(env, "/api/config", { signal: AbortSignal.timeout(3_000) });
+    const configRes = await backendFetch(env, "/api/config", { signal: AbortSignal.timeout(3_000) }, baseOrigin);
 
     // The leapify maintenance middleware blocks ALL routes (including /api/config)
     // when maintenance mode is active, returning 503. Since we can't read the config
@@ -591,7 +602,7 @@ async function routeIndex(
 
   if (config.maintenanceMode && !dev) {
     if (hasSession) {
-      const isAdmin = await isAdminUser(env, cookie);
+      const isAdmin = await isAdminUser(env, cookie, baseOrigin);
       if (isAdmin && wantsEnter) {
         // Admin entered — serve site and stamp _admin_entered cookie so Layout skips reload
         const res = await env.ASSETS.fetch(request);
@@ -612,7 +623,7 @@ async function routeIndex(
 
   if (config.comingSoonUntil && config.comingSoonUntil * 1000 > now && !dev) {
     if (hasSession) {
-      const isAdmin = await isAdminUser(env, cookie);
+      const isAdmin = await isAdminUser(env, cookie, baseOrigin);
       if (isAdmin && wantsEnter) {
         // Admin entered — serve site and stamp _admin_entered cookie so Layout skips reload
         const res = await env.ASSETS.fetch(request);
@@ -673,7 +684,7 @@ export default {
           headers,
           body: request.method !== "GET" && request.method !== "HEAD" ? await request.clone().blob() : undefined,
           redirect: "manual", // Crucial: lets the browser follow OAuth 302 redirects instead of following them internally
-        });
+        }, url.origin);
       } catch (err) {
         console.error("[worker] Failed to proxy API request");
         return jsonResponse({ error: "Upstream gateway error" }, 502);

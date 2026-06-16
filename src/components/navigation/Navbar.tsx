@@ -151,6 +151,19 @@ export default function Navbar() {
   }, [currentPath]);
 
   useEffect(() => {
+    const check = () => {
+      const cached = getCachedProfile();
+      setUser(cached);
+    };
+    window.addEventListener("storage", check);
+    window.addEventListener("leapify-auth-change", check);
+    return () => {
+      window.removeEventListener("storage", check);
+      window.removeEventListener("leapify-auth-change", check);
+    };
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
     const cached = getCachedProfile();
     if (cached) {
@@ -159,7 +172,7 @@ export default function Navbar() {
     }
     restoreSession().then((profile) => {
       if (cancelled) return;
-      if (profile) setUser(profile);
+      setUser(profile);
       setUserLoading(false);
     }).catch(() => { if (!cancelled) setUserLoading(false); });
     return () => { cancelled = true; };
@@ -304,7 +317,6 @@ export default function Navbar() {
     background: "rgba(180,40,40,0.18)",
     border: "1px solid rgba(220,60,60,0.3)",
     color: "rgba(255,140,140,0.95)",
-    marginTop: 4,
   };
 
   useEffect(() => {
@@ -611,6 +623,11 @@ export default function Navbar() {
               Saved Classes
             </button>
           )}
+          <div style={{
+            height: "1px",
+            background: "rgba(255, 255, 255, 0.06)",
+            margin: "0 4px",
+          }} />
           <button
             style={signOutStyle}
             onClick={() => { signOutUser(); toggleProfile(); }}

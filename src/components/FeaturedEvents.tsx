@@ -24,13 +24,17 @@ export default function FeaturedEvents() {
   useEffect(() => {
     const check = () => setIsLoggedIn(getCachedProfile() !== null);
     window.addEventListener('storage', check);
-    return () => window.removeEventListener('storage', check);
+    window.addEventListener('leapify-auth-change', check);
+    return () => {
+      window.removeEventListener('storage', check);
+      window.removeEventListener('leapify-auth-change', check);
+    };
   }, []);
 
   useEffect(() => {
     if (!isLoggedIn) return;
     leapifyApi.getBookmarks().then(bms => {
-      setBookmarkedIds(new Set(bms.map(b => b.eventId)));
+      setBookmarkedIds(new Set(bms.map(b => b.event.id)));
     }).catch(() => {});
   }, [isLoggedIn]);
 
@@ -89,7 +93,8 @@ export default function FeaturedEvents() {
     try {
       const result = await leapifyApi.toggleBookmark(eventId);
       setBookmarkedIds(prev => { const n = new Set(prev); result.bookmarked ? n.add(eventId) : n.delete(eventId); return n; });
-    } catch {
+    } catch (err) {
+      console.error("[FeaturedEvents] Failed to toggle bookmark:", err);
       setBookmarkedIds(prev => { const n = new Set(prev); wasBookmarked ? n.add(eventId) : n.delete(eventId); return n; });
     } finally {
       setBookmarkPending(null);

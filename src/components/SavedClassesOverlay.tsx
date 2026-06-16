@@ -31,7 +31,7 @@ export default function SavedClassesOverlay({ open, onClose }: Props) {
         setBookmarks(bms);
         setEvents(evs);
         // Fetch slot info for each bookmarked event
-        const bookmarkedEvs = evs.filter(e => bms.some(b => b.eventId === e.id));
+        const bookmarkedEvs = evs.filter(e => bms.some(b => b.event.id === e.id));
         Promise.allSettled(bookmarkedEvs.map(e => leapifyApi.getSlots(e.slug))).then(results => {
           const map = new Map<string, SlotInfo>();
           results.forEach((r, i) => {
@@ -67,7 +67,7 @@ export default function SavedClassesOverlay({ open, onClose }: Props) {
     setRemoving(eventId);
     try {
       await leapifyApi.deleteBookmark(eventId);
-      setBookmarks(prev => prev?.filter(b => b.eventId !== eventId) ?? prev);
+      setBookmarks(prev => prev?.filter(b => b.event.id !== eventId) ?? prev);
     } catch {}
     setRemoving(null);
   }
@@ -138,12 +138,12 @@ export default function SavedClassesOverlay({ open, onClose }: Props) {
           ) : (
             <>
               {bookmarks.map(bm => {
-                const ev = events?.find(e => e.id === bm.eventId);
-                const slotInfo = slotsMap.get(bm.eventId);
+                const ev = events?.find(e => e.id === bm.event.id);
+                const slotInfo = slotsMap.get(bm.event.id);
                 const isFull = ev ? computeSlotStatus(ev, slotInfo) === 'full' : false;
                 return (
                   <div
-                    key={bm.eventId}
+                    key={bm.event.id}
                     style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', opacity: isFull ? 0.5 : 1, transition: 'opacity 0.2s' }}
                   >
                     <div style={{ width: 36, height: 36, borderRadius: '22.37%', background: 'rgba(255,255,255,0.06)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -178,11 +178,11 @@ export default function SavedClassesOverlay({ open, onClose }: Props) {
                       <ArrowRight size={14} strokeWidth={2} />
                     </a>
                     <button
-                      onClick={() => handleRemove(bm.eventId)}
-                      disabled={removing === bm.eventId}
+                      onClick={() => handleRemove(bm.event.id)}
+                      disabled={removing === bm.event.id}
                       style={{
                         background: 'none', border: 'none', cursor: 'pointer', padding: 6,
-                        color: removing === bm.eventId ? 'rgba(255,255,255,0.2)' : 'rgba(255,80,80,0.65)',
+                        color: removing === bm.event.id ? 'rgba(255,255,255,0.2)' : 'rgba(255,80,80,0.65)',
                         display: 'flex', alignItems: 'center', flexShrink: 0,
                         transition: 'color 0.15s',
                       }}

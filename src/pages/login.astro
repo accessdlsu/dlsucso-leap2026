@@ -565,18 +565,19 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
 
   /* ── Legal Dialog ── */
   .legal-dialog {
-    border: none;
-    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
     padding: 0;
     max-width: 480px;
     width: 90vw;
-    background: rgba(255, 255, 255, 0.97);
-    backdrop-filter: blur(16px);
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     cursor: url("/assets/cursor.png"), auto;
   }
   .legal-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.55);
+    background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(4px);
   }
   .legal-dialog-content {
@@ -587,7 +588,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     font-family: "DM Sans", sans-serif;
     font-size: 1.15rem;
     font-weight: 600;
-    color: #1f1f1f;
+    color: rgba(255, 255, 255, 0.95);
     margin: 0 0 1rem;
     padding-right: 2rem;
   }
@@ -595,7 +596,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     font-family: "DM Sans", sans-serif;
     font-size: 0.875rem;
     line-height: 1.6;
-    color: #444;
+    color: rgba(255, 255, 255, 0.75);
     margin: 0;
   }
   .legal-dialog-close {
@@ -605,7 +606,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     background: none;
     border: none;
     font-size: 1.5rem;
-    color: #888;
+    color: rgba(255, 255, 255, 0.55);
     cursor: url("/assets/cursor.png"), pointer;
     width: 32px;
     height: 32px;
@@ -620,8 +621,86 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     line-height: 1;
   }
   .legal-dialog-close:hover {
-    background: #f0f0f0;
-    color: #333;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+
+  /* ── Privacy Policy Cards ── */
+  .pp-subtitle {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.45);
+    margin-top: -0.75rem;
+    margin-bottom: 1rem;
+    font-family: "DM Sans", sans-serif;
+  }
+  .pp-intro {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.75);
+    margin-bottom: 1.25rem;
+    font-family: "DM Sans", sans-serif;
+  }
+  .pp-intro strong {
+    color: #fff;
+    font-weight: 600;
+  }
+  .pp-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+    text-align: left;
+  }
+  .pp-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .pp-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.09);
+  }
+  .pp-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.85);
+    flex-shrink: 0;
+  }
+  .pp-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .pp-card-content h3 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    font-family: "DM Sans", sans-serif;
+  }
+  .pp-card-content p {
+    margin: 0 !important;
+    font-size: 0.78rem !important;
+    line-height: 1.4 !important;
+    color: rgba(255, 255, 255, 0.55) !important;
+  }
+  .pp-footer {
+    font-size: 0.75rem !important;
+    line-height: 1.45 !important;
+    color: rgba(255, 255, 255, 0.45) !important;
+    margin-top: 1rem !important;
+    font-family: "DM Sans", sans-serif;
   }
 
   /* ── Responsive ── */
@@ -671,11 +750,24 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
   const legalCopy = {
     tos: {
       title: "Terms of Service",
-      body: "By using LEAP 2026, you agree to comply with the policies and regulations set forth by the De La Salle University College Student Organization (DLSUCSO). You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. LEAP 2026 reserves the right to modify or terminate the service at any time without prior notice. Continued use of the platform constitutes acceptance of any such changes.",
+      body: `By using LEAP 2026, you agree to comply with the policies and regulations set forth by the De La Salle University Council of Student Organizations (DLSU-CSO). You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. LEAP 2026 reserves the right to modify or terminate the service at any time without prior notice. Continued use of the platform constitutes acceptance of any such changes.`,
     },
     pp: {
       title: "Privacy Policy",
-      body: "LEAP 2026 collects personal information — including your name, email address, and student ID — solely for the purposes of event registration, class scheduling, and organization communication. Your data will not be shared with third parties without your explicit consent, except as required by law. We implement reasonable security measures to protect your information, though no method of electronic storage is completely secure. You may request access to or deletion of your data by contacting DLSUCSO.",
+      body: `
+        <div class="pp-cards">
+          <div class="pp-card">
+            <div class="pp-card-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="pp-card-content">
+              <h3>Data Privacy Agreement</h3>
+              <p>In compliance with the <strong>Data Privacy Act of 2012</strong> (R.A. 10173), DLSU-CSO collects your name, email, and student ID solely for event registration, scheduling, and communication. We secure your records, never share them with third parties without consent, and honor data access/deletion requests sent to DLSU-CSO.</p>
+            </div>
+          </div>
+        </div>
+        <p class="pp-footer">By clicking continue, you acknowledge that your information will be processed in accordance with these terms.</p>
+      `,
     },
   };
 
@@ -719,7 +811,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
       const copy = legalCopy[type];
       if (copy) {
         dialogTitle.textContent = copy.title;
-        dialogBody.textContent = copy.body;
+        dialogBody.innerHTML = copy.body;
         dialog.showModal();
       }
     });

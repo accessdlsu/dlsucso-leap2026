@@ -71,16 +71,29 @@ export function getCachedProfile(): UserProfile | null {
 export async function fetchProfile(): Promise<UserProfile | null> {
   try {
     const token = await getLeapifyToken(getClient());
-    if (!token) return null;
+    if (!token) {
+      localStorage.removeItem(CACHE_KEY);
+      return null;
+    }
 
     const res = await fetch("/api/users/me", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem(CACHE_KEY);
+        localStorage.removeItem("better-auth.session_token");
+        leapifyApi.setToken(null);
+      }
+      return null;
+    }
 
     const body = await res.json();
     const user: UserProfile = body?.data ?? body;
-    if (!user?.id) return null;
+    if (!user?.id) {
+      localStorage.removeItem(CACHE_KEY);
+      return null;
+    }
     localStorage.setItem(CACHE_KEY, JSON.stringify(user));
     return user;
   } catch {

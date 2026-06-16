@@ -8,6 +8,102 @@ import { getCachedProfile } from '../services/auth';
 
 const SLOT_POLL_MS = 5_000;
 
+const SUBTHEME_DETAILS: Record<string, {
+  name: string;
+  img: string;
+  color: string;
+  desc: string;
+  quote: string;
+}> = {
+  'palayan': {
+    name: 'Palayan ng Karunungan',
+    img: '/images/themes/palay.png',
+    color: '#c8e6a0',
+    desc: 'In a vast rice field, every grain of knowledge is carefully nurtured. Here, wisdom is planted, watered by curiosity, and harvested as innovation and learning for the future.',
+    quote: 'Palawakin ang kaalaman sa pamamagitan ng mga intelektwal na disiplina.'
+  },
+  'palayan-ng-karunungan': {
+    name: 'Palayan ng Karunungan',
+    img: '/images/themes/palay.png',
+    color: '#c8e6a0',
+    desc: 'In a vast rice field, every grain of knowledge is carefully nurtured. Here, wisdom is planted, watered by curiosity, and harvested as innovation and learning for the future.',
+    quote: 'Palawakin ang kaalaman sa pamamagitan ng mga intelektwal na disiplina.'
+  },
+  'bahay': {
+    name: 'Bahay ng Bayanihan',
+    img: '/images/themes/bahay.png',
+    color: '#f0c080',
+    desc: 'In a home built by collective strength, trust and cooperation are learned. No challenge is too great when faced together.',
+    quote: 'Isabuhay ang diwa ng bayanihan at paglilingkod sa kapwa.'
+  },
+  'bahay-ng-bayanihan': {
+    name: 'Bahay ng Bayanihan',
+    img: '/images/themes/bahay.png',
+    color: '#f0c080',
+    desc: 'In a home built by collective strength, trust and cooperation are learned. No challenge is too great when faced together.',
+    quote: 'Isabuhay ang diwa ng bayanihan at paglilingkod sa kapwa.'
+  },
+  'palaisdaan': {
+    name: 'Palaisdaan ng Kalusugan',
+    img: '/images/themes/palaisdaan.png',
+    color: '#80d4b0',
+    desc: 'In a quiet palaisdaan, the gentle waters flow and bring life to the nayon. Here, both body and mind are nurtured, allowing moments of rest and reflection to restore the strength needed to grow, move forward, and serve others.',
+    quote: 'Alagaan ang kalusugan sa lahat ng aspeto ng pamumuhay.'
+  },
+  'palaisdaan-ng-kalusugan': {
+    name: 'Palaisdaan ng Kalusugan',
+    img: '/images/themes/palaisdaan.png',
+    color: '#80d4b0',
+    desc: 'In a quiet palaisdaan, the gentle waters flow and bring life to the nayon. Here, both body and mind are nurtured, allowing moments of rest and reflection to restore the strength needed to grow, move forward, and serve others.',
+    quote: 'Alagaan ang kalusugan sa lahat ng aspeto ng pamumuhay.'
+  },
+  'dambana': {
+    name: 'Dambana ng Pagkakaisa',
+    img: '/images/themes/dambana.png',
+    color: '#d4a0e8',
+    desc: 'At the village’s core, hands meet, ready to help. Here, compassion is strengthened, and service becomes the foundation of true bayanihan.',
+    quote: 'Itatag ang pagkakaisa at ipagdiwang ang pagkakaiba-iba.'
+  },
+  'dambana-ng-pagkakaisa': {
+    name: 'Dambana ng Pagkakaisa',
+    img: '/images/themes/dambana.png',
+    color: '#d4a0e8',
+    desc: 'At the village’s core, hands meet, ready to help. Here, compassion is strengthened, and service becomes the foundation of true bayanihan.',
+    quote: 'Itatag ang pagkakaisa at ipagdiwang ang pagkakaiba-iba.'
+  },
+  'pamilihan': {
+    name: 'Pamilihan ng Kakayahan',
+    img: '/images/themes/pamilihan.png',
+    color: '#ffb68c',
+    desc: 'At the heart of the marketplace, people exchange intellect and talent. Every skill has value, and every lesson learned becomes a contribution to the growth of the whole village.',
+    quote: 'Palakasin ang kakayahan para sa propesyonal na mundo.'
+  },
+  'pamilihan-ng-kakayahan': {
+    name: 'Pamilihan ng Kakayahan',
+    img: '/images/themes/pamilihan.png',
+    color: '#ffb68c',
+    desc: 'At the heart of the marketplace, people exchange intellect and talent. Every skill has value, and every lesson learned becomes a contribution to the growth of the whole village.',
+    quote: 'Palakasin ang kakayahan para sa propesyonal na mundo.'
+  },
+  'plaza': {
+    name: 'Plaza ng Malikhaing Diwa',
+    img: '/images/themes/plaza.png',
+    color: '#a0d4f0',
+    desc: 'In the vibrant plaza, music, color, and stories dance together. Imagination comes alive here, and every creation becomes the voice of the community.',
+    quote: 'Pahintulutan ang sariling lumikha sa sining at disenyo.'
+  },
+  'plaza-ng-malikhaing-diwa': {
+    name: 'Plaza ng Malikhaing Diwa',
+    img: '/images/themes/plaza.png',
+    color: '#a0d4f0',
+    desc: 'In the vibrant plaza, music, color, and stories dance together. Imagination comes alive here, and every creation becomes the voice of the community.',
+    quote: 'Pahintulutan ang sariling lumikha sa sining at disenyo.'
+  }
+};
+
+
+
+
 // Map sorted unique dates → Day 1, Day 2, …
 function buildDayMap(events: LeapEvent[]): Map<string, number> {
   const sorted = Array.from(new Set(events.map((e) => e.date))).sort(
@@ -242,14 +338,18 @@ export default function ClassesFilter() {
   useEffect(() => {
     const check = () => setIsLoggedIn(getCachedProfile() !== null);
     window.addEventListener('storage', check);
-    return () => window.removeEventListener('storage', check);
+    window.addEventListener('leapify-auth-change', check);
+    return () => {
+      window.removeEventListener('storage', check);
+      window.removeEventListener('leapify-auth-change', check);
+    };
   }, []);
 
   // Fetch bookmarks once when logged in
   useEffect(() => {
     if (!isLoggedIn) return;
     leapifyApi.getBookmarks().then(bms => {
-      setBookmarkedIds(new Set(bms.map(b => b.eventId)));
+      setBookmarkedIds(new Set(bms.map(b => b.event.id)));
     }).catch(() => {});
   }, [isLoggedIn]);
 
@@ -269,7 +369,8 @@ export default function ClassesFilter() {
     try {
       const result = await leapifyApi.toggleBookmark(eventId);
       setBookmarkedIds(prev => { const n = new Set(prev); result.bookmarked ? n.add(eventId) : n.delete(eventId); return n; });
-    } catch {
+    } catch (err) {
+      console.error("[ClassesFilter] Failed to toggle bookmark:", err);
       setBookmarkedIds(prev => { const n = new Set(prev); wasBookmarked ? n.add(eventId) : n.delete(eventId); return n; });
     } finally {
       setBookmarkPending(null);
@@ -496,6 +597,33 @@ export default function ClassesFilter() {
           )}
         </div>
       </section>
+
+      {/* Subtheme Info Card */}
+      {selectedTheme && SUBTHEME_DETAILS[selectedTheme] && (
+        <div
+          className="subtheme-card"
+          style={{ '--subtheme-color': SUBTHEME_DETAILS[selectedTheme].color } as React.CSSProperties}
+        >
+          <div className="subtheme-card-img-wrapper">
+            <img
+              src={SUBTHEME_DETAILS[selectedTheme].img}
+              alt={SUBTHEME_DETAILS[selectedTheme].name}
+              className="subtheme-card-img"
+            />
+          </div>
+          <div className="subtheme-card-content">
+            <h2 className="subtheme-card-title">
+              {SUBTHEME_DETAILS[selectedTheme].name}
+            </h2>
+            <p className="subtheme-card-desc">
+              {SUBTHEME_DETAILS[selectedTheme].desc}
+            </p>
+            <p className="subtheme-card-quote">
+              &ldquo;{SUBTHEME_DETAILS[selectedTheme].quote}&rdquo;
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Results */}
       <section className="classes-results">

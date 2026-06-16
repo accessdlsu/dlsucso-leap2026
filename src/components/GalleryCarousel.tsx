@@ -27,7 +27,7 @@ export default function GalleryCarousel() {
   useEffect(() => {
     if (!isLoggedIn) return;
     leapifyApi.getBookmarks().then(bms => {
-      setBookmarkedIds(new Set(bms.map(b => b.eventId)));
+      setBookmarkedIds(new Set(bms.map(b => b.event.id)));
     }).catch(() => {});
   }, [isLoggedIn]);
 
@@ -214,6 +214,7 @@ export default function GalleryCarousel() {
     let dragDistance = 0;
 
     const onDown = (e: PointerEvent) => {
+      if ((e.target as HTMLElement).closest('.gallery-card-view-more')) return;
       dragging = true;
       dragX = lastMoveX = e.clientX;
       dragSL = track.scrollLeft;

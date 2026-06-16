@@ -168,9 +168,8 @@ export interface UserProfile {
 }
 
 export interface BookmarkEntry {
-  userId: string;
-  eventId: string;
-  [key: string]: unknown;
+  bookmarkedAt: number;
+  event: LeapEvent;
 }
 
 export interface ToggleBookmarkResult {
@@ -283,16 +282,18 @@ class WsApiClient {
       };
 
       this.ws.onclose = (event) => {
+        console.error("[leapify ws] WebSocket closed:", event.code, event.reason);
         this.ws = null;
         this.connecting = null;
         for (const [id, p] of this.pending) {
           clearTimeout(p.timeout);
-          p.reject(new Error("WebSocket connection closed"));
+          p.reject(new Error(`WebSocket connection closed (${event.code})`));
           this.pending.delete(id);
         }
       };
 
       this.ws.onerror = (event) => {
+        console.error("[leapify ws] WebSocket error:", event);
         this.connecting = null;
         reject(new Error("WebSocket connection failed"));
       };
@@ -366,6 +367,12 @@ function rewriteUploadUrls(value: unknown): unknown {
 // ── Singleton + Public API ────────────────────────────────────────────────────
 
 const wsClient = new WsApiClient();
+if (typeof window !== "undefined") {
+  try {
+    const token = localStorage.getItem("better-auth.session_token");
+    if (token) wsClient.setToken(token);
+  } catch (e) {}
+}
 
 // Module-level slot cache: all components on the same page share one result per slug
 // within the TTL window, and concurrent requests for the same slug share one inflight request.
@@ -414,7 +421,12 @@ async function fetchHttpFirst<T>(path: string, fallback: () => Promise<T>): Prom
 }
 
 export const leapifyApi = {
-  setToken: (token: string | null) => wsClient.setToken(token),
+  setToken: (token: string | null) => {
+    wsClient.setToken(token);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("leapify-auth-change"));
+    }
+  },
 
   // Public
   getConfig: () => fetchHttpFirst<SiteConfig>("/api/config", () => wsClient.request<SiteConfig>("GET", "/config")),
