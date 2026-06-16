@@ -14,7 +14,7 @@ import Layout from "../layouts/Layout.astro";
     />
 
     <div class="cnt-content">
-      <div class="cnt-logo anim-in" style="opacity:0;transform:translateY(8px)">
+      <div class="cnt-logo anim-in" style="">
         <img
           src="/logo/logo-hd.png"
           alt="LEAP 2026"
@@ -22,8 +22,7 @@ import Layout from "../layouts/Layout.astro";
           style="width: min(320px, 60vw); height: auto; display: block;"
         />
       </div>
-      <span class="tagline anim-in" style="opacity:0;transform:translateY(8px)"
-        >Isang Nayon, Isang Layunin</span
+      <span class="tagline anim-in"        >Isang Nayon, Isang Layunin</span
       >
       <div class="cnt-timer" id="countdown">
         <div class="cnt-unit">
@@ -54,15 +53,14 @@ import Layout from "../layouts/Layout.astro";
           <span class="cnt-label" id="label-secs">Seconds</span>
         </div>
       </div>
-      <p class="cnt-desc anim-in" style="opacity:0;transform:translateY(8px)">
+      <p class="cnt-desc anim-in" style="">
         Step into a nayon built on bayanihan, shared purpose, and collective
         growth.
       </p>
       <p
         class="cnt-date anim-in"
         id="cnt-date-line"
-        style="opacity:0;transform:translateY(8px)"
-      >
+             >
       </p>
     </div>
 
@@ -310,7 +308,7 @@ import Layout from "../layouts/Layout.astro";
   }
 
   .anim-in {
-    animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+    animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
   }
 
   /* Opacity-only variant — safe for elements that contain backdrop-filter children */
@@ -324,7 +322,7 @@ import Layout from "../layouts/Layout.astro";
   }
 
   .anim-in-fade {
-    animation: fadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+    animation: fadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
   }
 
   /* ── Landscape ── */

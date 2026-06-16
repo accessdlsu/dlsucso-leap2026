@@ -1,6 +1,6 @@
 /* ── Gallery card shared styles ── */
 :root {
-  --card-w: min(280px, 75vw, 42vh);
+  --card-w: min(280px, 75vw);
 }
 
 .gallery-card {

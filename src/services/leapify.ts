@@ -176,6 +176,12 @@ export interface ToggleBookmarkResult {
   bookmarked: boolean;
 }
 
+export interface MyRegistration {
+  slug: string;
+  eventId: string;
+  submittedAt: number;
+}
+
 export interface HealthResponse {
   status: string;
   project: string;
@@ -261,8 +267,7 @@ class WsApiClient {
           this.pending.delete(res.id);
           clearTimeout(p.timeout);
           if (res.status >= 200 && res.status < 300) {
-            const body = res.body as { data?: unknown };
-            p.resolve(rewriteUploadUrls(body?.data ?? res.body));
+            p.resolve(rewriteUploadUrls(unwrapResponseBody(res.body)));
           } else {
             const body = res.body;
             let message: string;
@@ -346,6 +351,16 @@ class WsApiClient {
   }
 }
 
+// ── Response Unwrapping ───────────────────────────────────────────────────────
+
+/** Unwrap `{ data: T }` envelope. Returns `body.data` when the key exists (even if null), else `body`. */
+export function unwrapResponseBody(body: unknown): unknown {
+  if (body !== null && typeof body === 'object' && 'data' in (body as object)) {
+    return (body as { data: unknown }).data;
+  }
+  return body;
+}
+
 // ── Upload URL Rewriting ──────────────────────────────────────────────────────
 
 const UPLOADS_PREFIX = "/api/uploads/";
@@ -374,32 +389,39 @@ if (typeof window !== "undefined") {
   } catch (e) {}
 }
 
-// Module-level slot cache: all components on the same page share one result per slug
-// within the TTL window, and concurrent requests for the same slug share one inflight request.
+// Module-level bulk slot cache: one request fetches all slugs at once.
+// All components share the same cached result within the TTL window.
 const _slotCache = new Map<string, { data: SlotInfo; ts: number }>();
-const _slotInflight = new Map<string, Promise<SlotInfo>>();
+let _allSlotsInflight: Promise<Record<string, SlotInfo>> | null = null;
+const _ALL_SLOTS_TTL = 5_000;
 
-function getSlotsShared(slug: string, ttlMs = 5_000): Promise<SlotInfo> {
-  const hit = _slotCache.get(slug);
-  if (hit && Date.now() - hit.ts < ttlMs) return Promise.resolve(hit.data);
-
-  const inflight = _slotInflight.get(slug);
-  if (inflight) return inflight;
-
-  const p = wsClient
-    .request<SlotInfo>("GET", `/classes/${encodeURIComponent(slug)}/slots`)
-    .then(data => {
-      _slotCache.set(slug, { data, ts: Date.now() });
-      _slotInflight.delete(slug);
-      return data;
+async function fetchAllSlots(): Promise<Record<string, SlotInfo>> {
+  if (_allSlotsInflight) return _allSlotsInflight;
+  _allSlotsInflight = wsClient
+    .request<Record<string, SlotInfo>>("GET", "/classes/slots")
+    .then(all => {
+      const now = Date.now();
+      for (const [slug, info] of Object.entries(all)) {
+        _slotCache.set(slug, { data: info, ts: now });
+      }
+      _allSlotsInflight = null;
+      return all;
     })
     .catch(err => {
-      _slotInflight.delete(slug);
+      _allSlotsInflight = null;
       throw err;
     });
+  return _allSlotsInflight;
+}
 
-  _slotInflight.set(slug, p);
-  return p;
+async function getSlotsShared(slug: string): Promise<SlotInfo> {
+  const hit = _slotCache.get(slug);
+  if (hit && Date.now() - hit.ts < _ALL_SLOTS_TTL) return hit.data;
+
+  const all = await fetchAllSlots();
+  const info = all[slug];
+  if (!info) throw new Error(`No slot data for class: ${slug}`);
+  return info;
 }
 
 async function fetchHealth(): Promise<HealthResponse> {
@@ -461,4 +483,6 @@ export const leapifyApi = {
     ),
   reconcileSlots: (slug: string) =>
     wsClient.request<SlotInfo>("POST", `/classes/${encodeURIComponent(slug)}/reconcile`),
+  getMyRegistration: () =>
+    wsClient.request<MyRegistration | null>("GET", "/users/me/registration").catch(() => null),
 };

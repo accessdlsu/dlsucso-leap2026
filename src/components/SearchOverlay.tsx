@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Search, X, ArrowRight } from 'lucide-react';
 import { leapifyApi } from '../services/leapify';
 import type { LeapEvent } from '../services/leapify';
+import { computeSlotStatus } from './ClassCard';
 
 function buildDayMap(events: LeapEvent[]): Map<string, number> {
   const sorted = Array.from(new Set(events.map(e => e.date))).sort(
@@ -13,12 +14,13 @@ function buildDayMap(events: LeapEvent[]): Map<string, number> {
 
 interface FilterProps {
   label: string;
+  allLabel?: string;
   value: string | null;
   options: { value: string; label: string }[];
   onChange: (v: string | null) => void;
 }
 
-function OverlayFilter({ label, value, options, onChange }: FilterProps) {
+function OverlayFilter({ label, allLabel, value, options, onChange }: FilterProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const selected = options.find(o => o.value === value);
@@ -78,11 +80,9 @@ function OverlayFilter({ label, value, options, onChange }: FilterProps) {
       </button>
       {open && (
         <div style={menu}>
-          {value !== null && (
-            <button style={item(false)} onClick={() => { onChange(null); setOpen(false); }}>
-              All {label}s
-            </button>
-          )}
+          <button style={item(value === null)} onClick={() => { onChange(null); setOpen(false); }}>
+            {allLabel ?? `All ${label}s`}
+          </button>
           {options.map(opt => (
             <button key={opt.value} style={item(value === opt.value)}
               onClick={() => { onChange(opt.value); setOpen(false); }}
@@ -108,8 +108,8 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
   const inputRef = useRef<HTMLInputElement>(null);
 
   const availOptions = [
-    { value: 'unlimited', label: 'No Slot Limit' },
-    { value: 'limited', label: 'Has Slot Limit' },
+    { value: 'open', label: 'Open' },
+    { value: 'full', label: 'Full' },
   ];
 
   useEffect(() => {
@@ -180,8 +180,11 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
       if (selectedTheme && c.theme.path !== selectedTheme) return false;
       if (selectedDate && c.date !== selectedDate) return false;
       if (selectedOrg && c.organization.acronym !== selectedOrg) return false;
-      if (selectedAvail === 'unlimited' && c.maxSlots !== 0) return false;
-      if (selectedAvail === 'limited' && c.maxSlots === 0) return false;
+      if (selectedAvail) {
+        const isFull = computeSlotStatus(c) === 'full';
+        if (selectedAvail === 'full' && !isFull) return false;
+        if (selectedAvail === 'open' && isFull) return false;
+      }
       if (q) {
         const hay = [c.title, c.classCode, c.organization.name, c.organization.acronym, c.venue, c.theme.name]
           .join(' ').toLowerCase();
@@ -219,6 +222,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
         {/* Glass search + filter panel */}
         <div
           style={{
+            position: 'relative', zIndex: 1,
             background: 'rgba(8,14,24,0.90)',
             backdropFilter: 'blur(28px)',
             WebkitBackdropFilter: 'blur(28px)',
@@ -267,7 +271,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
             <OverlayFilter label="Subtheme" value={selectedTheme} options={themeOptions} onChange={setSelectedTheme} />
             <OverlayFilter label="Date" value={selectedDate} options={dateOptions} onChange={setSelectedDate} />
             <OverlayFilter label="Organization" value={selectedOrg} options={orgOptions} onChange={setSelectedOrg} />
-            <OverlayFilter label="Availability" value={selectedAvail} options={availOptions} onChange={setSelectedAvail} />
+            <OverlayFilter label="Availability" allLabel="All Availability" value={selectedAvail} options={availOptions} onChange={setSelectedAvail} />
           </div>
         </div>
 
@@ -275,6 +279,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
         {hasFilter && (
           <div
             style={{
+              position: 'relative', zIndex: 0,
               maxHeight: '55vh', overflowY: 'auto',
               background: 'rgba(6,12,22,0.97)',
               backdropFilter: 'blur(20px)',

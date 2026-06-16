@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Loader2, Search, X, Bookmark } from 'lucide-react';
 import { leapifyApi } from '../services/leapify';
-import type { LeapEvent, SlotInfo } from '../services/leapify';
+import type { LeapEvent, SlotInfo, MyRegistration } from '../services/leapify';
 import ClassCard, { computeSlotStatus } from './ClassCard';
 import { formatTime } from '../services/utils';
 import { getCachedProfile } from '../services/auth';
@@ -154,11 +154,13 @@ function OrgLogo({ logoUrl, acronym }: { logoUrl: string | null; acronym: string
 
 function FilterDropdown<T extends string>({
   label,
+  allLabel,
   options,
   value,
   onChange,
 }: {
   label: string;
+  allLabel?: string;
   options: { value: T; label: string; sub?: string }[];
   value: T | null;
   onChange: (v: T | null) => void;
@@ -181,7 +183,7 @@ function FilterDropdown<T extends string>({
       <button className="filter-dropdown-trigger" onClick={() => setOpen(!open)}>
         <span className="filter-dropdown-label">{label}</span>
         <span className="filter-dropdown-selected">
-          {selected ? selected.label : `All ${label}s`}
+          {selected ? selected.label : (allLabel ?? `All ${label}s`)}
         </span>
         <svg
           className={`dropdown-arrow ${open ? 'open' : ''}`}
@@ -208,7 +210,7 @@ function FilterDropdown<T extends string>({
               setOpen(false);
             }}
           >
-            All {label}s
+            {allLabel ?? `All ${label}s`}
           </button>
           {options.map((opt) => (
             <button
@@ -255,7 +257,10 @@ export default function ClassesFilter() {
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   const [bookmarkPending, setBookmarkPending] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(() => getCachedProfile() !== null);
+  const [myRegistration, setMyRegistration] = useState<MyRegistration | null>(null);
+  const [registrationPolling, setRegistrationPolling] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  const registrationPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Hide navbar when drawer is open
   useEffect(() => {
@@ -286,11 +291,21 @@ export default function ClassesFilter() {
         classes.map((c) => leapifyApi.getSlots(c.slug)),
       );
       if (cancelled) return;
-      const map = new Map<string, SlotInfo>();
-      results.forEach((r, i) => {
-        if (r.status === 'fulfilled' && r.value) map.set(classes[i].id, r.value);
+      setSlotsMap(prev => {
+        let changed = false;
+        const next = new Map(prev);
+        results.forEach((r, i) => {
+          if (r.status === 'fulfilled' && r.value) {
+            const cur = prev.get(classes[i].id);
+            const val = r.value;
+            if (!cur || cur.total !== val.total || cur.registered !== val.registered) {
+              next.set(classes[i].id, val);
+              changed = true;
+            }
+          }
+        });
+        return changed ? next : prev;
       });
-      setSlotsMap(map);
     };
 
     fetchSlots();
@@ -345,6 +360,17 @@ export default function ClassesFilter() {
     };
   }, []);
 
+  // Fetch registration status on login
+  useEffect(() => {
+    if (!isLoggedIn) { setMyRegistration(null); return; }
+    leapifyApi.getMyRegistration().then(reg => setMyRegistration(reg ?? null));
+  }, [isLoggedIn]);
+
+  // Cleanup poll on unmount
+  useEffect(() => {
+    return () => { if (registrationPollRef.current) clearInterval(registrationPollRef.current); };
+  }, []);
+
   // Fetch bookmarks once when logged in
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -353,13 +379,6 @@ export default function ClassesFilter() {
     }).catch(() => {});
   }, [isLoggedIn]);
 
-  // Reconcile + re-fetch slots when drawer opens
-  useEffect(() => {
-    if (!drawerClass) return;
-    leapifyApi.reconcileSlots(drawerClass.slug).then((si) => {
-      if (si) setSlotsMap(prev => new Map(prev).set(drawerClass.id, si));
-    }).catch(() => {});
-  }, [drawerClass?.id]);
 
   const handleBookmarkToggle = useCallback(async (eventId: string) => {
     if (!isLoggedIn || bookmarkPending) return;
@@ -431,8 +450,7 @@ export default function ClassesFilter() {
 
   const availabilityOptions = useMemo(
     () => [
-      { value: 'available', label: 'Available' },
-      { value: 'limited', label: 'Limited' },
+      { value: 'open', label: 'Open' },
       { value: 'full', label: 'Full' },
     ],
     [],
@@ -447,8 +465,9 @@ export default function ClassesFilter() {
       if (selectedOrg && c.organization.acronym !== selectedOrg) return false;
       if (selectedAvailability) {
         const status = computeSlotStatus(c, slotsMap.get(c.id));
-        const normalised = status === 'unlimited' ? 'available' : status;
-        if (normalised !== selectedAvailability) return false;
+        const isFull = status === 'full';
+        if (selectedAvailability === 'full' && !isFull) return false;
+        if (selectedAvailability === 'open' && isFull) return false;
       }
       if (q) {
         const haystack = [
@@ -586,6 +605,7 @@ export default function ClassesFilter() {
           />
           <FilterDropdown
             label="Availability"
+            allLabel="All Availability"
             options={availabilityOptions}
             value={selectedAvailability}
             onChange={setSelectedAvailability}
@@ -637,14 +657,27 @@ export default function ClassesFilter() {
             <p className="results-note">More LEAP classes to be announced soon.</p>
             <div className="classes-grid">
               {filtered.map((c) => (
-                <ClassCard
-                  key={c.id}
-                  event={c}
-                  slotInfo={slotsMap.get(c.id)}
-                  dayNumber={dayMap.get(c.date)}
-                  onAction={() => setDrawerClass(c)}
-                  actionLabel="View More"
-                />
+                <div key={c.id} style={{ position: 'relative' }}>
+                  {myRegistration?.slug === c.slug && (
+                    <div style={{
+                      position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
+                      zIndex: 10, background: 'rgba(42,98,52,0.85)', backdropFilter: 'blur(8px)',
+                      border: '1px solid rgba(139,229,155,0.4)', borderRadius: 9999,
+                      padding: '3px 12px', fontFamily: "'Poppins', sans-serif",
+                      fontSize: '0.6rem', fontWeight: 700, color: '#8be59b',
+                      letterSpacing: '0.06em', whiteSpace: 'nowrap', pointerEvents: 'none',
+                    }}>
+                      ✓ REGISTERED
+                    </div>
+                  )}
+                  <ClassCard
+                    event={c}
+                    slotInfo={slotsMap.get(c.id)}
+                    dayNumber={dayMap.get(c.date)}
+                    onAction={() => setDrawerClass(c)}
+                    actionLabel="View More"
+                  />
+                </div>
               ))}
             </div>
           </>
@@ -751,7 +784,8 @@ export default function ClassesFilter() {
                       const si = slotsMap.get(drawerClass.id);
                       if (!si) return drawerClass.maxSlots === 0 ? 'Unlimited' : `${drawerClass.maxSlots} Slots`;
                       if (si.total === 0) return 'Unlimited';
-                      return `${si.total - si.registered}/${si.total} Slots Left`;
+                      const avail = Math.max(0, (si.total || 0) - (si.registered || 0));
+                      return avail === 0 ? 'Full' : `${avail} Slots Left`;
                     })()}
                   </span>
                 </div>
@@ -797,6 +831,42 @@ export default function ClassesFilter() {
                         </button>
                       );
                     }
+                    // Already registered for this class
+                    if (myRegistration?.slug === drawerClass.slug) {
+                      return (
+                        <button
+                          className="drawer-enroll"
+                          disabled
+                          style={{
+                            opacity: 0.85,
+                            cursor: 'default',
+                            background: 'rgba(42,98,52,0.4)',
+                            border: '1px solid rgba(139,229,155,0.35)',
+                            color: '#8be59b',
+                          }}
+                        >
+                          ✓ Registered
+                        </button>
+                      );
+                    }
+                    // Already registered for a different class
+                    if (myRegistration) {
+                      return (
+                        <button
+                          className="drawer-enroll"
+                          disabled
+                          style={{
+                            opacity: 0.5,
+                            cursor: 'not-allowed',
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                          }}
+                          title="You already registered for another class"
+                        >
+                          Already Registered
+                        </button>
+                      );
+                    }
                     if (drawerClass.gformsUrl) {
                       return (
                         <a
@@ -804,11 +874,35 @@ export default function ClassesFilter() {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="drawer-enroll"
+                          onClick={() => {
+                            // Start polling for registration after student opens form
+                            if (registrationPolling || !isLoggedIn) return;
+                            setRegistrationPolling(true);
+                            const POLL_INTERVAL = 4_000;
+                            const POLL_TIMEOUT = 10 * 60 * 1000; // 10 min
+                            const startedAt = Date.now();
+                            registrationPollRef.current = setInterval(async () => {
+                              const reg = await leapifyApi.getMyRegistration();
+                              if (reg) {
+                                setMyRegistration(reg);
+                                setRegistrationPolling(false);
+                                if (registrationPollRef.current) clearInterval(registrationPollRef.current);
+                              } else if (Date.now() - startedAt > POLL_TIMEOUT) {
+                                setRegistrationPolling(false);
+                                if (registrationPollRef.current) clearInterval(registrationPollRef.current);
+                              }
+                            }, POLL_INTERVAL);
+                          }}
                         >
                           Register Now
-                          {status === 'limited' && si && (
+                          {registrationPolling && (
+                            <span style={{ marginLeft: 8, fontSize: '0.72rem', opacity: 0.6 }}>
+                              (checking…)
+                            </span>
+                          )}
+                          {status === 'limited' && si && !registrationPolling && (
                             <span style={{ marginLeft: 8, fontSize: '0.72rem', opacity: 0.75 }}>
-                              ({si.total - si.registered} left)
+                              ({Math.max(0, (si.total || 0) - (si.registered || 0))} left)
                             </span>
                           )}
                         </a>

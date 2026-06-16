@@ -13,7 +13,8 @@
 		"astro": "astro",
 		"generate-types": "wrangler types",
 		"deploy": "astro build && wrangler deploy --config wrangler.worker.jsonc",
-		"cf-typegen": "wrangler types"
+		"cf-typegen": "wrangler types",
+		"test": "vitest run"
 	},
 	"dependencies": {
 		"@astrojs/cloudflare": "^13.7.0",
@@ -28,6 +29,7 @@
 	},
 	"devDependencies": {
 		"@types/node": "^25.9.3",
+		"vitest": "^4.1.9",
 		"wrangler": "^4.99.0"
 	},
 	"overrides": {

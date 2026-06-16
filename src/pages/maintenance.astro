@@ -130,7 +130,7 @@ const getRackSlots = (
       ))
     }
     <div class="mnt-content">
-      <div class="mnt-icon anim-in" style="opacity:0;transform:translateY(8px)">
+      <div class="mnt-icon anim-in">
         <img
           src="/logo/logo-hd.png"
           alt="LEAP 2026"
@@ -138,13 +138,13 @@ const getRackSlots = (
           style="width: min(500px, 90vw); height: auto; display: block;"
         />
       </div>
-      <h1 class="mnt-title anim-in" style="opacity:0;transform:translateY(8px)">
+      <h1 class="mnt-title anim-in">
         Under Maintenance
       </h1>
-      <p class="mnt-desc anim-in" style="opacity:0;transform:translateY(8px)">
+      <p class="mnt-desc anim-in">
         We're making improvements to serve you better.
       </p>
-      <p class="mnt-sub anim-in" style="opacity:0;transform:translateY(8px)">
+      <p class="mnt-sub anim-in">
         Please check back soon.
       </p>
     </div>
@@ -476,7 +476,7 @@ const getRackSlots = (
   }
 
   .anim-in {
-    animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+    animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
     will-change: transform, opacity;
   }
 

@@ -57,9 +57,21 @@ export default function FeaturedEvents() {
     const fetchSlots = async () => {
       const results = await Promise.allSettled(events.map(e => leapifyApi.getSlots(e.slug)));
       if (cancelled) return;
-      const map = new Map<string, SlotInfo>();
-      results.forEach((r, i) => { if (r.status === 'fulfilled' && r.value) map.set(events[i].id, r.value); });
-      setSlotsMap(map);
+      setSlotsMap(prev => {
+        let changed = false;
+        const next = new Map(prev);
+        results.forEach((r, i) => {
+          if (r.status === 'fulfilled' && r.value) {
+            const cur = prev.get(events[i].id);
+            const val = r.value;
+            if (!cur || cur.total !== val.total || cur.registered !== val.registered) {
+              next.set(events[i].id, val);
+              changed = true;
+            }
+          }
+        });
+        return changed ? next : prev;
+      });
     };
     fetchSlots();
     const timer = setInterval(fetchSlots, 5_000);
@@ -75,7 +87,6 @@ export default function FeaturedEvents() {
     setDrawerClass(event);
     setDrawerSlot(undefined);
     document.body.classList.add('drawer-open');
-    leapifyApi.reconcileSlots(event.slug).then((si) => { if (si) setDrawerSlot(si); }).catch(() => {});
     leapifyApi.getSlots(event.slug).then(setDrawerSlot).catch(() => setDrawerSlot(null));
   }, []);
 
@@ -210,7 +221,7 @@ export default function FeaturedEvents() {
                     {drawerSlot === undefined ? 'Loading…'
                       : drawerSlot === null ? (drawerClass.maxSlots === 0 ? 'Unlimited' : `${drawerClass.maxSlots} Slots`)
                       : drawerSlot.total === 0 ? 'Unlimited'
-                      : `${drawerSlot.total - drawerSlot.registered}/${drawerSlot.total} Slots Left`}
+                      : (() => { const a = Math.max(0, (drawerSlot.total || 0) - (drawerSlot.registered || 0)); return a === 0 ? 'Full' : `${a} Slots Left`; })()}
                   </span>
                 </div>
               </div>
@@ -243,7 +254,7 @@ export default function FeaturedEvents() {
                         <a href={drawerClass.gformsUrl} target="_blank" rel="noopener noreferrer" className="drawer-enroll">
                           Register Now
                           {status === 'limited' && drawerSlot && (
-                            <span style={{ marginLeft: 8, fontSize: '0.72rem', opacity: 0.75 }}>({drawerSlot.total - drawerSlot.registered} left)</span>
+                            <span style={{ marginLeft: 8, fontSize: '0.72rem', opacity: 0.75 }}>({Math.max(0, (drawerSlot.total || 0) - (drawerSlot.registered || 0))} left)</span>
                           )}
                         </a>
                       );

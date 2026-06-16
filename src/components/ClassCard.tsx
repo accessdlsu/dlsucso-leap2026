@@ -67,6 +67,9 @@ export default function ClassCard({
   onAction,
   actionLabel = 'View More',
 }: ClassCardProps) {
+  const handleCardClick = actionHref
+    ? () => { window.location.href = actionHref; }
+    : onAction;
   const accent = THEME_ACCENTS[event.theme.path] || '#de9a49';
   const rgb = THEME_RGB[event.theme.path] || '222,154,73';
   const parts = event.date.split(' ');
@@ -81,10 +84,11 @@ export default function ClassCard({
   })();
 
   const status = computeSlotStatus(event, slotInfo);
-  const available = slotInfo ? slotInfo.total - slotInfo.registered : null;
+  const available = slotInfo ? Math.max(0, (slotInfo.total || 0) - (slotInfo.registered || 0)) : null;
   const slotsLabel =
     status === 'unlimited' ? 'Open Slots' :
-    slotInfo ? `${available}/${slotInfo.total} Slots Left` :
+    status === 'full' ? 'Full' :
+    slotInfo ? `${available} Slots Left` :
     event.maxSlots === 0 ? 'Open Slots' : `${event.maxSlots} Slots`;
   const slotsClass =
     status === 'full' ? 'red' :
@@ -93,7 +97,9 @@ export default function ClassCard({
   return (
     <article
       className="gallery-card"
-      style={{ '--accent': accent } as React.CSSProperties}
+      style={{ '--accent': accent, cursor: handleCardClick ? 'pointer' : undefined } as React.CSSProperties}
+      onClick={handleCardClick}
+      role={handleCardClick ? 'button' : undefined}
     >
       <div className="gallery-card-date-badge">
         <span className="badge-week">{dayOfWeek.toUpperCase()}</span>

@@ -52,7 +52,6 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
     <div class="login-content">
       <div
         class="logo-wrapper anim-in"
-        style="opacity:0;transform:translateY(8px)"
       >
         <img
           src="/logo/logo-hd.png"
@@ -61,13 +60,12 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
           style="width: min(500px, 90vw); height: auto; display: block;"
         />
       </div>
-      <span class="tagline anim-in" style="opacity:0;transform:translateY(8px)"
+      <span class="tagline anim-in"
         >Isang Nayon, Isang Layunin</span
       >
       <button
         class="gsi-material-button anim-in"
         id="google-signin-btn"
-        style="opacity:0;transform:translateY(8px)"
       >
         <div class="gsi-material-button-state"></div>
         <div class="gsi-material-button-content-wrapper">
@@ -103,7 +101,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
         </div>
         <div class="spinner" aria-hidden="true"></div>
       </button>
-      <p class="terms anim-in" style="opacity:0;transform:translateY(8px)">
+      <p class="terms anim-in">
         By clicking continue, you agree to our{" "}
         <a href="#" data-dialog="tos">Terms of Service</a> and{" "}
         <a href="#" data-dialog="pp">Privacy Policy</a>.
@@ -285,7 +283,7 @@ const fireflies = Array.from({ length: 16 }, (_, i) => ({
   }
 
   .anim-in {
-    animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+    animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
   }
   .anim-in:nth-child(2) {
     animation-delay: 0.15s;
