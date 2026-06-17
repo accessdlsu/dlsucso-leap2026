@@ -193,20 +193,6 @@ export default function FeaturedEvents() {
                     const ds = slotsMap.get(drawerClass.slug);
                     const status = computeSlotStatus(drawerClass, ds);
                     if (status === 'full') {
-                      if (drawerClass.gformsUrl) {
-                        const isTouch = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
-                        return (
-                          <a
-                            href={drawerClass.gformsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="drawer-enroll"
-                            style={{ opacity: 0.85, background: 'rgba(180,40,40,0.35)', border: '1px solid rgba(255,136,136,0.25)' }}
-                          >
-                            Class Full. {isTouch ? 'Tap' : 'Click'} to open the Registration Form anyway
-                          </a>
-                        );
-                      }
                       return (
                         <button className="drawer-enroll" disabled style={{ opacity: 0.6, cursor: 'not-allowed', background: 'rgba(180,40,40,0.35)', border: '1px solid rgba(255,136,136,0.25)' }}>
                           Class Full
