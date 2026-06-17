@@ -267,14 +267,8 @@ export default function GalleryCarousel() {
 
       const slideIdx = ((k % N) + N) % N;
 
-      // "See Details" button — open drawer for this event
-      if ((e.target as HTMLElement).closest('.gallery-card-view-more')) {
-        const ev = eventsRef.current[slideIdx];
-        if (ev) openDrawerRef.current(ev);
-        return;
-      }
-
-      scrollToCardRef.current(slideIdx);
+      const ev = eventsRef.current[slideIdx];
+      if (ev) openDrawerRef.current(ev);
     };
 
     const onCancel = () => {
@@ -453,6 +447,20 @@ export default function GalleryCarousel() {
                     const ds = slotsMap.get(drawerClass.slug);
                     const status = computeSlotStatus(drawerClass, ds);
                     if (status === 'full') {
+                      if (drawerClass.gformsUrl) {
+                        const isTouch = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+                        return (
+                          <a
+                            href={drawerClass.gformsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="drawer-enroll"
+                            style={{ opacity: 0.85, background: 'rgba(180,40,40,0.35)', border: '1px solid rgba(255,136,136,0.25)' }}
+                          >
+                            Class Full. {isTouch ? 'Tap' : 'Click'} to open the Registration Form anyway
+                          </a>
+                        );
+                      }
                       return (
                         <button className="drawer-enroll" disabled style={{ opacity: 0.6, cursor: 'not-allowed', background: 'rgba(180,40,40,0.35)', border: '1px solid rgba(255,136,136,0.25)' }}>
                           Class Full
