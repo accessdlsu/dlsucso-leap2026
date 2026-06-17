@@ -849,26 +849,27 @@ export default function ClassesFilter() {
                         </button>
                       );
                     }
-                    // Already registered for this class
-                    if (myRegistration?.slug === drawerClass.slug) {
-                      return (
-                        <button
-                          className="drawer-enroll"
-                          disabled
-                          style={{
-                            opacity: 0.85,
-                            cursor: 'default',
-                            background: 'rgba(42,98,52,0.4)',
-                            border: '1px solid rgba(139,229,155,0.35)',
-                            color: '#8be59b',
-                          }}
-                        >
-                          ✓ Registered
-                        </button>
-                      );
-                    }
-                    // Already registered for a different class
+                    // Already registered (this class or another)
                     if (myRegistration) {
+                      if (drawerClass.gformsUrl) {
+                        const isTouch = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
+                        return (
+                          <a
+                            href={drawerClass.gformsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="drawer-enroll"
+                            style={{
+                              opacity: 0.85,
+                              background: 'rgba(180,130,0,0.35)',
+                              border: '1px solid rgba(255,210,80,0.3)',
+                              color: '#ffe480',
+                            }}
+                          >
+                            Already registered. {isTouch ? 'Tap' : 'Click'} to open the Registration Form anyway
+                          </a>
+                        );
+                      }
                       return (
                         <button
                           className="drawer-enroll"
@@ -879,7 +880,6 @@ export default function ClassesFilter() {
                             background: 'rgba(255,255,255,0.05)',
                             border: '1px solid rgba(255,255,255,0.1)',
                           }}
-                          title="You already registered for another class"
                         >
                           Already Registered
                         </button>
