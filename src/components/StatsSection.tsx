@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { leapifyApi } from "../services/leapify";
+import { useAllEvents } from "../hooks/useAllEvents";
 
 interface Props {
   subthemeCount: number;
@@ -7,13 +6,8 @@ interface Props {
 }
 
 export default function StatsSection({ subthemeCount, dayCount }: Props) {
-  const [classCount, setClassCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    leapifyApi.getEvents()
-      .then(events => setClassCount(events.length))
-      .catch(() => setClassCount(null));
-  }, []);
+  const allEvents = useAllEvents();
+  const classCount = allEvents.length > 0 ? allEvents.length : null;
 
   const stats = [
     { value: classCount, label: "Classes" },

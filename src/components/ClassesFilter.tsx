@@ -2,11 +2,12 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Loader2, Search, X, Bookmark } from 'lucide-react';
 import { leapifyApi } from '../services/leapify';
 import type { LeapEvent, SlotInfo, MyRegistration } from '../services/leapify';
+import { useAllSlots } from '../hooks/useAllSlots';
+import { useAllEvents } from '../hooks/useAllEvents';
 import ClassCard, { computeSlotStatus } from './ClassCard';
 import { formatTime } from '../services/utils';
 import { getCachedProfile } from '../services/auth';
 
-const SLOT_POLL_MS = 5_000;
 
 const SUBTHEME_DETAILS: Record<string, {
   name: string;
@@ -243,10 +244,9 @@ function FilterDropdown<T extends string>({
 }
 
 export default function ClassesFilter() {
-  const [classes, setClasses] = useState<LeapEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [slotsMap, setSlotsMap] = useState<Map<string, SlotInfo>>(new Map());
+  const classes = useAllEvents();
+  const loading = classes.length === 0;
+  const slotsMap = useAllSlots();
   const [search, setSearch] = useState('');
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -268,50 +268,7 @@ export default function ClassesFilter() {
     return () => { document.body.classList.remove('drawer-open'); };
   }, [drawerClass]);
 
-  useEffect(() => {
-    leapifyApi
-      .getEvents()
-      .then((data) => {
-        setClasses(data ?? []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Failed to load classes');
-        setLoading(false);
-      });
-  }, []);
 
-  // Fetch + poll slot availability
-  useEffect(() => {
-    if (classes.length === 0) return;
-    let cancelled = false;
-
-    const fetchSlots = async () => {
-      const results = await Promise.allSettled(
-        classes.map((c) => leapifyApi.getSlots(c.slug)),
-      );
-      if (cancelled) return;
-      setSlotsMap(prev => {
-        let changed = false;
-        const next = new Map(prev);
-        results.forEach((r, i) => {
-          if (r.status === 'fulfilled' && r.value) {
-            const cur = prev.get(classes[i].id);
-            const val = r.value;
-            if (!cur || cur.total !== val.total || cur.registered !== val.registered) {
-              next.set(classes[i].id, val);
-              changed = true;
-            }
-          }
-        });
-        return changed ? next : prev;
-      });
-    };
-
-    fetchSlots();
-    const timer = setInterval(fetchSlots, SLOT_POLL_MS);
-    return () => { cancelled = true; clearInterval(timer); };
-  }, [classes]);
 
   // Parse URL params on mount
   useEffect(() => {
@@ -464,7 +421,7 @@ export default function ClassesFilter() {
       if (selectedDate && c.date !== selectedDate) return false;
       if (selectedOrg && c.organization.acronym !== selectedOrg) return false;
       if (selectedAvailability) {
-        const status = computeSlotStatus(c, slotsMap.get(c.id));
+        const status = computeSlotStatus(c, slotsMap.get(c.slug));
         const isFull = status === 'full';
         if (selectedAvailability === 'full' && !isFull) return false;
         if (selectedAvailability === 'open' && isFull) return false;
@@ -521,46 +478,6 @@ export default function ClassesFilter() {
     );
   }
 
-  if (error) {
-    return (
-      <div
-        style={{ textAlign: 'center', padding: '4rem 0', fontFamily: "'DM Sans', sans-serif" }}
-      >
-        <p style={{ color: 'rgba(255,100,100,0.7)', fontSize: '0.9rem', margin: '0 0 1rem' }}>
-          {error}
-        </p>
-        <button
-          onClick={() => {
-            setLoading(true);
-            setError(null);
-            leapifyApi
-              .getEvents()
-              .then((d) => {
-                setClasses(d ?? []);
-                setLoading(false);
-              })
-              .catch((e) => {
-                setError(e.message);
-                setLoading(false);
-              });
-          }}
-          style={{
-            fontFamily: "'DM Sans', sans-serif",
-            fontSize: '0.8rem',
-            fontWeight: 600,
-            padding: '0.5rem 1.25rem',
-            borderRadius: 9999,
-            border: '1px solid rgba(255,255,255,0.1)',
-            background: 'rgba(255,255,255,0.06)',
-            color: 'rgba(255,255,255,0.7)',
-            cursor: 'pointer',
-          }}
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className="classes-page">
@@ -672,7 +589,7 @@ export default function ClassesFilter() {
                   )}
                   <ClassCard
                     event={c}
-                    slotInfo={slotsMap.get(c.id)}
+                    slotInfo={slotsMap.get(c.slug)}
                     dayNumber={dayMap.get(c.date)}
                     onAction={() => setDrawerClass(c)}
                     actionLabel="View More"
@@ -781,7 +698,7 @@ export default function ClassesFilter() {
                   <span className="drawer-meta-label">Slots</span>
                   <span className="drawer-meta-val">
                     {(() => {
-                      const si = slotsMap.get(drawerClass.id);
+                      const si = slotsMap.get(drawerClass.slug);
                       if (!si) return drawerClass.maxSlots === 0 ? 'Unlimited' : `${drawerClass.maxSlots} Slots`;
                       if (si.total === 0) return 'Unlimited';
                       const avail = Math.max(0, (si.total || 0) - (si.registered || 0));
@@ -813,7 +730,7 @@ export default function ClassesFilter() {
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   {(() => {
-                    const si = slotsMap.get(drawerClass.id);
+                    const si = slotsMap.get(drawerClass.slug);
                     const status = computeSlotStatus(drawerClass, si);
                     if (status === 'full') {
                       return (

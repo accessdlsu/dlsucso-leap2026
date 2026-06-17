@@ -2,18 +2,19 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Loader2, Bookmark } from 'lucide-react';
 import { leapifyApi } from '../services/leapify';
-import type { LeapEvent, SlotInfo } from '../services/leapify';
+import type { LeapEvent } from '../services/leapify';
+import { useAllSlots } from '../hooks/useAllSlots';
+import { useAllEvents } from '../hooks/useAllEvents';
 import ClassCard, { computeSlotStatus } from './ClassCard';
 import { formatTime } from '../services/utils';
 import { getCachedProfile } from '../services/auth';
 
 export default function FeaturedEvents() {
-  const [events, setEvents] = useState<LeapEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [slotsMap, setSlotsMap] = useState<Map<string, SlotInfo>>(new Map());
+  const allEvents = useAllEvents();
+  const events = useMemo(() => allEvents.filter(e => e.isSpotlight), [allEvents]);
+  const loading = allEvents.length === 0;
+  const slotsMap = useAllSlots();
   const [drawerClass, setDrawerClass] = useState<LeapEvent | null>(null);
-  const [drawerSlot, setDrawerSlot] = useState<SlotInfo | null | undefined>(undefined);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   const [bookmarkPending, setBookmarkPending] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(() => getCachedProfile() !== null);
@@ -38,46 +39,6 @@ export default function FeaturedEvents() {
     }).catch(() => {});
   }, [isLoggedIn]);
 
-  useEffect(() => {
-    leapifyApi.getEvents()
-      .then((data) => {
-        setEvents((data ?? []).filter((e) => e.isSpotlight));
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Failed to load events');
-        setLoading(false);
-      });
-  }, []);
-
-  // Poll slots for all spotlight events every 5s (shared cache via leapifyApi.getSlots)
-  useEffect(() => {
-    if (events.length === 0) return;
-    let cancelled = false;
-    const fetchSlots = async () => {
-      const results = await Promise.allSettled(events.map(e => leapifyApi.getSlots(e.slug)));
-      if (cancelled) return;
-      setSlotsMap(prev => {
-        let changed = false;
-        const next = new Map(prev);
-        results.forEach((r, i) => {
-          if (r.status === 'fulfilled' && r.value) {
-            const cur = prev.get(events[i].id);
-            const val = r.value;
-            if (!cur || cur.total !== val.total || cur.registered !== val.registered) {
-              next.set(events[i].id, val);
-              changed = true;
-            }
-          }
-        });
-        return changed ? next : prev;
-      });
-    };
-    fetchSlots();
-    const timer = setInterval(fetchSlots, 5_000);
-    return () => { cancelled = true; clearInterval(timer); };
-  }, [events]);
-
   const dayMap = useMemo(() => {
     const sorted = Array.from(new Set(events.map(e => e.date))).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
     return new Map(sorted.map((d, i) => [d, i + 1]));
@@ -85,14 +46,11 @@ export default function FeaturedEvents() {
 
   const openDrawer = useCallback((event: LeapEvent) => {
     setDrawerClass(event);
-    setDrawerSlot(undefined);
     document.body.classList.add('drawer-open');
-    leapifyApi.getSlots(event.slug).then(setDrawerSlot).catch(() => setDrawerSlot(null));
   }, []);
 
   const closeDrawer = useCallback(() => {
     setDrawerClass(null);
-    setDrawerSlot(undefined);
     document.body.classList.remove('drawer-open');
   }, []);
 
@@ -121,19 +79,7 @@ export default function FeaturedEvents() {
     );
   }
 
-  if (error) {
-    return (
-      <div style={{ textAlign: 'center', padding: '4rem 0', fontFamily: "'DM Sans', sans-serif" }}>
-        <p style={{ color: 'rgba(255,100,100,0.7)', fontSize: '0.9rem', margin: '0 0 1rem' }}>{error}</p>
-        <button
-          onClick={() => { setLoading(true); setError(null); leapifyApi.getEvents().then((d) => { setEvents((d ?? []).filter(e => e.isSpotlight)); setLoading(false); }).catch((e) => { setError(e instanceof Error ? e.message : 'Error'); setLoading(false); }); }}
-          style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.8rem', fontWeight: 600, padding: '0.5rem 1.25rem', borderRadius: 9999, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)', cursor: 'pointer' }}
-        >Retry</button>
-      </div>
-    );
-  }
-
-  if (events.length === 0) {
+  if (events.length === 0 && !loading) {
     return (
       <div style={{ textAlign: 'center', padding: '4rem 0', fontFamily: "'DM Sans', sans-serif", fontSize: '0.9rem', color: 'rgba(255,255,255,0.4)' }}>
         No featured events yet.
@@ -148,7 +94,7 @@ export default function FeaturedEvents() {
           <ClassCard
             key={ev.id}
             event={ev}
-            slotInfo={slotsMap.get(ev.id)}
+            slotInfo={slotsMap.get(ev.slug)}
             dayNumber={dayMap.get(ev.date)}
             imageLoading={i < 3 ? 'eager' : 'lazy'}
             onAction={() => openDrawer(ev)}
@@ -218,10 +164,13 @@ export default function FeaturedEvents() {
                 <div className="drawer-meta-row">
                   <span className="drawer-meta-label">Slots</span>
                   <span className="drawer-meta-val">
-                    {drawerSlot === undefined ? 'Loading…'
-                      : drawerSlot === null ? (drawerClass.maxSlots === 0 ? 'Unlimited' : `${drawerClass.maxSlots} Slots`)
-                      : drawerSlot.total === 0 ? 'Unlimited'
-                      : (() => { const a = Math.max(0, (drawerSlot.total || 0) - (drawerSlot.registered || 0)); return a === 0 ? 'Full' : `${a} Slots Left`; })()}
+                    {(() => {
+                      const ds = slotsMap.get(drawerClass.slug);
+                      if (!ds) return drawerClass.maxSlots === 0 ? 'Unlimited' : `${drawerClass.maxSlots} Slots`;
+                      if (ds.total === 0) return 'Unlimited';
+                      const a = Math.max(0, ds.total - ds.registered);
+                      return a === 0 ? 'Full' : `${a} Slots Left`;
+                    })()}
                   </span>
                 </div>
               </div>
@@ -241,7 +190,8 @@ export default function FeaturedEvents() {
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   {(() => {
-                    const status = computeSlotStatus(drawerClass, drawerSlot ?? undefined);
+                    const ds = slotsMap.get(drawerClass.slug);
+                    const status = computeSlotStatus(drawerClass, ds);
                     if (status === 'full') {
                       return (
                         <button className="drawer-enroll" disabled style={{ opacity: 0.6, cursor: 'not-allowed', background: 'rgba(180,40,40,0.35)', border: '1px solid rgba(255,136,136,0.25)' }}>
@@ -253,8 +203,8 @@ export default function FeaturedEvents() {
                       return (
                         <a href={drawerClass.gformsUrl} target="_blank" rel="noopener noreferrer" className="drawer-enroll">
                           Register Now
-                          {status === 'limited' && drawerSlot && (
-                            <span style={{ marginLeft: 8, fontSize: '0.72rem', opacity: 0.75 }}>({Math.max(0, (drawerSlot.total || 0) - (drawerSlot.registered || 0))} left)</span>
+                          {status === 'limited' && ds && (
+                            <span style={{ marginLeft: 8, fontSize: '0.72rem', opacity: 0.75 }}>({Math.max(0, ds.total - ds.registered)} left)</span>
                           )}
                         </a>
                       );

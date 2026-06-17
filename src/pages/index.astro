@@ -810,7 +810,7 @@ const themes = [
   });
 
   // Section IntersectionObserver for active dot (root = scroll container)
-  const sectionIds = ['hero-section', 'featured-section', 'subthemes', 'leapdays'];
+  const sectionIds = ['hero-section', 'featured-section', 'classes-section', 'subthemes', 'leapdays'];
   const sectionRatios = new Map<string, number>(sectionIds.map(id => [id, 0]));
   const sectionObserver = new IntersectionObserver(
     (entries) => {

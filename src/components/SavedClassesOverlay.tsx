@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Bookmark, BookmarkX, ArrowRight } from 'lucide-react';
 import { leapifyApi } from '../services/leapify';
-import type { BookmarkEntry, LeapEvent, SlotInfo } from '../services/leapify';
+import type { BookmarkEntry } from '../services/leapify';
+import { useAllEvents } from '../hooks/useAllEvents';
 import { computeSlotStatus } from './ClassCard';
+import { useAllSlots } from '../hooks/useAllSlots';
 
 interface Props {
   open: boolean;
@@ -12,8 +14,8 @@ interface Props {
 
 export default function SavedClassesOverlay({ open, onClose }: Props) {
   const [bookmarks, setBookmarks] = useState<BookmarkEntry[] | null>(null);
-  const [events, setEvents] = useState<LeapEvent[] | null>(null);
-  const [slotsMap, setSlotsMap] = useState<Map<string, SlotInfo>>(new Map());
+  const events = useAllEvents();
+  const slotsMap = useAllSlots();
   const [removing, setRemoving] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const prevOpen = useRef(false);
@@ -23,26 +25,9 @@ export default function SavedClassesOverlay({ open, onClose }: Props) {
   useEffect(() => {
     if (open && !prevOpen.current) {
       setBookmarks(null);
-      setEvents(null);
-      Promise.all([
-        leapifyApi.getBookmarks(),
-        leapifyApi.getEvents(),
-      ]).then(([bms, evs]) => {
-        setBookmarks(bms);
-        setEvents(evs);
-        // Fetch slot info for each bookmarked event
-        const bookmarkedEvs = evs.filter(e => bms.some(b => b.event.id === e.id));
-        Promise.allSettled(bookmarkedEvs.map(e => leapifyApi.getSlots(e.slug))).then(results => {
-          const map = new Map<string, SlotInfo>();
-          results.forEach((r, i) => {
-            if (r.status === 'fulfilled' && r.value) map.set(bookmarkedEvs[i].id, r.value);
-          });
-          setSlotsMap(map);
-        });
-      }).catch(() => {
-        setBookmarks([]);
-        setEvents([]);
-      });
+      leapifyApi.getBookmarks()
+        .then(bms => setBookmarks(bms))
+        .catch(() => setBookmarks([]));
     }
     prevOpen.current = open;
   }, [open]);
@@ -138,8 +123,8 @@ export default function SavedClassesOverlay({ open, onClose }: Props) {
           ) : (
             <>
               {bookmarks.map(bm => {
-                const ev = events?.find(e => e.id === bm.event.id);
-                const slotInfo = slotsMap.get(bm.event.id);
+                const ev = events.find(e => e.id === bm.event.id);
+                const slotInfo = slotsMap.get(bm.event.slug);
                 const isFull = ev ? computeSlotStatus(ev, slotInfo) === 'full' : false;
                 return (
                   <div

@@ -389,10 +389,54 @@ if (typeof window !== "undefined") {
   } catch (e) {}
 }
 
-// Module-level bulk slot cache: one request fetches all slugs at once.
-// All components share the same cached result within the TTL window.
-const _slotCache = new Map<string, { data: SlotInfo; ts: number }>();
+// ── Shared classes store ──────────────────────────────────────────────────────
+// Fetch once per session; no poll needed (classes don't change during user session).
+type EventsSubscriber = (events: readonly LeapEvent[]) => void;
+
+let _eventsCache: LeapEvent[] | null = null;
+let _eventsInflight: Promise<LeapEvent[]> | null = null;
+const _eventsSubscribers = new Set<EventsSubscriber>();
+
+async function fetchEventsOnce(): Promise<LeapEvent[]> {
+  if (_eventsCache) return _eventsCache;
+  if (_eventsInflight) return _eventsInflight;
+  _eventsInflight = wsClient.request<LeapEvent[]>("GET", "/classes")
+    .then(data => {
+      _eventsCache = data ?? [];
+      _eventsInflight = null;
+      _eventsSubscribers.forEach(fn => fn(_eventsCache!));
+      return _eventsCache;
+    })
+    .catch(err => {
+      _eventsInflight = null;
+      throw err;
+    });
+  return _eventsInflight;
+}
+
+export function subscribeToEvents(fn: EventsSubscriber): () => void {
+  _eventsSubscribers.add(fn);
+  if (_eventsCache) fn(_eventsCache);
+  else fetchEventsOnce().catch(() => {});
+  return () => { _eventsSubscribers.delete(fn); };
+}
+
+export function getEventsSnapshot(): readonly LeapEvent[] {
+  return _eventsCache ?? [];
+}
+
+// ── Shared slots store ────────────────────────────────────────────────────────
+// Single source of truth for all slot data across every component.
+// One poll loop, all subscribers notified on change.
+type SlotsSubscriber = (slots: ReadonlyMap<string, SlotInfo>) => void;
+
+const _slotsStore = new Map<string, SlotInfo>(); // slug → SlotInfo
+const _slotsSubscribers = new Set<SlotsSubscriber>();
+let _slotsPolling = false;
 let _allSlotsInflight: Promise<Record<string, SlotInfo>> | null = null;
+
+// Legacy per-slug cache kept for getSlots() backwards compat
+const _slotCache = new Map<string, { data: SlotInfo; ts: number }>();
 const _ALL_SLOTS_TTL = 5_000;
 
 async function fetchAllSlots(): Promise<Record<string, SlotInfo>> {
@@ -401,8 +445,18 @@ async function fetchAllSlots(): Promise<Record<string, SlotInfo>> {
     .request<Record<string, SlotInfo>>("GET", "/classes/slots")
     .then(all => {
       const now = Date.now();
+      let changed = false;
       for (const [slug, info] of Object.entries(all)) {
         _slotCache.set(slug, { data: info, ts: now });
+        const cur = _slotsStore.get(slug);
+        if (!cur || cur.total !== info.total || cur.registered !== info.registered) {
+          _slotsStore.set(slug, info);
+          changed = true;
+        }
+      }
+      if (changed) {
+        const snapshot = new Map(_slotsStore);
+        _slotsSubscribers.forEach(fn => fn(snapshot));
       }
       _allSlotsInflight = null;
       return all;
@@ -414,10 +468,28 @@ async function fetchAllSlots(): Promise<Record<string, SlotInfo>> {
   return _allSlotsInflight;
 }
 
+function startSlotsPolling() {
+  if (_slotsPolling) return;
+  _slotsPolling = true;
+  fetchAllSlots().catch(() => {});
+  setInterval(() => fetchAllSlots().catch(() => {}), _ALL_SLOTS_TTL);
+}
+
+export function subscribeToSlots(fn: SlotsSubscriber): () => void {
+  _slotsSubscribers.add(fn);
+  startSlotsPolling();
+  // Emit current snapshot immediately
+  if (_slotsStore.size > 0) fn(new Map(_slotsStore));
+  return () => { _slotsSubscribers.delete(fn); };
+}
+
+export function getSlotsSnapshot(): ReadonlyMap<string, SlotInfo> {
+  return _slotsStore;
+}
+
 async function getSlotsShared(slug: string): Promise<SlotInfo> {
   const hit = _slotCache.get(slug);
   if (hit && Date.now() - hit.ts < _ALL_SLOTS_TTL) return hit.data;
-
   const all = await fetchAllSlots();
   const info = all[slug];
   if (!info) throw new Error(`No slot data for class: ${slug}`);
@@ -430,18 +502,6 @@ async function fetchHealth(): Promise<HealthResponse> {
   return res.json();
 }
 
-async function fetchHttpFirst<T>(path: string, fallback: () => Promise<T>): Promise<T> {
-  try {
-    const res = await fetch(path);
-    if (res.ok) {
-      const body = await res.json() as any;
-      return rewriteUploadUrls(body.data ?? body) as T;
-    }
-  } catch (e) {
-  }
-  return fallback();
-}
-
 export const leapifyApi = {
   setToken: (token: string | null) => {
     wsClient.setToken(token);
@@ -451,14 +511,14 @@ export const leapifyApi = {
   },
 
   // Public
-  getConfig: () => fetchHttpFirst<SiteConfig>("/api/config", () => wsClient.request<SiteConfig>("GET", "/config")),
-  getEvents: () => fetchHttpFirst<LeapEvent[]>("/api/classes", () => wsClient.request<LeapEvent[]>("GET", "/classes")),
+  getConfig: () => wsClient.request<SiteConfig>("GET", "/config"),
+  getEvents: () => fetchEventsOnce(),
   getEvent: (slug: string) =>
     wsClient.request<LeapEvent>("GET", `/classes/${encodeURIComponent(slug)}`),
   getSlots: (slug: string) => getSlotsShared(slug),
-  getThemes: () => fetchHttpFirst<Theme[]>("/api/themes", () => wsClient.request<Theme[]>("GET", "/themes")),
-  getOrganizations: () => fetchHttpFirst<Organization[]>("/api/organizations", () => wsClient.request<Organization[]>("GET", "/organizations")),
-  getFaqs: () => fetchHttpFirst<Faq[]>("/api/faqs", () => wsClient.request<Faq[]>("GET", "/faqs")),
+  getThemes: () => wsClient.request<Theme[]>("GET", "/themes"),
+  getOrganizations: () => wsClient.request<Organization[]>("GET", "/organizations"),
+  getFaqs: () => wsClient.request<Faq[]>("GET", "/faqs"),
   getHealth: () => fetchHealth(),
 
   // Admin

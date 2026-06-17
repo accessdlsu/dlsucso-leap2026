@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Search, X, ArrowRight } from 'lucide-react';
 import { leapifyApi } from '../services/leapify';
 import type { LeapEvent } from '../services/leapify';
+import { useAllEvents } from '../hooks/useAllEvents';
 import { computeSlotStatus } from './ClassCard';
 
 function buildDayMap(events: LeapEvent[]): Map<string, number> {
@@ -99,7 +100,7 @@ function OverlayFilter({ label, allLabel, value, options, onChange }: FilterProp
 }
 
 export default function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [events, setEvents] = useState<LeapEvent[]>([]);
+  const events = useAllEvents();
   const [query, setQuery] = useState('');
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -123,7 +124,6 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
       return;
     }
     document.body.classList.add('search-open');
-    leapifyApi.getEvents().then(data => setEvents(data ?? [])).catch(() => {});
     const t = setTimeout(() => inputRef.current?.focus(), 60);
     return () => {
       clearTimeout(t);
