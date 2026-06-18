@@ -664,8 +664,13 @@ export default {
       const apiResponse = await handleApiRequest(request, env, pathname, ctx);
       if (apiResponse) return apiResponse;
 
-      // Fallback: proxy all other HTTP /api/* requests (e.g. /api/auth/* for Google OAuth)
-      // dynamically to the backend console worker.
+      // Fallback: only /api/auth/** may bypass the WebSocket gate via plain HTTP.
+      // OAuth redirect flows (sign-in, callbacks, session) are inherently HTTP-based.
+      // All other /api/* routes must go through the WebSocket at /api (Turnstile enforced).
+      if (!pathname.startsWith('/api/auth/')) {
+        return jsonResponse({ error: 'Forbidden' }, 403)
+      }
+
       try {
         const headers = new Headers(request.headers);
         headers.set("X-Forwarded-Host", url.host);
