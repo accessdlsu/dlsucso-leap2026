@@ -130,6 +130,7 @@ export interface LeapEvent {
   endTime: string;
   registrationClosesAt: number;
   isSpotlight: boolean;
+  registrationEnabled: boolean;
   maxSlots: number;
   gformsUrl: string | null;
   theme: LeapEventTheme;
@@ -545,4 +546,6 @@ export const leapifyApi = {
     wsClient.request<SlotInfo>("POST", `/classes/${encodeURIComponent(slug)}/reconcile`),
   getMyRegistration: () =>
     wsClient.request<MyRegistration | null>("GET", "/users/me/registration").catch(() => null),
+  getMyRegistrations: () =>
+    wsClient.request<MyRegistration[]>("GET", "/users/me/registrations").catch(() => [] as MyRegistration[]),
 };

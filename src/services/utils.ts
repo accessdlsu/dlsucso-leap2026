@@ -39,3 +39,13 @@ export function shortenVenue(venue: string): string {
 
   return v;
 }
+
+/**
+ * Build a map of date strings to day numbers (1-indexed, sorted chronologically).
+ */
+export function buildDayMap(events: { date: string }[]): Map<string, number> {
+  const sorted = Array.from(new Set(events.map(e => e.date))).sort(
+    (a, b) => new Date(a).getTime() - new Date(b).getTime()
+  );
+  return new Map(sorted.map((d, i) => [d, i + 1]));
+}

@@ -296,17 +296,6 @@ import Layout from "../layouts/Layout.astro";
     text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
   }
 
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-
   .anim-in {
     animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
   }
@@ -335,28 +324,6 @@ import Layout from "../layouts/Layout.astro";
     z-index: 1;
     pointer-events: none;
     line-height: 0;
-  }
-
-  /* ── Fireflies ── */
-  .firefly {
-    position: absolute;
-    border-radius: 50%;
-    background: #fae185;
-    will-change: opacity;
-    box-shadow: 0 0 6px 4px rgba(250, 225, 133, 0.5);
-    pointer-events: none;
-    z-index: 1;
-    animation: fireflyBlink 4s ease-in-out infinite;
-  }
-
-  @keyframes fireflyBlink {
-    0%,
-    100% {
-      opacity: 0.06;
-    }
-    50% {
-      opacity: 0.7;
-    }
   }
 
   /* ── Bubbles ── */
@@ -568,10 +535,6 @@ import Layout from "../layouts/Layout.astro";
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .firefly {
-      animation: none;
-      opacity: 0.3;
-    }
     .bubble {
       display: none;
     }

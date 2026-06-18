@@ -6,6 +6,7 @@ import type { BookmarkEntry } from '../services/leapify';
 import { useAllEvents } from '../hooks/useAllEvents';
 import { computeSlotStatus } from './ClassCard';
 import { useAllSlots } from '../hooks/useAllSlots';
+import OrgLogo from './OrgLogo';
 
 interface Props {
   open: boolean;
@@ -132,10 +133,7 @@ export default function SavedClassesOverlay({ open, onClose }: Props) {
                     style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', opacity: isFull ? 0.5 : 1, transition: 'opacity 0.2s' }}
                   >
                     <div style={{ width: 36, height: 36, borderRadius: '22.37%', background: 'rgba(255,255,255,0.06)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {ev?.organization.logoUrl
-                        ? <img src={ev.organization.logoUrl} alt={ev.organization.acronym} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                        : <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.55rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)' }}>{ev?.organization.acronym?.slice(0, 2) ?? '?'}</span>
-                      }
+                      <OrgLogo logoUrl={ev?.organization.logoUrl ?? null} acronym={ev?.organization.acronym ?? '?'} size={36} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

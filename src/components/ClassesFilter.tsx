@@ -5,8 +5,10 @@ import type { LeapEvent, SlotInfo, MyRegistration } from '../services/leapify';
 import { useAllSlots } from '../hooks/useAllSlots';
 import { useAllEvents } from '../hooks/useAllEvents';
 import ClassCard, { computeSlotStatus } from './ClassCard';
-import { formatTime } from '../services/utils';
-import { getCachedProfile } from '../services/auth';
+import { formatTime, buildDayMap } from '../services/utils';
+import { useBookmarks } from '../hooks/useBookmarks';
+import OrgLogo from './OrgLogo';
+import ClassDrawer from './ClassDrawer';
 
 
 const SUBTHEME_DETAILS: Record<string, {
@@ -104,54 +106,6 @@ const SUBTHEME_DETAILS: Record<string, {
 
 
 
-
-// Map sorted unique dates → Day 1, Day 2, …
-function buildDayMap(events: LeapEvent[]): Map<string, number> {
-  const sorted = Array.from(new Set(events.map((e) => e.date))).sort(
-    (a, b) => new Date(a).getTime() - new Date(b).getTime(),
-  );
-  return new Map(sorted.map((d, i) => [d, i + 1]));
-}
-
-function OrgLogo({ logoUrl, acronym }: { logoUrl: string | null; acronym: string }) {
-  if (!logoUrl) {
-    return (
-      <span
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 24,
-          height: 24,
-          borderRadius: '50%',
-          background: 'rgba(255,255,255,0.08)',
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: '0.55rem',
-          fontWeight: 700,
-          color: 'rgba(255,255,255,0.5)',
-          flexShrink: 0,
-        }}
-      >
-        {acronym.slice(0, 2)}
-      </span>
-    );
-  }
-  return (
-    <img
-      src={logoUrl}
-      alt={acronym}
-      style={{
-        width: 24,
-        height: 24,
-        borderRadius: '50%',
-        objectFit: 'cover',
-        flexShrink: 0,
-        background: 'rgba(255,255,255,0.06)',
-      }}
-      loading="lazy"
-    />
-  );
-}
 
 function FilterDropdown<T extends string>({
   label,
@@ -254,11 +208,11 @@ export default function ClassesFilter() {
   const [selectedAvailability, setSelectedAvailability] = useState<string | null>(null);
   const [pendingDay, setPendingDay] = useState<number | null>(null);
   const [drawerClass, setDrawerClass] = useState<LeapEvent | null>(null);
-  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
-  const [bookmarkPending, setBookmarkPending] = useState<string | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(() => getCachedProfile() !== null);
-  const [myRegistration, setMyRegistration] = useState<MyRegistration | null>(null);
+  const { bookmarkedIds, bookmarkPending, handleBookmarkToggle, isLoggedIn } = useBookmarks();
+  const [myRegistrations, setMyRegistrations] = useState<MyRegistration[]>([]);
   const [registrationPolling, setRegistrationPolling] = useState(false);
+  const [myRegsDialogOpen, setMyRegsDialogOpen] = useState(false);
+  const [showOnlyBookmarked, setShowOnlyBookmarked] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const registrationPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -306,52 +260,30 @@ export default function ClassesFilter() {
   }, [drawerClass]);
 
 
-  // Track login state via localStorage (restoreSession writes profile there)
-  useEffect(() => {
-    const check = () => setIsLoggedIn(getCachedProfile() !== null);
-    window.addEventListener('storage', check);
-    window.addEventListener('leapify-auth-change', check);
-    return () => {
-      window.removeEventListener('storage', check);
-      window.removeEventListener('leapify-auth-change', check);
-    };
-  }, []);
-
   // Fetch registration status on login
   useEffect(() => {
-    if (!isLoggedIn) { setMyRegistration(null); return; }
-    leapifyApi.getMyRegistration().then(reg => setMyRegistration(reg ?? null));
+    if (!isLoggedIn) { setMyRegistrations([]); return; }
+    leapifyApi.getMyRegistrations().then(regs => setMyRegistrations(regs ?? []));
+  }, [isLoggedIn]);
+
+  // Auto-close dialog if registrations are cleared (e.g. admin removal reflected via 60s poll)
+  useEffect(() => {
+    if (myRegistrations.length === 0) setMyRegsDialogOpen(false);
+  }, [myRegistrations]);
+
+  // Refresh registrations on tab focus (catches admin-side removals without polling)
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    const refresh = () => leapifyApi.getMyRegistrations().then(regs => setMyRegistrations(regs ?? []));
+    const onVisibility = () => { if (document.visibilityState === 'visible') refresh(); };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => { document.removeEventListener('visibilitychange', onVisibility); };
   }, [isLoggedIn]);
 
   // Cleanup poll on unmount
   useEffect(() => {
     return () => { if (registrationPollRef.current) clearInterval(registrationPollRef.current); };
   }, []);
-
-  // Fetch bookmarks once when logged in
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    leapifyApi.getBookmarks().then(bms => {
-      setBookmarkedIds(new Set(bms.map(b => b.event.id)));
-    }).catch(() => {});
-  }, [isLoggedIn]);
-
-
-  const handleBookmarkToggle = useCallback(async (eventId: string) => {
-    if (!isLoggedIn || bookmarkPending) return;
-    const wasBookmarked = bookmarkedIds.has(eventId);
-    setBookmarkedIds(prev => { const n = new Set(prev); wasBookmarked ? n.delete(eventId) : n.add(eventId); return n; });
-    setBookmarkPending(eventId);
-    try {
-      const result = await leapifyApi.toggleBookmark(eventId);
-      setBookmarkedIds(prev => { const n = new Set(prev); result.bookmarked ? n.add(eventId) : n.delete(eventId); return n; });
-    } catch (err) {
-      console.error("[ClassesFilter] Failed to toggle bookmark:", err);
-      setBookmarkedIds(prev => { const n = new Set(prev); wasBookmarked ? n.add(eventId) : n.delete(eventId); return n; });
-    } finally {
-      setBookmarkPending(null);
-    }
-  }, [isLoggedIn, bookmarkedIds, bookmarkPending]);
 
   const handleCloseDrawer = useCallback(() => setDrawerClass(null), []);
 
@@ -414,9 +346,30 @@ export default function ClassesFilter() {
   );
 
   const q = search.trim().toLowerCase();
+  const todayDate = new Date().toISOString().split('T')[0];
+  const hasClassesToday = useMemo(() => classes.some(c => c.date === todayDate), [classes, todayDate]);
+
+  // Conflict detection: bookmarked classes on same day with overlapping times
+  const bookmarkConflicts = useMemo(() => {
+    const bookmarked = classes.filter(c => bookmarkedIds.has(c.id));
+    const conflicts: { a: LeapEvent; b: LeapEvent }[] = [];
+    for (let i = 0; i < bookmarked.length; i++) {
+      for (let j = i + 1; j < bookmarked.length; j++) {
+        const a = bookmarked[i];
+        const b = bookmarked[j];
+        if (a.date !== b.date) continue;
+        // HH:MM strings compare lexicographically correctly
+        if (a.startTime < b.endTime && a.endTime > b.startTime) {
+          conflicts.push({ a, b });
+        }
+      }
+    }
+    return conflicts;
+  }, [classes, bookmarkedIds]);
 
   const filtered = useMemo(() => {
     return classes.filter((c) => {
+      if (showOnlyBookmarked && !bookmarkedIds.has(c.id)) return false;
       if (selectedTheme && c.theme.path !== selectedTheme) return false;
       if (selectedDate && c.date !== selectedDate) return false;
       if (selectedOrg && c.organization.acronym !== selectedOrg) return false;
@@ -442,9 +395,9 @@ export default function ClassesFilter() {
       }
       return true;
     });
-  }, [classes, selectedTheme, selectedDate, selectedOrg, selectedAvailability, slotsMap, q]);
+  }, [classes, showOnlyBookmarked, bookmarkedIds, selectedTheme, selectedDate, selectedOrg, selectedAvailability, slotsMap, q]);
 
-  const hasFilters = !!(selectedTheme || selectedDate || selectedOrg || selectedAvailability || search);
+  const hasFilters = !!(selectedTheme || selectedDate || selectedOrg || selectedAvailability || search || showOnlyBookmarked);
 
   const clearAll = () => {
     setSelectedTheme(null);
@@ -452,6 +405,7 @@ export default function ClassesFilter() {
     setSelectedOrg(null);
     setSelectedAvailability(null);
     setSearch('');
+    setShowOnlyBookmarked(false);
   };
 
   if (loading) {
@@ -477,6 +431,88 @@ export default function ClassesFilter() {
       </div>
     );
   }
+
+
+  // Drawer footer with complex registration logic
+  const drawerFooter = drawerClass && (
+    <div style={{ display: 'flex', gap: 8, alignItems: 'stretch' }}>
+      {isLoggedIn && (
+        <button
+          className="drawer-bookmark-btn"
+          onClick={() => handleBookmarkToggle(drawerClass.id)}
+          disabled={bookmarkPending === drawerClass.id}
+          aria-label={bookmarkedIds.has(drawerClass.id) ? 'Unsave class' : 'Save class'}
+          title={bookmarkedIds.has(drawerClass.id) ? 'Unsave class' : 'Save class'}
+        >
+          <Bookmark size={18} strokeWidth={1.75} fill={bookmarkedIds.has(drawerClass.id) ? 'currentColor' : 'none'} />
+        </button>
+      )}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {(() => {
+          const si = slotsMap.get(drawerClass.slug);
+          const status = computeSlotStatus(drawerClass, si);
+          if (drawerClass.registrationEnabled === false) {
+            return (
+              <button className="drawer-enroll" disabled style={{ opacity: 0.5, cursor: 'not-allowed', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                Registration Closed
+              </button>
+            );
+          }
+          if (status === 'full') {
+            return (
+              <button className="drawer-enroll" disabled style={{ opacity: 0.6, cursor: 'not-allowed', background: 'rgba(180,40,40,0.35)', border: '1px solid rgba(255,136,136,0.25)' }}>
+                Class Full
+              </button>
+            );
+          }
+          if (myRegistrations.length > 0) {
+            return (
+              <button className="drawer-enroll" onClick={() => setMyRegsDialogOpen(true)} style={{ background: 'rgba(180,130,0,0.35)', border: '1px solid rgba(255,210,80,0.3)', color: '#ffe480' }}>
+                Already Registered — View My Class{myRegistrations.length !== 1 ? 'es' : ''}
+              </button>
+            );
+          }
+          if (drawerClass.gformsUrl) {
+            return (
+              <a
+                href={drawerClass.gformsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="drawer-enroll"
+                onClick={() => {
+                  if (registrationPolling || !isLoggedIn) return;
+                  setRegistrationPolling(true);
+                  const POLL_INTERVAL = 4_000;
+                  const POLL_TIMEOUT = 10 * 60 * 1000;
+                  const startedAt = Date.now();
+                  registrationPollRef.current = setInterval(async () => {
+                    const regs = await leapifyApi.getMyRegistrations();
+                    if (regs && regs.length > 0) {
+                      setMyRegistrations(regs);
+                      setRegistrationPolling(false);
+                      if (registrationPollRef.current) clearInterval(registrationPollRef.current);
+                    } else if (Date.now() - startedAt > POLL_TIMEOUT) {
+                      setRegistrationPolling(false);
+                      if (registrationPollRef.current) clearInterval(registrationPollRef.current);
+                    }
+                  }, POLL_INTERVAL);
+                }}
+              >
+                Register Now
+                {registrationPolling && <span style={{ marginLeft: 8, fontSize: '0.72rem', opacity: 0.6 }}>(checking…)</span>}
+                {status === 'limited' && si && !registrationPolling && <span style={{ marginLeft: 8, fontSize: '0.72rem', opacity: 0.75 }}>({Math.max(0, (si.total || 0) - (si.registered || 0))} left)</span>}
+              </a>
+            );
+          }
+          return (
+            <button className="drawer-enroll" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>
+              Registration Unavailable
+            </button>
+          );
+        })()}
+      </div>
+    </div>
+  );
 
 
   return (
@@ -527,6 +563,24 @@ export default function ClassesFilter() {
             value={selectedAvailability}
             onChange={setSelectedAvailability}
           />
+          {hasClassesToday && (
+            <button
+              className="clear-btn"
+              onClick={() => setSelectedDate(selectedDate === todayDate ? null : todayDate)}
+              style={selectedDate === todayDate ? { background: 'rgba(250,225,133,0.2)', color: '#fae185', borderColor: 'rgba(250,225,133,0.4)' } : {}}
+            >
+              Today
+            </button>
+          )}
+          {isLoggedIn && (
+            <button
+              className="clear-btn"
+              onClick={() => setShowOnlyBookmarked(v => !v)}
+              style={showOnlyBookmarked ? { background: 'rgba(255,255,255,0.12)', color: '#fff', borderColor: 'rgba(255,255,255,0.3)' } : {}}
+            >
+              Saved{bookmarkedIds.size > 0 ? ` (${bookmarkedIds.size})` : ''}
+            </button>
+          )}
           {hasFilters && (
             <button className="clear-btn" onClick={clearAll}>
               Clear All
@@ -534,6 +588,29 @@ export default function ClassesFilter() {
           )}
         </div>
       </section>
+
+      {/* Conflict warning */}
+      {bookmarkConflicts.length > 0 && (
+        <div style={{
+          margin: '0 0 1rem',
+          padding: '0.65rem 1rem',
+          background: 'rgba(220,100,0,0.15)',
+          border: '1px solid rgba(255,160,60,0.3)',
+          borderRadius: 10,
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: '0.78rem',
+          color: '#ffb566',
+        }}>
+          <strong style={{ fontWeight: 700 }}>⚠ Schedule conflict{bookmarkConflicts.length !== 1 ? 's' : ''} in saved classes</strong>
+          <ul style={{ margin: '4px 0 0', paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {bookmarkConflicts.map(({ a, b }, i) => (
+              <li key={i}>
+                <em>{a.title}</em> &amp; <em>{b.title}</em> overlap on {a.date} ({formatTime(a.startTime)}–{formatTime(a.endTime)} vs {formatTime(b.startTime)}–{formatTime(b.endTime)})
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Subtheme Info Card */}
       {selectedTheme && SUBTHEME_DETAILS[selectedTheme] && (
@@ -575,7 +652,7 @@ export default function ClassesFilter() {
             <div className="classes-grid">
               {filtered.map((c) => (
                 <div key={c.id} style={{ position: 'relative' }}>
-                  {myRegistration?.slug === c.slug && (
+                  {myRegistrations.some(r => r.slug === c.slug) && (
                     <div style={{
                       position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
                       zIndex: 10, background: 'rgba(42,98,52,0.85)', backdropFilter: 'blur(8px)',
@@ -603,236 +680,87 @@ export default function ClassesFilter() {
 
       {/* Drawer */}
       {drawerClass && (
+        <ClassDrawer
+          event={drawerClass}
+          onClose={handleCloseDrawer}
+          dayMap={dayMap}
+          slotsMap={slotsMap}
+          footer={drawerFooter}
+        />
+      )}
+
+      {/* My Registrations Dialog */}
+      {myRegsDialogOpen && (
         <div
-          className="drawer-overlay"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) handleCloseDrawer();
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '1rem',
           }}
+          onClick={() => setMyRegsDialogOpen(false)}
         >
-          <div className="drawer">
-            <button className="drawer-close" onClick={handleCloseDrawer} aria-label="Close">
-              &times;
-            </button>
-            {/* Hero: poster left, header right */}
-            <div className="drawer-hero">
-              <div className="drawer-poster">
-                {drawerClass.backgroundImageUrl ? (
-                  <img src={drawerClass.backgroundImageUrl} alt={drawerClass.title} />
-                ) : (
-                  <div className="drawer-poster-placeholder" />
-                )}
-              </div>
-              <div className="drawer-header">
-                <div className="drawer-tags">
-                  <span className="class-theme-tag">{drawerClass.theme.name}</span>
-                  {drawerClass.isSpotlight && (
-                    <span
-                      className="class-theme-tag"
-                      style={{
-                        background: 'rgba(250,225,133,0.15)',
-                        color: '#fae185',
-                        borderColor: 'rgba(250,225,133,0.3)',
-                      }}
-                    >
-                      ★ Main Event
-                    </span>
-                  )}
-                </div>
-                <h2 className="drawer-title">{drawerClass.title}</h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 'auto' }}>
-                  <OrgLogo
-                    logoUrl={drawerClass.organization.logoUrl}
-                    acronym={drawerClass.organization.acronym}
-                  />
-                  <span
+          <div
+            style={{
+              background: 'rgba(18,18,24,0.97)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 16,
+              padding: '1.5rem',
+              maxWidth: 480,
+              width: '100%',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+              boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0, fontFamily: "'Poppins', sans-serif", fontSize: '1rem', fontWeight: 700, color: '#ffe480' }}>
+                Your Registered Class{myRegistrations.length !== 1 ? 'es' : ''}
+              </h3>
+              <button
+                onClick={() => setMyRegsDialogOpen(false)}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: 'rgba(255,255,255,0.5)', padding: 4, lineHeight: 1,
+                  fontSize: '1.2rem',
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <p style={{ margin: '0 0 1rem', fontSize: '0.78rem', color: 'rgba(255,255,255,0.45)', fontFamily: "'DM Sans', sans-serif" }}>
+              You are already registered for {myRegistrations.length === 1 ? 'a class' : `${myRegistrations.length} classes`}. Registration is limited to one class per student.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {myRegistrations.map(reg => {
+                const cls = classes.find(c => c.slug === reg.slug);
+                return (
+                  <div
+                    key={reg.eventId}
                     style={{
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: '0.78rem',
-                      color: 'rgba(255,255,255,0.5)',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: 10,
+                      padding: '0.75rem 1rem',
                     }}
                   >
-                    {drawerClass.organization.name}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Scrollable body — meta + description */}
-            <div className="drawer-body">
-              <div className="drawer-meta">
-                {drawerClass.classCode && (
-                  <div className="drawer-meta-row">
-                    <span className="drawer-meta-label">Code</span>
-                    <span className="drawer-meta-val">{drawerClass.classCode}</span>
+                    <div style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontSize: '0.88rem', color: '#fff', marginBottom: 4 }}>
+                      {cls?.title ?? reg.slug}
+                    </div>
+                    {cls && (
+                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <span>{cls.date}{dayMap.get(cls.date) != null ? ` · Day ${dayMap.get(cls.date)}` : ''}</span>
+                        <span>{formatTime(cls.startTime)} – {formatTime(cls.endTime)}</span>
+                        <span>{cls.venue}</span>
+                      </div>
+                    )}
+                    <div style={{ marginTop: 6, fontSize: '0.68rem', color: 'rgba(139,229,155,0.8)', fontFamily: "'DM Sans', sans-serif" }}>
+                      ✓ Registered {new Date(reg.submittedAt * 1000).toLocaleDateString()}
+                    </div>
                   </div>
-                )}
-                <div className="drawer-meta-row">
-                  <span className="drawer-meta-label">Theme</span>
-                  <span className="drawer-meta-val">{drawerClass.theme.name}</span>
-                </div>
-                <div className="drawer-meta-row">
-                  <span className="drawer-meta-label">Date</span>
-                  <span className="drawer-meta-val">
-                    {drawerClass.date}
-                    {dayMap.get(drawerClass.date) != null
-                      ? ` (Day ${dayMap.get(drawerClass.date)})`
-                      : ''}
-                  </span>
-                </div>
-                <div className="drawer-meta-row">
-                  <span className="drawer-meta-label">Time</span>
-                  <span className="drawer-meta-val">
-                    {formatTime(drawerClass.startTime)} – {formatTime(drawerClass.endTime)}
-                  </span>
-                </div>
-                <div className="drawer-meta-row">
-                  <span className="drawer-meta-label">Venue</span>
-                  <span className="drawer-meta-val">{drawerClass.venue}</span>
-                </div>
-                <div className="drawer-meta-row">
-                  <span className="drawer-meta-label">Slots</span>
-                  <span className="drawer-meta-val">
-                    {(() => {
-                      const si = slotsMap.get(drawerClass.slug);
-                      if (!si) return drawerClass.maxSlots === 0 ? 'Unlimited' : `${drawerClass.maxSlots} Slots`;
-                      if (si.total === 0) return 'Unlimited';
-                      const avail = Math.max(0, (si.total || 0) - (si.registered || 0));
-                      return avail === 0 ? 'Full' : `${avail} Slots Left`;
-                    })()}
-                  </span>
-                </div>
-              </div>
-              <p className="drawer-desc">{drawerClass.description}</p>
-            </div>
-
-            {/* Pinned footer — bookmark + register */}
-            <div className="drawer-footer">
-              <div style={{ display: 'flex', gap: 8, alignItems: 'stretch' }}>
-                {isLoggedIn && (
-                  <button
-                    className="drawer-bookmark-btn"
-                    onClick={() => handleBookmarkToggle(drawerClass.id)}
-                    disabled={bookmarkPending === drawerClass.id}
-                    aria-label={bookmarkedIds.has(drawerClass.id) ? 'Unsave class' : 'Save class'}
-                    title={bookmarkedIds.has(drawerClass.id) ? 'Unsave class' : 'Save class'}
-                  >
-                    <Bookmark
-                      size={18}
-                      strokeWidth={1.75}
-                      fill={bookmarkedIds.has(drawerClass.id) ? 'currentColor' : 'none'}
-                    />
-                  </button>
-                )}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  {(() => {
-                    const si = slotsMap.get(drawerClass.slug);
-                    const status = computeSlotStatus(drawerClass, si);
-                    if (status === 'full') {
-                      return (
-                        <button
-                          className="drawer-enroll"
-                          disabled
-                          style={{
-                            opacity: 0.6,
-                            cursor: 'not-allowed',
-                            background: 'rgba(180,40,40,0.35)',
-                            border: '1px solid rgba(255,136,136,0.25)',
-                          }}
-                        >
-                          Class Full
-                        </button>
-                      );
-                    }
-                    // Already registered (this class or another)
-                    if (myRegistration) {
-                      if (drawerClass.gformsUrl) {
-                        const isTouch = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches;
-                        return (
-                          <a
-                            href={drawerClass.gformsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="drawer-enroll"
-                            style={{
-                              opacity: 0.85,
-                              background: 'rgba(180,130,0,0.35)',
-                              border: '1px solid rgba(255,210,80,0.3)',
-                              color: '#ffe480',
-                            }}
-                          >
-                            Already registered. {isTouch ? 'Tap' : 'Click'} to open the Registration Form anyway
-                          </a>
-                        );
-                      }
-                      return (
-                        <button
-                          className="drawer-enroll"
-                          disabled
-                          style={{
-                            opacity: 0.5,
-                            cursor: 'not-allowed',
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                          }}
-                        >
-                          Already Registered
-                        </button>
-                      );
-                    }
-                    if (drawerClass.gformsUrl) {
-                      return (
-                        <a
-                          href={drawerClass.gformsUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="drawer-enroll"
-                          onClick={() => {
-                            // Start polling for registration after student opens form
-                            if (registrationPolling || !isLoggedIn) return;
-                            setRegistrationPolling(true);
-                            const POLL_INTERVAL = 4_000;
-                            const POLL_TIMEOUT = 10 * 60 * 1000; // 10 min
-                            const startedAt = Date.now();
-                            registrationPollRef.current = setInterval(async () => {
-                              const reg = await leapifyApi.getMyRegistration();
-                              if (reg) {
-                                setMyRegistration(reg);
-                                setRegistrationPolling(false);
-                                if (registrationPollRef.current) clearInterval(registrationPollRef.current);
-                              } else if (Date.now() - startedAt > POLL_TIMEOUT) {
-                                setRegistrationPolling(false);
-                                if (registrationPollRef.current) clearInterval(registrationPollRef.current);
-                              }
-                            }, POLL_INTERVAL);
-                          }}
-                        >
-                          Register Now
-                          {registrationPolling && (
-                            <span style={{ marginLeft: 8, fontSize: '0.72rem', opacity: 0.6 }}>
-                              (checking…)
-                            </span>
-                          )}
-                          {status === 'limited' && si && !registrationPolling && (
-                            <span style={{ marginLeft: 8, fontSize: '0.72rem', opacity: 0.75 }}>
-                              ({Math.max(0, (si.total || 0) - (si.registered || 0))} left)
-                            </span>
-                          )}
-                        </a>
-                      );
-                    }
-                    return (
-                      <button className="drawer-enroll" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>
-                        Registration Unavailable
-                      </button>
-                    );
-                  })()}
-                </div>
-              </div>
+                );
+              })}
             </div>
           </div>
         </div>

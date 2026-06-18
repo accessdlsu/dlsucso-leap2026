@@ -5,13 +5,8 @@ import { leapifyApi } from '../services/leapify';
 import type { LeapEvent } from '../services/leapify';
 import { useAllEvents } from '../hooks/useAllEvents';
 import { computeSlotStatus } from './ClassCard';
-
-function buildDayMap(events: LeapEvent[]): Map<string, number> {
-  const sorted = Array.from(new Set(events.map(e => e.date))).sort(
-    (a, b) => new Date(a).getTime() - new Date(b).getTime()
-  );
-  return new Map(sorted.map((d, i) => [d, i + 1]));
-}
+import OrgLogo from './OrgLogo';
+import { buildDayMap } from '../services/utils';
 
 interface FilterProps {
   label: string;
@@ -304,10 +299,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
                     onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'none')}
                   >
                     <div style={{ width: 36, height: 36, borderRadius: '22.37%', background: 'rgba(255,255,255,0.06)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {ev.organization.logoUrl
-                        ? <img src={ev.organization.logoUrl} alt={ev.organization.acronym} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                        : <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.55rem', fontWeight: 700, color: 'rgba(255,255,255,0.5)' }}>{ev.organization.acronym.slice(0, 2)}</span>
-                      }
+                      <OrgLogo logoUrl={ev.organization.logoUrl} acronym={ev.organization.acronym} size={36} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: '0.88rem', color: 'rgba(255,255,255,0.9)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

@@ -1,0 +1,48 @@
+---
+interface Props {
+  /** Number of fireflies to render (default 16) */
+  count?: number;
+  /** Additional CSS class for the container */
+  class?: string;
+  /** z-index for individual fireflies (default 3) */
+  zIndex?: number;
+  /** Whether container is fixed or absolute positioned (default fixed) */
+  fixed?: boolean;
+}
+const { count = 16, class: className = '', zIndex = 3, fixed = true } = Astro.props;
+
+const flies = Array.from({ length: count }, (_, i) => ({
+  id: i,
+  x: ((i * 17.3 + (i % 3) * 29) % 94) + 3,
+  y: ((i * 11.7 + (i % 5) * 13) % 55) + 5,
+  size: 2 + (i % 3),
+  delay: (i * 0.61) % 7,
+  dur: 3.5 + (i % 5) * 0.6,
+}));
+---
+
+<div class={`fireflies-container ${className}`}>
+  {flies.map((f) => (
+    <div
+      class="firefly"
+      style={{
+        left: `${f.x}%`,
+        top: `${f.y}%`,
+        width: f.size,
+        height: f.size,
+        animationDelay: `${f.delay}s`,
+        animationDuration: `${f.dur}s`,
+        zIndex,
+      }}
+    />
+  ))}
+</div>
+
+<style>
+  .fireflies-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+</style>
