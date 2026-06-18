@@ -664,10 +664,14 @@ export default {
       const apiResponse = await handleApiRequest(request, env, pathname, ctx);
       if (apiResponse) return apiResponse;
 
-      // Fallback: only /api/auth/** may bypass the WebSocket gate via plain HTTP.
-      // OAuth redirect flows (sign-in, callbacks, session) are inherently HTTP-based.
+      // Fallback: only specific routes may bypass the WebSocket gate via plain HTTP.
+      //   /api/auth/**   — OAuth redirect flows (sign-in, callbacks, session)
+      //   /api/users/me  — fetched directly with Bearer token by auth.ts before WS is ready
       // All other /api/* routes must go through the WebSocket at /api (Turnstile enforced).
-      if (!pathname.startsWith('/api/auth/')) {
+      const isHttpAllowed =
+        pathname.startsWith('/api/auth/') ||
+        pathname === '/api/users/me';
+      if (!isHttpAllowed) {
         return jsonResponse({ error: 'Forbidden' }, 403)
       }
 
