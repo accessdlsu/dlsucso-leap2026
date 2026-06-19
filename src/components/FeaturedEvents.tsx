@@ -4,7 +4,6 @@ import type { LeapEvent } from '../services/leapify';
 import { useAllSlots } from '../hooks/useAllSlots';
 import { useAllEvents } from '../hooks/useAllEvents';
 import ClassCard, { computeSlotStatus } from './ClassCard';
-import { buildDayMap } from '../services/utils';
 import { useBookmarks } from '../hooks/useBookmarks';
 import ClassDrawer from './ClassDrawer';
 
@@ -18,8 +17,6 @@ export default function FeaturedEvents() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
-
-  const dayMap = useMemo(() => buildDayMap(events), [events]);
 
   const openDrawer = useCallback((event: LeapEvent) => {
     setDrawerClass(event);
@@ -94,28 +91,26 @@ export default function FeaturedEvents() {
   return (
     <>
       <div className="featured-cards-grid">
-        {events.map((ev, i) => (
-          <ClassCard
-            key={ev.id}
-            event={ev}
-            slotInfo={slotsMap.get(ev.slug)}
-            dayNumber={dayMap.get(ev.date)}
-            imageLoading={i < 3 ? 'eager' : 'lazy'}
-            onAction={() => openDrawer(ev)}
-            actionLabel="See Details"
-          />
-        ))}
-      </div>
+       {events.map((ev, i) => (
+           <ClassCard
+             key={ev.id}
+             event={ev}
+             slotInfo={slotsMap.get(ev.slug)}
+             imageLoading={i < 3 ? 'eager' : 'lazy'}
+             onAction={() => openDrawer(ev)}
+             actionLabel="See Details"
+           />
+         ))}
+       </div>
 
-      {mounted && drawerClass && (
-        <ClassDrawer
-          event={drawerClass}
-          onClose={closeDrawer}
-          dayMap={dayMap}
-          slotsMap={slotsMap}
-          footer={drawerFooter}
-        />
-      )}
+       {mounted && drawerClass && (
+         <ClassDrawer
+           event={drawerClass}
+           onClose={closeDrawer}
+           slotsMap={slotsMap}
+           footer={drawerFooter}
+         />
+       )}
     </>
   );
 }

@@ -6,7 +6,7 @@ import type { LeapEvent } from '../services/leapify';
 import { useAllEvents } from '../hooks/useAllEvents';
 import { computeSlotStatus } from './ClassCard';
 import OrgLogo from './OrgLogo';
-import { buildDayMap } from '../services/utils';
+import { buildStaticDayMap, LEAP_DAYS } from '../constants/leapDays';
 
 interface FilterProps {
   label: string;
@@ -133,7 +133,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  const dayMap = useMemo(() => buildDayMap(events), [events]);
+  const dayMap = useMemo(() => buildStaticDayMap(), []);
 
   const themeOptions = useMemo(() => {
     const seen = new Map<string, { name: string; order: number }>();
@@ -146,15 +146,15 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
   }, [events]);
 
   const dateOptions = useMemo(() => {
-    const seen = new Set<string>();
-    return events
-      .filter(c => { if (seen.has(c.date)) return false; seen.add(c.date); return true; })
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .map(c => {
-        const day = dayMap.get(c.date);
-        return { value: c.date, label: day != null ? `${c.date} (Day ${day})` : c.date };
-      });
-  }, [events, dayMap]);
+    // Use static LEAP_DAYS as the source of truth
+    const classDateSet = new Set(events.map(c => c.date));
+    return LEAP_DAYS
+      .filter(day => classDateSet.has(day.date))
+      .map(day => ({
+        value: day.date,
+        label: `${day.date} (Day ${day.num})`,
+      }));
+  }, [events]);
 
   const orgOptions = useMemo(() => {
     const seen = new Map<string, string>();

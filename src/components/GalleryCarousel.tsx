@@ -4,7 +4,6 @@ import type { LeapEvent } from '../services/leapify';
 import { useAllSlots } from '../hooks/useAllSlots';
 import { useAllEvents } from '../hooks/useAllEvents';
 import ClassCard, { computeSlotStatus } from './ClassCard';
-import { buildDayMap } from '../services/utils';
 import { useBookmarks } from '../hooks/useBookmarks';
 import ClassDrawer from './ClassDrawer';
 
@@ -36,8 +35,6 @@ export default function GalleryCarousel() {
   useEffect(() => { openDrawerRef.current = openDrawer; }, [openDrawer]);
 
   const N = events.length;
-
-  const dayMap = useMemo(() => buildDayMap(events), [events]);
 
   // Update indicator dots directly (avoids React re-render during scroll)
   const updateDots = (idx: number) => {
@@ -337,38 +334,36 @@ export default function GalleryCarousel() {
   return (
     <div className="gallery-outer">
       <div className="gallery-track" ref={trackRef}>
-        {events.map((card, i) => (
-          <ClassCard
-            key={card.id}
-            event={card}
-            slotInfo={slotsMap.get(card.slug)}
-            dayNumber={dayMap.get(card.date)}
-            imageLoading={i < 4 ? 'eager' : 'lazy'}
-            onAction={() => openDrawer(card)}
-            actionLabel="See Details"
-          />
-        ))}
-      </div>
-      <div className="gallery-dots" ref={dotRef}>
-        {events.map((_, i) => (
-          <button
-            key={i}
-            className="gallery-dot"
-            aria-label={`Go to slide ${i + 1}`}
-            onClick={() => scrollToCardRef.current(i)}
-          />
-        ))}
-      </div>
+       {events.map((card, i) => (
+           <ClassCard
+             key={card.id}
+             event={card}
+             slotInfo={slotsMap.get(card.slug)}
+             imageLoading={i < 4 ? 'eager' : 'lazy'}
+             onAction={() => openDrawer(card)}
+             actionLabel="See Details"
+           />
+         ))}
+       </div>
+       <div className="gallery-dots" ref={dotRef}>
+         {events.map((_, i) => (
+           <button
+             key={i}
+             className="gallery-dot"
+             aria-label={`Go to slide ${i + 1}`}
+             onClick={() => scrollToCardRef.current(i)}
+           />
+         ))}
+       </div>
 
-      {drawerClass && (
-        <ClassDrawer
-          event={drawerClass}
-          onClose={closeDrawer}
-          dayMap={dayMap}
-          slotsMap={slotsMap}
-          footer={drawerFooter}
-        />
-      )}
+       {drawerClass && (
+         <ClassDrawer
+           event={drawerClass}
+           onClose={closeDrawer}
+           slotsMap={slotsMap}
+           footer={drawerFooter}
+         />
+       )}
     </div>
   );
 }

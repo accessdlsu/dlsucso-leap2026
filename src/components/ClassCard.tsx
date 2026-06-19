@@ -1,6 +1,7 @@
 import { ArrowRight } from 'lucide-react';
 import type { LeapEvent, SlotInfo } from '../services/leapify';
 import { shortenVenue, formatTime } from '../services/utils';
+import { getDayNumber } from '../constants/leapDays';
 
 export const THEME_ACCENTS: Record<string, string> = {
   'palayan': '#c8e6a0',
@@ -49,6 +50,7 @@ export function computeSlotStatus(event: LeapEvent, slotInfo?: SlotInfo): SlotSt
 interface ClassCardProps {
   event: LeapEvent;
   slotInfo?: SlotInfo;
+  /** @deprecated dayNumber is now computed from LEAP_DAYS constant; pass event only */
   dayNumber?: number;
   imageLoading?: 'eager' | 'lazy';
   /** Renders an <a> tag — use for gallery carousel */
@@ -61,12 +63,15 @@ interface ClassCardProps {
 export default function ClassCard({
   event,
   slotInfo,
-  dayNumber,
+  dayNumber: _dayNumberDeprecated,
   imageLoading = 'lazy',
   actionHref,
   onAction,
   actionLabel = 'View More',
 }: ClassCardProps) {
+  // Compute day number from static LEAP_DAYS constant
+  const dayNumber = getDayNumber(event.date);
+  
   const handleCardClick = actionHref
     ? () => { window.location.href = actionHref; }
     : onAction;

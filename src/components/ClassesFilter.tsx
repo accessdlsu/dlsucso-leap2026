@@ -5,7 +5,8 @@ import type { LeapEvent, SlotInfo, MyRegistration } from '../services/leapify';
 import { useAllSlots } from '../hooks/useAllSlots';
 import { useAllEvents } from '../hooks/useAllEvents';
 import ClassCard, { computeSlotStatus } from './ClassCard';
-import { formatTime, buildDayMap } from '../services/utils';
+import { formatTime } from '../services/utils';
+import { buildStaticDayMap, LEAP_DAYS } from '../constants/leapDays';
 import { useBookmarks } from '../hooks/useBookmarks';
 import OrgLogo from './OrgLogo';
 import ClassDrawer from './ClassDrawer';
@@ -237,7 +238,7 @@ export default function ClassesFilter() {
     if (org) setSelectedOrg(org);
   }, []);
 
-  const dayMap = useMemo(() => buildDayMap(classes), [classes]);
+  const dayMap = useMemo(() => buildStaticDayMap(), []);
 
   // Resolve pending ?day= param once classes load
   useEffect(() => {
@@ -310,22 +311,15 @@ export default function ClassesFilter() {
   }, [classes]);
 
   const dateOptions = useMemo(() => {
-    const seen = new Set<string>();
-    return classes
-      .filter((c) => {
-        if (seen.has(c.date)) return false;
-        seen.add(c.date);
-        return true;
-      })
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .map((c) => {
-        const dayNum = dayMap.get(c.date);
-        return {
-          value: c.date,
-          label: dayNum != null ? `${c.date} (Day ${dayNum})` : c.date,
-        };
-      });
-  }, [classes, dayMap]);
+    // Use static LEAP_DAYS as the source of truth
+    const classDateSet = new Set(classes.map(c => c.date));
+    return LEAP_DAYS
+      .filter(day => classDateSet.has(day.date))
+      .map(day => ({
+        value: day.date,
+        label: `${day.date} (Day ${day.num})`,
+      }));
+  }, [classes]);
 
   const orgOptions = useMemo(() => {
     const seen = new Map<string, string>();

@@ -2,12 +2,13 @@ import { createPortal } from 'react-dom';
 import type { LeapEvent, SlotInfo } from '../services/leapify';
 import { computeSlotStatus } from './ClassCard';
 import { formatTime } from '../services/utils';
+import { getDayNumber } from '../constants/leapDays';
 import OrgLogo from './OrgLogo';
 
 interface ClassDrawerProps {
   event: LeapEvent;
   onClose: () => void;
-  /** Optional day map for showing "Day N" next to dates */
+  /** @deprecated No longer used; day map is built from LEAP_DAYS constant */
   dayMap?: Map<string, number>;
   /** Slot info map for computing availability */
   slotsMap?: Map<string, SlotInfo>;
@@ -26,7 +27,9 @@ function SlotsDisplay({ event, slotsMap }: { event: LeapEvent; slotsMap?: Map<st
   return <>{avail === 0 ? 'Full' : `${avail} Slots Left`}</>;
 }
 
-export default function ClassDrawer({ event, onClose, dayMap, slotsMap, footer }: ClassDrawerProps) {
+export default function ClassDrawer({ event, onClose, slotsMap, footer }: ClassDrawerProps) {
+  const dayNumber = getDayNumber(event.date);
+  
   return createPortal(
     <div
       className="drawer-overlay"
@@ -79,7 +82,7 @@ export default function ClassDrawer({ event, onClose, dayMap, slotsMap, footer }
               <span className="drawer-meta-label">Date</span>
               <span className="drawer-meta-val">
                 {event.date}
-                {dayMap?.get(event.date) != null ? ` (Day ${dayMap.get(event.date)})` : ''}
+                {dayNumber != null ? ` (Day ${dayNumber})` : ''}
               </span>
             </div>
             <div className="drawer-meta-row">

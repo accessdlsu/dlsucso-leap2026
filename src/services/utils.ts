@@ -41,11 +41,13 @@ export function shortenVenue(venue: string): string {
 }
 
 /**
- * Build a map of date strings to day numbers (1-indexed, sorted chronologically).
+ * @deprecated Use buildStaticDayMap() from constants/leapDays.ts instead
+ * This function is kept for backwards compatibility but should not be used in new code.
+ * 
+ * Days should come from LEAP_DAYS constant to ensure consistency across frontend.
  */
 export function buildDayMap(events: { date: string }[]): Map<string, number> {
-  const sorted = Array.from(new Set(events.map(e => e.date))).sort(
-    (a, b) => new Date(a).getTime() - new Date(b).getTime()
-  );
-  return new Map(sorted.map((d, i) => [d, i + 1]));
+  // Import here to avoid circular dependency
+  const { buildStaticDayMap } = require('../constants/leapDays');
+  return buildStaticDayMap();
 }

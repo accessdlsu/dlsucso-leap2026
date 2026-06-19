@@ -4,15 +4,17 @@ import GalleryCarousel from '../components/GalleryCarousel';
 import StatsSection from '../components/StatsSection';
 import Footer from '../components/navigation/Footer.astro';
 import Fireflies from '../components/Fireflies.astro';
+import { LEAP_DAYS } from '../constants/leapDays';
 
-const days = [
-  { num: 1, label: 'Day 1', date: 'June 19', weekday: 'Fri', mode: 'Onsite and Online' },
-  { num: 2, label: 'Day 2', date: 'June 20', weekday: 'Sat', mode: 'Onsite and Online' },
-  { num: 3, label: 'Day 3', date: 'June 22', weekday: 'Mon', mode: 'Onsite and Online' },
-  { num: 4, label: 'Day 4', date: 'June 23', weekday: 'Tue', mode: 'Onsite and Online' },
-  { num: 5, label: 'Day 5', date: 'June 25', weekday: 'Thu', mode: 'Onsite and Off-Campus' },
-  { num: 6, label: 'Day 6', date: 'June 26', weekday: 'Fri', mode: 'Onsite until 3:00PM' },
-];
+// Map LEAP_DAYS to the display format used on homepage
+// (removing year from date for homepage display)
+const days = LEAP_DAYS.map(day => ({
+  num: day.num,
+  label: day.label,
+  date: day.date.replace(', 2026', ''), // Convert "June 19, 2026" → "June 19"
+  weekday: day.weekday,
+  mode: day.mode,
+}));
 
 const themes = [
   { slug: 'palayan-ng-karunungan', name: 'Palayan ng Karunungan', img: '/images/themes/palay.png', color: '#c8e6a0' },
