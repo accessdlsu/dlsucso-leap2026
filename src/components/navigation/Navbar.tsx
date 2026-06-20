@@ -371,7 +371,7 @@ export default function Navbar() {
   };
 
   const topPills = (
-    <>
+    <div className="nav-top-pills">
       <style dangerouslySetInnerHTML={{ __html: `
         .nav-glass-pill {
           transition: border-color 0.25s ease, box-shadow 0.25s ease, opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) !important;
@@ -646,7 +646,7 @@ export default function Navbar() {
         </div>,
         document.body
       )}
-    </>
+    </div>
   );
 
   const ib = indicatorBase;
@@ -722,6 +722,7 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onMouseEnter={() => setHoveredIndex(i)}
+                  onClick={(e) => { if (isActive) e.preventDefault(); }}
                   style={{
                     position: "relative",
                     zIndex: 1,
@@ -765,6 +766,7 @@ export default function Navbar() {
       {drawerOpen ? null : topPills}
 
       <nav
+        className="nav-desktop"
         style={{
           position: "fixed",
           top: 0,
@@ -813,6 +815,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 onMouseEnter={() => setHoveredIndex(i)}
+                onClick={(e) => { if (isActive) e.preventDefault(); }}
                 style={{
                   ...linkStyle,
                   flex: 1,

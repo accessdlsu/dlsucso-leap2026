@@ -1,5 +1,5 @@
 import { useState, useEffect, type CSSProperties } from "react";
-import { ChevronDown, HelpCircle, Loader2 } from "lucide-react";
+import { ChevronDown, HelpCircle } from "lucide-react";
 import { leapifyApi } from "../services/leapify";
 import type { Faq } from "leapify/types";
 
@@ -46,18 +46,19 @@ export default function FaqAccordion() {
 
   if (loading) {
     return (
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 10,
-        padding: "3rem 0",
-        fontFamily: "'DM Sans', sans-serif",
-        fontSize: "0.9rem",
-        color: "rgba(255, 255, 255, 0.5)",
-      }}>
-        <Loader2 size={20} strokeWidth={1.75} style={{ animation: "faqSpin 0.8s linear infinite" }} />
-        Loading FAQs...
+      <div style={{ width: "100%", maxWidth: 720, margin: "0 auto" }} role="status" aria-label="Loading FAQs">
+        {Array.from({ length: 5 }, (_, i) => (
+          <div
+            key={i}
+            className="skeleton"
+            style={{
+              height: 52,
+              borderRadius: 14,
+              marginBottom: 10,
+              opacity: 1 - i * 0.1,
+            }}
+          />
+        ))}
       </div>
     );
   }

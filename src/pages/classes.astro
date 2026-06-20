@@ -11,11 +11,41 @@ import "../styles/gallery-card.css";
 >
   <div class="classes-bg">
     <div class="classes-content">
-      <h1 class="classes-title">Classes</h1>
+      <h1 class="classes-title" transition:name="page-title">Classes</h1>
       <p class="classes-desc">
         Discover workshops and sessions across all subthemes of LEAP 2026.
       </p>
-      <ClassesFilter client:only="react" />
+      <ClassesFilter client:only="react">
+        <div slot="fallback" style="width: 100%; max-width: 960px; margin: 0 auto;" aria-label="Loading classes" role="status">
+          <div class="search-bar-wrapper" style="pointer-events: none;">
+            <div class="skeleton" style="width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;" />
+            <div class="skeleton" style="flex: 1; height: 16px; border-radius: 4px;" />
+          </div>
+          <div style="display: flex; gap: 10px; margin-bottom: 1.25rem;">
+            {Array.from({ length: 3 }, () => (
+              <div class="skeleton" style="width: 140px; height: 36px; border-radius: 9999px;" />
+            ))}
+          </div>
+          <div class="classes-grid">
+            {Array.from({ length: 8 }, () => (
+              <div class="skeleton-card">
+                <div class="skeleton skeleton-card-img" />
+                <div class="skeleton skeleton-card-badge" />
+                <div class="skeleton skeleton-card-logo" />
+                <div class="skeleton-card-body">
+                  <div class="skeleton skeleton-card-tag" />
+                  <div class="skeleton skeleton-card-title" />
+                  <div class="skeleton skeleton-card-info" />
+                  <div class="skeleton-card-footer">
+                    <div class="skeleton skeleton-card-badge-sm" />
+                    <div class="skeleton skeleton-card-btn" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </ClassesFilter>
       <Footer />
     </div>
   </div>

@@ -117,6 +117,9 @@ export default function ClassCard({
         <img
           src={event.organization.logoUrl || '/logo/cso-green.png'}
           alt={event.organization.name}
+          width={56}
+          height={56}
+          decoding="async"
           draggable="false"
         />
       </div>
@@ -125,6 +128,9 @@ export default function ClassCard({
         src={event.backgroundImageUrl || '/logo/logo-hd.png'}
         alt={event.title}
         className="gallery-card-img"
+        width={1080}
+        height={1350}
+        decoding="async"
         loading={imageLoading}
         draggable="false"
       />

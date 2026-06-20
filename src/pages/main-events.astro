@@ -8,12 +8,31 @@ import "../styles/gallery-card.css";
 <Layout title="Main Events | LEAP 2026" description="Discover the featured main events of LEAP 2026.">
   <div class="events-bg">
     <div class="events-content">
-      <h1 class="events-title">Main Events</h1>
+      <h1 class="events-title" transition:name="page-title">Main Events</h1>
       <p class="events-desc">
         Discover the spotlight events that make LEAP&nbsp;2026 an unforgettable
         celebration. These main events are not to be missed.
       </p>
-      <FeaturedEvents client:only="react" />
+      <FeaturedEvents client:only="react">
+        <div slot="fallback" class="featured-cards-grid" aria-label="Loading events" role="status">
+          {Array.from({ length: 4 }, () => (
+            <div class="skeleton-card">
+              <div class="skeleton skeleton-card-img" />
+              <div class="skeleton skeleton-card-badge" />
+              <div class="skeleton skeleton-card-logo" />
+              <div class="skeleton-card-body">
+                <div class="skeleton skeleton-card-tag" />
+                <div class="skeleton skeleton-card-title" />
+                <div class="skeleton skeleton-card-info" />
+                <div class="skeleton-card-footer">
+                  <div class="skeleton skeleton-card-badge-sm" />
+                  <div class="skeleton skeleton-card-btn" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </FeaturedEvents>
       <div class="events-cta">
         <p class="events-cta-text">
           Want to see all workshops and sessions?

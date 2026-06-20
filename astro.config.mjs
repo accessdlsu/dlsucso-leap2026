@@ -8,6 +8,10 @@ import react from '@astrojs/react';
 export default defineConfig({
   adapter: cloudflare(),
   integrations: [react()],
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'viewport',
+  },
   vite: {
     server: {
       allowedHosts: ['leap.wincs.dev'],

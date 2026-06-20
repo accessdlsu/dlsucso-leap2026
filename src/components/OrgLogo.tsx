@@ -31,6 +31,9 @@ export default function OrgLogo({ logoUrl, acronym, size = 24 }: OrgLogoProps) {
     <img
       src={logoUrl}
       alt={acronym}
+      width={size}
+      height={size}
+      decoding="async"
       style={{
         width: size,
         height: size,

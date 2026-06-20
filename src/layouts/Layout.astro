@@ -1,5 +1,5 @@
 ---
-import { ClientRouter } from "astro:transitions";
+import { ClientRouter, fade } from "astro:transitions";
 import Navbar from "../components/navigation/Navbar";
 import BackToTop from "../components/navigation/BackToTop.astro";
 
@@ -42,6 +42,7 @@ const {
       @import '../styles/glass.css';
       @import '../styles/animations.css';
       @import '../styles/drawer.css';
+      @import '../styles/skeleton.css';
 
       :root {
         --nav-space-top: 88px;
@@ -93,7 +94,7 @@ const {
         font-display: swap;
       }
 
-      ::view-transition-group(*) { animation-duration: 200ms; }
+      ::view-transition-group(*) { animation-duration: 100ms; }
 
       /* ── Hide navbar when drawer / search overlay is open ── */
       body.drawer-open .nav-glass-pill,
@@ -230,7 +231,7 @@ const {
     {!noSession && (
       <div id="turnstile-widget" style="position:fixed;bottom:-120px;left:0;pointer-events:none;z-index:-1" aria-hidden="true"></div>
     )}
-    <main transition:animate="fade">
+    <main transition:animate={fade({ duration: 100 })}>
       <slot />
     </main>
   </body>

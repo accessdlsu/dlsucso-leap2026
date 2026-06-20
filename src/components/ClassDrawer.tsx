@@ -42,7 +42,7 @@ export default function ClassDrawer({ event, onClose, slotsMap, footer }: ClassD
         <div className="drawer-hero">
           <div className="drawer-poster">
             {event.backgroundImageUrl
-              ? <img src={event.backgroundImageUrl} alt={event.title} />
+              ? <img src={event.backgroundImageUrl} alt={event.title} width={1080} height={1350} decoding="async" />
               : <div className="drawer-poster-placeholder" />}
           </div>
           <div className="drawer-header">

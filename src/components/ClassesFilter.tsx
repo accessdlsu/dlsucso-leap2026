@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { Loader2, Search, X, Bookmark } from 'lucide-react';
+import { Search, X, Bookmark } from 'lucide-react';
+import { useProgressiveRender } from '../hooks/useProgressiveRender';
 import { leapifyApi } from '../services/leapify';
 import type { LeapEvent, SlotInfo, MyRegistration } from '../services/leapify';
 import { useAllSlots } from '../hooks/useAllSlots';
 import { useAllEvents } from '../hooks/useAllEvents';
 import ClassCard, { computeSlotStatus } from './ClassCard';
+import { SkeletonGrid } from './skeletons';
 import { formatTime } from '../services/utils';
 import { buildStaticDayMap, LEAP_DAYS } from '../constants/leapDays';
 import { useBookmarks } from '../hooks/useBookmarks';
@@ -139,7 +141,7 @@ function FilterDropdown<T extends string>({
       <button className="filter-dropdown-trigger" onClick={() => setOpen(!open)}>
         <span className="filter-dropdown-label">{label}</span>
         <span className="filter-dropdown-selected">
-          {selected ? selected.label : (allLabel ?? `All ${label}s`)}
+          {selected ? (selected.sub ?? selected.label) : (allLabel ?? `All ${label}s`)}
         </span>
         <svg
           className={`dropdown-arrow ${open ? 'open' : ''}`}
@@ -182,6 +184,7 @@ function FilterDropdown<T extends string>({
                 <span
                   style={{
                     marginLeft: 'auto',
+                    paddingLeft: '1rem',
                     fontSize: '0.65rem',
                     color: 'rgba(255,255,255,0.35)',
                     fontWeight: 500,
@@ -224,6 +227,21 @@ export default function ClassesFilter() {
   }, [drawerClass]);
 
 
+
+  // Listen for search overlay navigation events (when already on /classes)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail.search) setSearch(detail.search);
+      if (detail.theme) setSelectedTheme(detail.theme);
+      if (detail.date) setSelectedDate(detail.date);
+      if (detail.org) setSelectedOrg(detail.org);
+      // Focus the search input after state updates
+      setTimeout(() => searchRef.current?.focus(), 50);
+    };
+    window.addEventListener('search-overlay:navigate', handler);
+    return () => window.removeEventListener('search-overlay:navigate', handler);
+  }, []);
 
   // Parse URL params on mount
   useEffect(() => {
@@ -328,7 +346,7 @@ export default function ClassesFilter() {
     }
     return Array.from(seen.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([value, label]) => ({ value, label }));
+      .map(([value, label]) => ({ value, label, sub: value }));
   }, [classes]);
 
   const availabilityOptions = useMemo(
@@ -393,6 +411,9 @@ export default function ClassesFilter() {
 
   const hasFilters = !!(selectedTheme || selectedDate || selectedOrg || selectedAvailability || search || showOnlyBookmarked);
 
+  // Progressive rendering — mount cards in batches as the user scrolls
+  const { visibleCount, sentinelRef, hasMore } = useProgressiveRender(filtered.length);
+
   const clearAll = () => {
     setSelectedTheme(null);
     setSelectedDate(null);
@@ -404,24 +425,21 @@ export default function ClassesFilter() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 10,
-          padding: '4rem 0',
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: '0.9rem',
-          color: 'rgba(255,255,255,0.5)',
-        }}
-      >
-        <Loader2
-          size={20}
-          strokeWidth={1.75}
-          style={{ animation: 'faqSpin 0.8s linear infinite' }}
-        />
-        Loading classes...
+      <div className="classes-page">
+        {/* Search bar skeleton */}
+        <div className="search-bar-wrapper" aria-hidden="true">
+          <div className="skeleton" style={{ width: 16, height: 16, borderRadius: '50%', flexShrink: 0 }} />
+          <div className="skeleton" style={{ flex: 1, height: 16, borderRadius: 4 }} />
+        </div>
+        {/* Filter row skeleton */}
+        <section className="classes-filters" aria-hidden="true">
+          <div className="filter-group">
+            {Array.from({ length: 3 }, (_, i) => (
+              <div key={i} className="skeleton" style={{ width: 140, height: 36, borderRadius: 9999 }} />
+            ))}
+          </div>
+        </section>
+        <SkeletonGrid count={8} />
       </div>
     );
   }
@@ -644,7 +662,7 @@ export default function ClassesFilter() {
             </p>
             <p className="results-note">More LEAP classes to be announced soon.</p>
             <div className="classes-grid">
-              {filtered.map((c) => (
+              {filtered.slice(0, visibleCount).map((c) => (
                 <div key={c.id} style={{ position: 'relative' }}>
                   {myRegistrations.some(r => r.slug === c.slug) && (
                     <div style={{
@@ -668,6 +686,9 @@ export default function ClassesFilter() {
                 </div>
               ))}
             </div>
+            {hasMore && (
+              <div ref={sentinelRef} style={{ height: 1 }} />
+            )}
           </>
         )}
       </section>

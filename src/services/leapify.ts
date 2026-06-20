@@ -221,6 +221,7 @@ class WsApiClient {
   private connecting: Promise<void> | null = null;
   private authToken: string | null = null;
   private getCache = new Map<string, unknown>();
+  private reconnectAttempts = 0;
   private static CACHED_GET_PATHS = new Set(["/faqs"]);
 
   setToken(token: string | null): void {
@@ -295,6 +296,24 @@ class WsApiClient {
           clearTimeout(p.timeout);
           p.reject(new Error(`WebSocket connection closed (${event.code})`));
           this.pending.delete(id);
+        }
+        // Auto-reconnect with backoff if there are active subscribers
+        if (_eventsSubscribers.size > 0 || _slotsSubscribers.size > 0) {
+          const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30_000);
+          this.reconnectAttempts++;
+          setTimeout(() => {
+            if (!this.ws && (_eventsSubscribers.size > 0 || _slotsSubscribers.size > 0)) {
+              this.ensureConnected().then(() => {
+                this.reconnectAttempts = 0;
+                // Re-fetch data after reconnect
+                if (_eventsCache) {
+                  _eventsCache = null;
+                  fetchEventsOnce().catch(() => {});
+                }
+                if (_slotsPolling) fetchAllSlots().catch(() => {});
+              }).catch(() => {});
+            }
+          }, delay);
         }
       };
 
@@ -417,8 +436,23 @@ async function fetchEventsOnce(): Promise<LeapEvent[]> {
 
 export function subscribeToEvents(fn: EventsSubscriber): () => void {
   _eventsSubscribers.add(fn);
-  if (_eventsCache) fn(_eventsCache);
-  else fetchEventsOnce().catch(() => {});
+  if (_eventsCache) {
+    fn(_eventsCache);
+    // Stale-while-revalidate: emit cached data, then refresh in background
+    if (!_eventsInflight) {
+      _eventsInflight = wsClient.request<LeapEvent[]>("GET", "/classes")
+        .then(data => {
+          const fresh = data ?? [];
+          _eventsCache = fresh;
+          _eventsInflight = null;
+          _eventsSubscribers.forEach(fn => fn(fresh));
+          return fresh;
+        })
+        .catch(err => { _eventsInflight = null; throw err; });
+    }
+  } else {
+    fetchEventsOnce().catch(() => {});
+  }
   return () => { _eventsSubscribers.delete(fn); };
 }
 
@@ -434,6 +468,7 @@ type SlotsSubscriber = (slots: ReadonlyMap<string, SlotInfo>) => void;
 const _slotsStore = new Map<string, SlotInfo>(); // slug → SlotInfo
 const _slotsSubscribers = new Set<SlotsSubscriber>();
 let _slotsPolling = false;
+let _slotsInterval: ReturnType<typeof setInterval> | null = null;
 let _allSlotsInflight: Promise<Record<string, SlotInfo>> | null = null;
 
 // Legacy per-slug cache kept for getSlots() backwards compat
@@ -473,7 +508,15 @@ function startSlotsPolling() {
   if (_slotsPolling) return;
   _slotsPolling = true;
   fetchAllSlots().catch(() => {});
-  setInterval(() => fetchAllSlots().catch(() => {}), _ALL_SLOTS_TTL);
+  _slotsInterval = setInterval(() => fetchAllSlots().catch(() => {}), _ALL_SLOTS_TTL);
+}
+
+function stopSlotsPolling() {
+  if (_slotsInterval) {
+    clearInterval(_slotsInterval);
+    _slotsInterval = null;
+  }
+  _slotsPolling = false;
 }
 
 export function subscribeToSlots(fn: SlotsSubscriber): () => void {
@@ -481,7 +524,11 @@ export function subscribeToSlots(fn: SlotsSubscriber): () => void {
   startSlotsPolling();
   // Emit current snapshot immediately
   if (_slotsStore.size > 0) fn(new Map(_slotsStore));
-  return () => { _slotsSubscribers.delete(fn); };
+  return () => {
+    _slotsSubscribers.delete(fn);
+    // Stop polling when no subscribers remain
+    if (_slotsSubscribers.size === 0) stopSlotsPolling();
+  };
 }
 
 export function getSlotsSnapshot(): ReadonlyMap<string, SlotInfo> {

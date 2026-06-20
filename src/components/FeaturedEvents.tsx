@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Loader2, Bookmark } from 'lucide-react';
+import { Bookmark } from 'lucide-react';
 import type { LeapEvent } from '../services/leapify';
 import { useAllSlots } from '../hooks/useAllSlots';
 import { useAllEvents } from '../hooks/useAllEvents';
 import ClassCard, { computeSlotStatus } from './ClassCard';
+import { SkeletonCarousel } from './skeletons';
 import { useBookmarks } from '../hooks/useBookmarks';
 import ClassDrawer from './ClassDrawer';
 
@@ -29,12 +30,7 @@ export default function FeaturedEvents() {
   }, []);
 
   if (loading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '4rem 0', fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>
-        <Loader2 size={20} strokeWidth={1.75} style={{ animation: 'faqSpin 0.8s linear infinite' }} />
-        Loading events...
-      </div>
-    );
+    return <SkeletonCarousel count={4} />;
   }
 
   if (events.length === 0 && !loading) {

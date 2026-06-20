@@ -12,7 +12,7 @@ interface FilterProps {
   label: string;
   allLabel?: string;
   value: string | null;
-  options: { value: string; label: string }[];
+  options: { value: string; label: string; sub?: string }[];
   onChange: (v: string | null) => void;
 }
 
@@ -62,7 +62,7 @@ function OverlayFilter({ label, allLabel, value, options, onChange }: FilterProp
   return (
     <div ref={ref} style={{ position: 'relative', flexShrink: 0 }}>
       <button style={trigger} onClick={() => setOpen(o => !o)}>
-        <span>{selected ? `${label}: ${selected.label}` : label}</span>
+        <span>{selected ? `${label}: ${selected.sub ?? selected.label}` : label}</span>
         <svg width="8" height="5" viewBox="0 0 10 6" fill="none"
           style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s', opacity: 0.5 }}>
           <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -80,12 +80,17 @@ function OverlayFilter({ label, allLabel, value, options, onChange }: FilterProp
             {allLabel ?? `All ${label}s`}
           </button>
           {options.map(opt => (
-            <button key={opt.value} style={item(value === opt.value)}
+            <button key={opt.value} style={{ ...item(value === opt.value), display: 'flex', alignItems: 'center', gap: 8 }}
               onClick={() => { onChange(opt.value); setOpen(false); }}
               onMouseEnter={e => { if (value !== opt.value) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; }}
               onMouseLeave={e => { if (value !== opt.value) (e.currentTarget as HTMLElement).style.background = 'none'; }}
             >
-              {opt.label}
+              <span>{opt.label}</span>
+              {opt.sub && (
+                <span style={{ marginLeft: 'auto', paddingLeft: '1rem', fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)', fontWeight: 500 }}>
+                  {opt.sub}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -163,11 +168,28 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
     }
     return Array.from(seen.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([value, label]) => ({ value, label }));
+      .map(([value, label]) => ({ value, label, sub: value }));
   }, [events]);
 
   const q = query.trim().toLowerCase();
   const hasFilter = !!(q || selectedTheme || selectedDate || selectedOrg || selectedAvail);
+
+  // If already on /classes, dispatch a custom event instead of navigating
+  const handleResultClick = useCallback((e: React.MouseEvent, ev?: LeapEvent) => {
+    if (window.location.pathname === '/classes') {
+      e.preventDefault();
+      window.dispatchEvent(new CustomEvent('search-overlay:navigate', {
+        detail: {
+          search: ev ? ev.title : q,
+          theme: selectedTheme,
+          date: selectedDate,
+          org: selectedOrg,
+        },
+      }));
+    }
+    // Always close the overlay
+    onClose();
+  }, [q, selectedTheme, selectedDate, selectedOrg, onClose]);
 
   const filtered = useMemo(() => {
     if (!hasFilter) return [];
@@ -293,7 +315,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
                   <a
                     key={ev.id}
                     href={`/classes?search=${encodeURIComponent(ev.title)}`}
-                    onClick={onClose}
+                    onClick={(e) => handleResultClick(e, ev)}
                     style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 20px', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.12s' }}
                     onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)')}
                     onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'none')}
@@ -323,7 +345,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
                 ))}
                 <a
                   href={classesHref}
-                  onClick={onClose}
+                  onClick={(e) => handleResultClick(e)}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                     padding: '13px 20px', textDecoration: 'none', position: 'sticky', bottom: 0,

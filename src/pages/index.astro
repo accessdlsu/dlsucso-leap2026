@@ -1,45 +1,93 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import GalleryCarousel from '../components/GalleryCarousel';
-import StatsSection from '../components/StatsSection';
-import Footer from '../components/navigation/Footer.astro';
-import Fireflies from '../components/Fireflies.astro';
-import { LEAP_DAYS } from '../constants/leapDays';
+import Layout from "../layouts/Layout.astro";
+import GalleryCarousel from "../components/GalleryCarousel";
+import StatsSection from "../components/StatsSection";
+import Footer from "../components/navigation/Footer.astro";
+import Fireflies from "../components/Fireflies.astro";
+import { LEAP_DAYS } from "../constants/leapDays";
 
 // Map LEAP_DAYS to the display format used on homepage
 // (removing year from date for homepage display)
-const days = LEAP_DAYS.map(day => ({
+const days = LEAP_DAYS.map((day) => ({
   num: day.num,
   label: day.label,
-  date: day.date.replace(', 2026', ''), // Convert "June 19, 2026" → "June 19"
+  date: day.date.replace(", 2026", ""), // Convert "June 19, 2026" → "June 19"
   weekday: day.weekday,
   mode: day.mode,
 }));
 
 const themes = [
-  { slug: 'palayan-ng-karunungan', name: 'Palayan ng Karunungan', img: '/images/themes/palay.png', color: '#c8e6a0' },
-  { slug: 'pamilihan-ng-kakayahan', name: 'Pamilihan ng Kakayahan', img: '/images/themes/pamilihan.png', color: '#ffb68c' },
-  { slug: 'plaza-ng-malikhaing-diwa', name: 'Plaza ng Malikhaing Diwa', img: '/images/themes/plaza.png', color: '#a0d4f0' },
-  { slug: 'dambana-ng-pagkakaisa', name: 'Dambana ng Pagkakaisa', img: '/images/themes/dambana.png', color: '#d4a0e8' },
-  { slug: 'palaisdaan-ng-kalusugan', name: 'Palaisdaan ng Kalusugan', img: '/images/themes/palaisdaan.png', color: '#80d4b0' },
-  { slug: 'bahay-ng-bayanihan', name: 'Bahay ng Bayanihan', img: '/images/themes/bahay.png', color: '#f0c080' },
+  {
+    slug: "palayan-ng-karunungan",
+    name: "Palayan ng Karunungan",
+    img: "/images/themes/palay.png",
+    color: "#c8e6a0",
+  },
+  {
+    slug: "pamilihan-ng-kakayahan",
+    name: "Pamilihan ng Kakayahan",
+    img: "/images/themes/pamilihan.png",
+    color: "#ffb68c",
+  },
+  {
+    slug: "plaza-ng-malikhaing-diwa",
+    name: "Plaza ng Malikhaing Diwa",
+    img: "/images/themes/plaza.png",
+    color: "#a0d4f0",
+  },
+  {
+    slug: "dambana-ng-pagkakaisa",
+    name: "Dambana ng Pagkakaisa",
+    img: "/images/themes/dambana.png",
+    color: "#d4a0e8",
+  },
+  {
+    slug: "palaisdaan-ng-kalusugan",
+    name: "Palaisdaan ng Kalusugan",
+    img: "/images/themes/palaisdaan.png",
+    color: "#80d4b0",
+  },
+  {
+    slug: "bahay-ng-bayanihan",
+    name: "Bahay ng Bayanihan",
+    img: "/images/themes/bahay.png",
+    color: "#f0c080",
+  },
 ];
 ---
 
-<Layout title="LEAP 2026" description="De La Salle University CSO LEAP 2026: Isang Nayon, Isang Layunin.">
+<Layout
+  title="LEAP 2026"
+  description="De La Salle University CSO LEAP 2026: Isang Nayon, Isang Layunin."
+>
   <div class="home-bg">
     <Fireflies />
 
     <!-- Sidebar Scroll-Snap Dots -->
     <div class="scroll-indicator">
-      <button class="indicator-dot active" data-target="hero-section" aria-label="Go to Hero Section"></button>
-      <button class="indicator-dot" data-target="featured-section" aria-label="Go to Featured Section"></button>
-      <button class="indicator-dot" data-target="classes-section" aria-label="Go to Classes Section"></button>
-      <button class="indicator-dot" data-target="subthemes" aria-label="Go to Subthemes Section"></button>
-      <button class="indicator-dot" data-target="leapdays" aria-label="Go to LEAP Days Section"></button>
+      <button
+        class="indicator-dot active"
+        data-target="hero-section"
+        aria-label="Go to Hero Section"></button>
+      <button
+        class="indicator-dot"
+        data-target="featured-section"
+        aria-label="Go to Featured Section"></button>
+      <button
+        class="indicator-dot"
+        data-target="classes-section"
+        aria-label="Go to Classes Section"></button>
+      <button
+        class="indicator-dot"
+        data-target="subthemes"
+        aria-label="Go to Subthemes Section"></button>
+      <button
+        class="indicator-dot"
+        data-target="leapdays"
+        aria-label="Go to LEAP Days Section"></button>
     </div>
 
-    <div class="home-hero" id="hero-section">
+    <div class="home-hero" id="hero-section" transition:name="hero">
       <div class="home-content">
         <div class="logo-wrapper anim-in">
           <img
@@ -54,7 +102,16 @@ const themes = [
       </div>
       <div class="scroll-cue anim-in">
         <span class="scroll-cue-text">Scroll Down</span>
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <polyline points="6 9 12 15 18 9"></polyline>
         </svg>
       </div>
@@ -62,79 +119,163 @@ const themes = [
 
     <section class="home-featured" id="featured-section">
       <h2 class="featured-title">Main Events</h2>
-      <p class="featured-desc">Discover what makes LEAP 2026 a celebration of community, culture, and shared purpose.</p>
-      <GalleryCarousel client:only="react" />
+      <p class="featured-desc">
+        Discover what makes LEAP 2026 a celebration of community, culture, and
+        shared purpose.
+      </p>
+      <GalleryCarousel client:only="react">
+        <div slot="fallback" class="gallery-outer" aria-label="Loading events" role="status">
+          <div class="gallery-track" style="display: flex; gap: 1rem; overflow: hidden;">
+            {Array.from({ length: 4 }, () => (
+              <div class="skeleton-card">
+                <div class="skeleton skeleton-card-img" />
+                <div class="skeleton skeleton-card-badge" />
+                <div class="skeleton skeleton-card-logo" />
+                <div class="skeleton-card-body">
+                  <div class="skeleton skeleton-card-tag" />
+                  <div class="skeleton skeleton-card-title" />
+                  <div class="skeleton skeleton-card-info" />
+                  <div class="skeleton-card-footer">
+                    <div class="skeleton skeleton-card-badge-sm" />
+                    <div class="skeleton skeleton-card-btn" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </GalleryCarousel>
     </section>
 
     <section class="home-classes" id="classes-section">
-      <StatsSection client:only="react" subthemeCount={themes.length} dayCount={days.length} />
+      <StatsSection
+        client:only="react"
+        subthemeCount={themes.length}
+        dayCount={days.length}
+      >
+        <div slot="fallback" class="stats-section" aria-hidden="true">
+          <div class="stats-tagline-wrap">
+            <div class="skeleton" style="height: 2.5rem; width: 80%; margin: 0 auto 0.75rem; border-radius: 8px;" />
+            <div class="skeleton" style="height: 1rem; width: 60%; margin: 0 auto; border-radius: 4px;" />
+          </div>
+          <div class="stats-counters">
+            {Array.from({ length: 3 }, () => (
+              <div class="stats-counter">
+                <div class="skeleton" style="height: 2.5rem; width: 4rem; border-radius: 8px;" />
+                <div class="skeleton" style="height: 0.8rem; width: 3rem; margin-top: 4px; border-radius: 4px;" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </StatsSection>
     </section>
 
     <section class="home-subthemes" id="subthemes">
       <h2 class="section-title">Subthemes</h2>
-      <p class="section-desc">Explore the six pillars of LEAP 2026 — each representing a unique facet of community and growth.</p>
+      <p class="section-desc">
+        Explore the six pillars of LEAP 2026 — each representing a unique facet
+        of community and growth.
+      </p>
       <div class="subthemes-scroll">
         <div class="subthemes-grid">
-          {themes.map((t) => (
-            <a href={`/classes?theme=${t.slug}`} class="subtheme-card">
-              <div class="subtheme-img-wrap">
-                <img src={t.img} alt={t.name} loading="lazy" />
-              </div>
-              <span class="subtheme-name" style={`color:${t.color}`}>{t.name}</span>
-            </a>
-          ))}
+          {
+            themes.map((t) => (
+              <a href={`/classes?theme=${t.slug}`} class="subtheme-card">
+                <div class="subtheme-img-wrap">
+                  <img src={t.img} alt={t.name} width="80" height="80" loading="lazy" decoding="async" />
+                </div>
+                <span class="subtheme-name" style={`color:${t.color}`}>
+                  {t.name}
+                </span>
+              </a>
+            ))
+          }
         </div>
       </div>
     </section>
 
     <section class="home-leapdays" id="leapdays">
       <h2 class="section-title">LEAP Days</h2>
-      <p class="section-desc">Six days of celebration, learning, and community — pick your day.</p>
+      <p class="section-desc">
+        Six days of celebration, learning, and community — pick your day.
+      </p>
       <div class="leapdays-row">
-        {days.map((d) => (
-          <a href={`/classes?day=${d.num}`} class={`leapday-card ${d.mode.includes('Off-Campus') ? 'off-campus' : ''} ${d.mode.includes('until') ? 'limited' : ''}`}>
-            <span class="leapday-num">{d.label}</span>
-            <span class="leapday-date">{d.date}</span>
-            <span class="leapday-weekday">{d.weekday}</span>
-            <span class="leapday-mode">{d.mode}</span>
-          </a>
-        ))}
+        {
+          days.map((d) => (
+            <a
+              href={`/classes?day=${d.num}`}
+              class={`leapday-card ${d.mode.includes("Off-Campus") ? "off-campus" : ""} ${d.mode.includes("until") ? "limited" : ""}`}
+            >
+              <span class="leapday-num">{d.label}</span>
+              <span class="leapday-date">{d.date}</span>
+              <span class="leapday-weekday">{d.weekday}</span>
+              <span class="leapday-mode">{d.mode}</span>
+            </a>
+          ))
+        }
       </div>
       <Footer />
     </section>
 
     <div class="landscape">
-      <svg viewBox="0 0 1440 360" preserveAspectRatio="xMidYMax slice" style="display:block;width:100%;height:100%;">
+      <svg
+        viewBox="0 0 1440 360"
+        preserveAspectRatio="xMidYMax slice"
+        style="display:block;width:100%;height:100%;"
+      >
         <defs>
           <linearGradient id="vG" x1="0%" y1="0%" x2="60%" y2="100%">
-            <stop offset="0%" stop-color="#1a3520" /><stop offset="100%" stop-color="#0d1e10" />
+            <stop offset="0%" stop-color="#1a3520"></stop><stop
+              offset="100%"
+              stop-color="#0d1e10"></stop>
           </linearGradient>
           <linearGradient id="h3G" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#193825" /><stop offset="100%" stop-color="#0f2018" />
+            <stop offset="0%" stop-color="#193825"></stop><stop
+              offset="100%"
+              stop-color="#0f2018"></stop>
           </linearGradient>
           <linearGradient id="h2G" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#1e4a2c" /><stop offset="100%" stop-color="#12271a" />
+            <stop offset="0%" stop-color="#1e4a2c"></stop><stop
+              offset="100%"
+              stop-color="#12271a"></stop>
           </linearGradient>
           <linearGradient id="h1G" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#245630" /><stop offset="100%" stop-color="#152e1c" />
+            <stop offset="0%" stop-color="#245630"></stop><stop
+              offset="100%"
+              stop-color="#152e1c"></stop>
           </linearGradient>
           <linearGradient id="gG" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#2a6234" /><stop offset="100%" stop-color="#1a3a20" />
+            <stop offset="0%" stop-color="#2a6234"></stop><stop
+              offset="100%"
+              stop-color="#1a3a20"></stop>
           </linearGradient>
           <linearGradient id="fadeG" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#1a2940" stop-opacity="0" />
-            <stop offset="100%" stop-color="#3a4a35" stop-opacity="1" />
+            <stop offset="0%" stop-color="#1a2940" stop-opacity="0"></stop>
+            <stop offset="100%" stop-color="#3a4a35" stop-opacity="1"></stop>
           </linearGradient>
         </defs>
-        <path d="M900 0 L710 200 L1090 200 Z" fill="url(#vG)" />
-        <path d="M900 0 L1090 200 L1020 200 Z" fill="rgba(0,0,0,0.12)" />
-        <path d="M0 170 Q150 130 310 150 Q430 165 550 145 Q620 132 710 200 L0 200 Z" fill="url(#h3G)" />
-        <path d="M1090 200 Q1170 130 1280 122 Q1360 115 1440 140 L1440 200 Z" fill="url(#h3G)" />
-        <path d="M0 200 Q130 170 280 184 Q430 200 560 174 Q680 150 800 180 Q920 210 1060 178 Q1180 150 1310 180 Q1390 196 1440 186 L1440 360 L0 360 Z" fill="url(#h2G)" />
-        <path d="M0 250 Q130 225 300 238 Q460 252 620 228 Q760 205 900 234 Q1050 264 1200 238 Q1330 215 1440 234 L1440 360 L0 360 Z" fill="url(#h1G)" />
-        <path d="M0 280 C160 262 320 308 540 280 C760 252 960 304 1180 276 C1340 258 1420 290 1440 282 L1440 360 L0 360 Z" fill="url(#gG)" />
-        <path d="M0 300 C200 284 400 320 600 298 C800 276 1000 316 1200 294 C1340 280 1410 308 1440 300 L1440 360 L0 360 Z" fill="#1a3a20" opacity="0.55" />
-        <rect x="0" y="335" width="1440" height="25" fill="url(#fadeG)" />
+        <path d="M900 0 L710 200 L1090 200 Z" fill="url(#vG)"></path>
+        <path d="M900 0 L1090 200 L1020 200 Z" fill="rgba(0,0,0,0.12)"></path>
+        <path
+          d="M0 170 Q150 130 310 150 Q430 165 550 145 Q620 132 710 200 L0 200 Z"
+          fill="url(#h3G)"></path>
+        <path
+          d="M1090 200 Q1170 130 1280 122 Q1360 115 1440 140 L1440 200 Z"
+          fill="url(#h3G)"></path>
+        <path
+          d="M0 200 Q130 170 280 184 Q430 200 560 174 Q680 150 800 180 Q920 210 1060 178 Q1180 150 1310 180 Q1390 196 1440 186 L1440 360 L0 360 Z"
+          fill="url(#h2G)"></path>
+        <path
+          d="M0 250 Q130 225 300 238 Q460 252 620 228 Q760 205 900 234 Q1050 264 1200 238 Q1330 215 1440 234 L1440 360 L0 360 Z"
+          fill="url(#h1G)"></path>
+        <path
+          d="M0 280 C160 262 320 308 540 280 C760 252 960 304 1180 276 C1340 258 1420 290 1440 282 L1440 360 L0 360 Z"
+          fill="url(#gG)"></path>
+        <path
+          d="M0 300 C200 284 400 320 600 298 C800 276 1000 316 1200 294 C1340 280 1410 308 1440 300 L1440 360 L0 360 Z"
+          fill="#1a3a20"
+          opacity="0.55"></path>
+        <rect x="0" y="335" width="1440" height="25" fill="url(#fadeG)"></rect>
       </svg>
     </div>
   </div>
@@ -142,8 +283,8 @@ const themes = [
 
 <style>
   @font-face {
-    font-family: 'TD-Sulog';
-    src: url('/fonts/TD-Sulog.woff2') format('woff2');
+    font-family: "TD-Sulog";
+    src: url("/fonts/TD-Sulog.woff2") format("woff2");
     font-weight: 700;
     font-style: normal;
     font-display: swap;
@@ -169,7 +310,21 @@ const themes = [
     scrollbar-width: none;
     scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
-    background: linear-gradient(180deg, #1a2940 0%, #1d3148 8%, #1f3a4c 18%, #234048 28%, #284240 38%, #2c4338 48%, #2e4632 58%, #314830 68%, #344932 78%, #3a4a35 86%, #4a4a3a 94%, #5a4838 100%);
+    background: linear-gradient(
+      180deg,
+      #1a2940 0%,
+      #1d3148 8%,
+      #1f3a4c 18%,
+      #234048 28%,
+      #284240 38%,
+      #2c4338 48%,
+      #2e4632 58%,
+      #314830 68%,
+      #344932 78%,
+      #3a4a35 86%,
+      #4a4a3a 94%,
+      #5a4838 100%
+    );
   }
   .home-bg::-webkit-scrollbar {
     display: none;
@@ -198,7 +353,9 @@ const themes = [
     gap: clamp(0.5rem, 3vh, 1.25rem);
     max-width: min(520px, 90vw);
     padding: 0;
-    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+    transition:
+      opacity 0.3s ease-out,
+      transform 0.3s ease-out;
     box-sizing: border-box;
   }
   .home-content .logo-wrapper img {
@@ -221,24 +378,35 @@ const themes = [
 
   .tagline {
     margin-top: clamp(-0.5rem, -1.5vh, 0rem);
-    font-family: 'TD-Sulog', serif;
+    font-family: "TD-Sulog", serif;
     font-weight: 700;
     font-size: clamp(1.2rem, 5vmin, 2.4rem);
     letter-spacing: 0.015em;
     line-height: 1.15;
     text-align: center;
-    background: linear-gradient(180deg, #fff5c4 0%, #fae185 35%, #de9a49 75%, #b07820 100%);
+    background: linear-gradient(
+      180deg,
+      #fff5c4 0%,
+      #fae185 35%,
+      #de9a49 75%,
+      #b07820 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 2px 0 rgba(80,40,10,0.4), 0 4px 24px rgba(0,0,0,0.55), 0 0 48px rgba(222,154,73,0.4), 0 0 96px rgba(250,225,133,0.2);
-    filter: drop-shadow(0 3px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 24px rgba(222,154,73,0.35));
+    text-shadow:
+      0 2px 0 rgba(80, 40, 10, 0.4),
+      0 4px 24px rgba(0, 0, 0, 0.55),
+      0 0 48px rgba(222, 154, 73, 0.4),
+      0 0 96px rgba(250, 225, 133, 0.2);
+    filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.5))
+      drop-shadow(0 0 24px rgba(222, 154, 73, 0.35));
   }
 
   .home-desc {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: clamp(0.85rem, 2vw, 1rem);
-    color: rgba(255,255,255,0.65);
+    color: rgba(255, 255, 255, 0.65);
     text-align: center;
     line-height: 1.6;
     letter-spacing: 0.02em;
@@ -260,21 +428,24 @@ const themes = [
     align-items: center;
     justify-content: center;
     padding: 0.7rem 2rem;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.95rem;
     font-weight: 600;
     color: #fff;
     background: linear-gradient(135deg, #4a7a5a 0%, #2a5a3a 100%);
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 30px;
     text-decoration: none;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s,
+      background 0.2s;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
   }
   .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
     background: linear-gradient(135deg, #568c68 0%, #346e44 100%);
   }
 
@@ -283,31 +454,40 @@ const themes = [
     align-items: center;
     justify-content: center;
     padding: 0.7rem 2rem;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.95rem;
     font-weight: 500;
-    color: rgba(255,255,255,0.85);
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 30px;
     text-decoration: none;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s,
+      background 0.2s;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   }
   .btn-secondary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(0,0,0,0.25);
-    background: rgba(255,255,255,0.14);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+    background: rgba(255, 255, 255, 0.14);
     color: #fff;
   }
 
   .anim-in {
     animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
   }
-  .anim-in:nth-child(2) { animation-delay: 0.15s; }
-  .anim-in:nth-child(3) { animation-delay: 0.2s; }
-  .anim-in:nth-child(4) { animation-delay: 0.25s; }
+  .anim-in:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .anim-in:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+  .anim-in:nth-child(4) {
+    animation-delay: 0.25s;
+  }
 
   /* ── Landscape ── */
   .landscape {
@@ -319,7 +499,9 @@ const themes = [
     z-index: 1;
     pointer-events: none;
     line-height: 0;
-    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+    transition:
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.6s ease;
   }
   .landscape.scroll-hide {
     opacity: 0;
@@ -334,11 +516,13 @@ const themes = [
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem calc(1.5rem + var(--nav-space-bottom));
+    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem
+      calc(1.5rem + var(--nav-space-bottom));
     text-align: center;
     min-height: 100dvh;
     box-sizing: border-box;
     scroll-snap-align: start;
+    scroll-margin-top: var(--nav-space-top);
   }
 
   .subthemes-scroll {
@@ -350,7 +534,9 @@ const themes = [
     padding: 3rem 0 4rem;
     box-sizing: border-box;
   }
-  .subthemes-scroll::-webkit-scrollbar { display: none; }
+  .subthemes-scroll::-webkit-scrollbar {
+    display: none;
+  }
 
   .subthemes-grid {
     display: flex;
@@ -381,8 +567,6 @@ const themes = [
     margin-top: 1.5rem;
   }
 
-
-
   .subtheme-img-wrap {
     width: 100%;
     height: 140px;
@@ -401,11 +585,22 @@ const themes = [
   }
 
   @keyframes wiggle {
-    0%, 100% { transform: rotate(0deg); }
-    20% { transform: rotate(-7deg); }
-    40% { transform: rotate(5deg); }
-    60% { transform: rotate(-3deg); }
-    80% { transform: rotate(2deg); }
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+    20% {
+      transform: rotate(-7deg);
+    }
+    40% {
+      transform: rotate(5deg);
+    }
+    60% {
+      transform: rotate(-3deg);
+    }
+    80% {
+      transform: rotate(2deg);
+    }
   }
 
   .subtheme-card:hover .subtheme-img-wrap {
@@ -417,7 +612,7 @@ const themes = [
   }
 
   .subtheme-name {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-weight: 700;
     font-size: clamp(0.7rem, 1.8vw, 0.95rem);
     line-height: 1.3;
@@ -429,25 +624,36 @@ const themes = [
   .section-title,
   .featured-title {
     margin: 0 0 0.2rem;
-    font-family: 'TD-Sulog', serif;
+    font-family: "TD-Sulog", serif;
     font-weight: 700;
     font-size: clamp(2.6rem, 6.5vw, 4.5rem);
     letter-spacing: 0.015em;
     line-height: 1.15;
     white-space: nowrap;
-    background: linear-gradient(180deg, #fff5c4 0%, #fae185 35%, #de9a49 75%, #b07820 100%);
+    background: linear-gradient(
+      180deg,
+      #fff5c4 0%,
+      #fae185 35%,
+      #de9a49 75%,
+      #b07820 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 2px 0 rgba(80,40,10,0.4), 0 4px 24px rgba(0,0,0,0.55), 0 0 48px rgba(222,154,73,0.4), 0 0 96px rgba(250,225,133,0.2);
-    filter: drop-shadow(0 3px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 24px rgba(222,154,73,0.35));
+    text-shadow:
+      0 2px 0 rgba(80, 40, 10, 0.4),
+      0 4px 24px rgba(0, 0, 0, 0.55),
+      0 0 48px rgba(222, 154, 73, 0.4),
+      0 0 96px rgba(250, 225, 133, 0.2);
+    filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.5))
+      drop-shadow(0 0 24px rgba(222, 154, 73, 0.35));
   }
 
   .section-desc,
   .featured-desc {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: clamp(0.8rem, 2.2vw, 1.2rem);
-    color: rgba(255,255,255,0.75);
+    color: rgba(255, 255, 255, 0.75);
     line-height: 1.6;
     letter-spacing: 0.02em;
     margin: 0.3rem 1.5rem 1rem;
@@ -462,11 +668,22 @@ const themes = [
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem calc(1.5rem + var(--nav-space-bottom));
+    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem
+      calc(1.5rem + var(--nav-space-bottom));
     text-align: center;
     min-height: 100dvh;
     box-sizing: border-box;
     scroll-snap-align: start;
+    scroll-margin-top: var(--nav-space-top);
+  }
+
+  /* ── Below-the-fold: skip layout/paint until near viewport ── */
+  .home-featured,
+  .home-classes,
+  .home-subthemes,
+  .home-leapdays {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 100dvh;
   }
 
   .leapdays-row {
@@ -484,25 +701,35 @@ const themes = [
     gap: 0.2rem;
     padding: 1rem 0.5rem;
     text-decoration: none;
-    background: rgba(255,255,255,0.04);
+    background: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     cursor: pointer;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    transition:
+      transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.3s ease;
   }
 
   .leapday-card:hover {
     transform: scale(1.08);
-    box-shadow: 0 0 24px rgba(222,154,73,0.3), 0 0 48px rgba(250,225,133,0.1);
+    box-shadow:
+      0 0 24px rgba(222, 154, 73, 0.3),
+      0 0 48px rgba(250, 225, 133, 0.1);
   }
 
   .leapday-num {
-    font-family: 'TD-Sulog', serif;
+    font-family: "TD-Sulog", serif;
     font-weight: 700;
     font-size: clamp(1rem, 2.5vw, 1.4rem);
-    background: linear-gradient(180deg, #fff5c4 0%, #fae185 35%, #de9a49 75%, #b07820 100%);
+    background: linear-gradient(
+      180deg,
+      #fff5c4 0%,
+      #fae185 35%,
+      #de9a49 75%,
+      #b07820 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -510,27 +737,27 @@ const themes = [
   }
 
   .leapday-date {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: clamp(0.65rem, 1.4vw, 0.8rem);
     font-weight: 600;
-    color: rgba(255,255,255,0.5);
+    color: rgba(255, 255, 255, 0.5);
     letter-spacing: 0.05em;
   }
 
   .leapday-weekday {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: clamp(0.55rem, 1.2vw, 0.7rem);
     font-weight: 500;
-    color: rgba(255,255,255,0.3);
+    color: rgba(255, 255, 255, 0.3);
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
   .leapday-mode {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: clamp(0.5rem, 1.1vw, 0.68rem);
     font-weight: 600;
-    color: rgba(250,225,133,0.65);
+    color: rgba(250, 225, 133, 0.65);
     letter-spacing: 0.03em;
   }
 
@@ -541,15 +768,15 @@ const themes = [
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem calc(1.5rem + var(--nav-space-bottom));
+    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem
+      calc(1.5rem + var(--nav-space-bottom));
     text-align: center;
     min-height: 100dvh;
     justify-content: center;
     box-sizing: border-box;
     scroll-snap-align: start;
+    scroll-margin-top: var(--nav-space-top);
   }
-
-
 
   /* ── Classes / Stats Section ── */
   .home-classes {
@@ -559,14 +786,13 @@ const themes = [
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem calc(1.5rem + var(--nav-space-bottom));
+    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem
+      calc(1.5rem + var(--nav-space-bottom));
     min-height: 100dvh;
     box-sizing: border-box;
     scroll-snap-align: start;
+    scroll-margin-top: var(--nav-space-top);
   }
-
-
-
 
   /* ── Responsive ── */
   @media (max-width: 968px) {
@@ -577,7 +803,8 @@ const themes = [
       flex-direction: column;
       align-items: center;
     }
-    .btn-primary, .btn-secondary {
+    .btn-primary,
+    .btn-secondary {
       width: 100%;
       max-width: 280px;
     }
@@ -639,13 +866,15 @@ const themes = [
     align-items: center;
     gap: 0.5rem;
     color: rgba(255, 255, 255, 0.45);
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.75rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     pointer-events: none;
     z-index: 1001;
-    transition: opacity 0.4s ease, transform 0.4s ease;
+    transition:
+      opacity 0.4s ease,
+      transform 0.4s ease;
   }
   @media (max-width: 968px) {
     .scroll-cue {
@@ -660,9 +889,19 @@ const themes = [
     animation: bounce 2s infinite;
   }
   @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-6px); }
-    60% { transform: translateY(-3px); }
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-6px);
+    }
+    60% {
+      transform: translateY(-3px);
+    }
   }
 
   /* ── Sidebar Scroll Indicator ── */
@@ -689,7 +928,9 @@ const themes = [
     border: none;
     cursor: pointer;
     padding: 0;
-    transition: height 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease;
+    transition:
+      height 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+      background 0.3s ease;
   }
   .indicator-dot:hover {
     background: rgba(255, 255, 255, 0.5);
@@ -721,7 +962,9 @@ const themes = [
     border-color: rgba(128, 212, 176, 0.12);
   }
   .leapday-card.off-campus:hover {
-    box-shadow: 0 0 24px rgba(128, 212, 176, 0.25), 0 0 48px rgba(128, 212, 176, 0.1);
+    box-shadow:
+      0 0 24px rgba(128, 212, 176, 0.25),
+      0 0 48px rgba(128, 212, 176, 0.1);
   }
   .leapday-card.off-campus .leapday-mode {
     color: #80d4b0;
@@ -731,84 +974,106 @@ const themes = [
     border-color: rgba(250, 225, 133, 0.12);
   }
   .leapday-card.limited:hover {
-    box-shadow: 0 0 24px rgba(250, 225, 133, 0.25), 0 0 48px rgba(250, 225, 133, 0.1);
+    box-shadow:
+      0 0 24px rgba(250, 225, 133, 0.25),
+      0 0 48px rgba(250, 225, 133, 0.1);
   }
-  
-
 
   @media (prefers-reduced-motion: reduce) {
-    .anim-in { animation: none; opacity: 1; transform: none; }
+    .anim-in {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
   }
 </style>
 
 <script is:inline>
-(() => {
-  const bg = document.querySelector('.home-bg');
-  const content = document.querySelector('.home-content');
-  const landscape = document.querySelector('.landscape');
-  const cue = document.querySelector('.scroll-cue');
-  const dots = document.querySelectorAll('.indicator-dot');
-  
-  if (!bg) return;
+  (() => {
+    const bg = document.querySelector(".home-bg");
+    const content = document.querySelector(".home-content");
+    const landscape = document.querySelector(".landscape");
+    const cue = document.querySelector(".scroll-cue");
+    const dots = document.querySelectorAll(".indicator-dot");
 
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!bg) return;
 
-  // Dot navigation click handler
-  dots.forEach(dot => {
-    dot.addEventListener('click', () => {
-      const targetId = dot.getAttribute('data-target');
-      const target = document.getElementById(targetId);
-      if (target) {
-        bg.scrollTo({
-          top: target.offsetTop,
-          behavior: 'smooth'
-        });
-      }
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    // Dot navigation click handler
+    dots.forEach((dot) => {
+      dot.addEventListener("click", () => {
+        const targetId = dot.getAttribute("data-target");
+        const target = document.getElementById(targetId);
+        if (target) {
+          bg.scrollTo({
+            top: target.offsetTop,
+            behavior: "smooth",
+          });
+        }
+      });
     });
-  });
 
-  // Section IntersectionObserver for active dot (root = scroll container)
-  const sectionIds = ['hero-section', 'featured-section', 'classes-section', 'subthemes', 'leapdays'];
-  const sectionRatios = new Map<string, number>(sectionIds.map(id => [id, 0]));
-  const sectionObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(entry => {
-        sectionRatios.set(entry.target.id, entry.intersectionRatio);
-      });
-      // Pick the section with the highest intersection ratio
-      let bestId = '';
-      let bestRatio = 0;
-      sectionRatios.forEach((ratio, id) => {
-        if (ratio > bestRatio) { bestRatio = ratio; bestId = id; }
-      });
-      if (bestId && bestRatio > 0) {
-        const idx = sectionIds.indexOf(bestId);
-        if (idx !== -1) dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-      }
-    },
-    { root: bg, threshold: [0, 0.25, 0.5, 0.75, 1] }
-  );
-  sectionIds.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) sectionObserver.observe(el);
-  });
+    // Section IntersectionObserver for active dot (root = scroll container)
+    const sectionIds = [
+      "hero-section",
+      "featured-section",
+      "classes-section",
+      "subthemes",
+      "leapdays",
+    ];
+    const sectionRatios = new Map<string, number>(
+      sectionIds.map((id) => [id, 0]),
+    );
+    const sectionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          sectionRatios.set(entry.target.id, entry.intersectionRatio);
+        });
+        // Pick the section with the highest intersection ratio
+        let bestId = "";
+        let bestRatio = 0;
+        sectionRatios.forEach((ratio, id) => {
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestId = id;
+          }
+        });
+        if (bestId && bestRatio > 0) {
+          const idx = sectionIds.indexOf(bestId);
+          if (idx !== -1)
+            dots.forEach((d, i) => d.classList.toggle("active", i === idx));
+        }
+      },
+      { root: bg, threshold: [0, 0.25, 0.5, 0.75, 1] },
+    );
+    sectionIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) sectionObserver.observe(el);
+    });
 
-  /* ── Hero scroll listener (hide/show hero elements only) ── */
-  bg.addEventListener('scroll', () => {
-    const st = bg.scrollTop;
-    if (!reduced) {
-      if (st > 80) {
-        if (content) content.classList.add('scroll-hide');
-        if (landscape) landscape.classList.add('scroll-hide');
-        if (cue) cue.classList.add('scroll-hide');
-      } else {
-        if (content) content.classList.remove('scroll-hide');
-        if (landscape) landscape.classList.remove('scroll-hide');
-        if (cue) cue.classList.remove('scroll-hide');
-      }
-    }
-  }, { passive: true });
-})();
+    /* ── Hero scroll listener (hide/show hero elements only) ── */
+    bg.addEventListener(
+      "scroll",
+      () => {
+        const st = bg.scrollTop;
+        if (!reduced) {
+          if (st > 80) {
+            if (content) content.classList.add("scroll-hide");
+            if (landscape) landscape.classList.add("scroll-hide");
+            if (cue) cue.classList.add("scroll-hide");
+          } else {
+            if (content) content.classList.remove("scroll-hide");
+            if (landscape) landscape.classList.remove("scroll-hide");
+            if (cue) cue.classList.remove("scroll-hide");
+          }
+        }
+      },
+      { passive: true },
+    );
+  })();
 </script>
 
 <style is:global>
@@ -829,29 +1094,35 @@ const themes = [
   }
 
   .stats-tagline {
-    font-family: 'TD-Sulog', serif;
+    font-family: "TD-Sulog", serif;
     font-size: clamp(2rem, 5vw, 3.2rem);
     font-weight: 700;
     color: #fff;
     margin: 0;
     line-height: 1.2;
-    background: linear-gradient(180deg, #fff5c4 0%, #fae185 35%, #de9a49 75%, #b07820 100%);
+    background: linear-gradient(
+      180deg,
+      #fff5c4 0%,
+      #fae185 35%,
+      #de9a49 75%,
+      #b07820 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 3px 12px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.5));
   }
 
   .stats-subtitle {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: clamp(0.85rem, 2vw, 1rem);
-    color: rgba(255,255,255,0.55);
+    color: rgba(255, 255, 255, 0.55);
     margin: 0;
     line-height: 1.7;
   }
 
   .stats-subtitle em {
-    color: rgba(255,255,255,0.75);
+    color: rgba(255, 255, 255, 0.75);
     font-style: italic;
   }
 
@@ -869,27 +1140,28 @@ const themes = [
     align-items: center;
     gap: 0.35rem;
     min-width: 90px;
+    padding-top: 0.2em;
   }
 
   .stats-number {
-    font-family: 'TD-Sulog', serif;
+    font-family: "TD-Sulog", serif;
     font-size: clamp(3rem, 8vw, 5rem);
     font-weight: 700;
-    line-height: 1;
+    line-height: 1.1;
     background: linear-gradient(180deg, #fff5c4 0%, #fae185 50%, #de9a49 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
   }
 
   .stats-label {
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.8rem;
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.45);
+    color: rgba(255, 255, 255, 0.45);
   }
 
   .stats-cta {
@@ -897,21 +1169,24 @@ const themes = [
     align-items: center;
     justify-content: center;
     padding: 0.75rem 2.25rem;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.9rem;
     font-weight: 700;
     color: #fff;
     background: linear-gradient(135deg, #4a7a5a 0%, #2a5a3a 100%);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 9999px;
     text-decoration: none;
-    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, background 0.2s ease;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    transition:
+      transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.2s ease,
+      background 0.2s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   }
 
   .stats-cta:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
     background: linear-gradient(135deg, #568c68 0%, #346e44 100%);
   }
   :root {
@@ -936,13 +1211,25 @@ const themes = [
     position: relative;
     padding: 0 1rem;
     box-sizing: border-box;
-    mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 8%,
+      black 92%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 8%,
+      black 92%,
+      transparent 100%
+    );
   }
 
   .gallery-outer::before,
   .gallery-outer::after {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     bottom: 0;
@@ -955,14 +1242,30 @@ const themes = [
 
   .gallery-outer::before {
     left: 0;
-    mask-image: linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
-    -webkit-mask-image: linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+    mask-image: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0) 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0) 100%
+    );
   }
 
   .gallery-outer::after {
     right: 0;
-    mask-image: linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
-    -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+    mask-image: linear-gradient(
+      to left,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0) 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to left,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 0) 100%
+    );
   }
 
   .gallery-track {
@@ -982,7 +1285,9 @@ const themes = [
        swipes, which would let native momentum fight our snap logic. */
     touch-action: pan-y;
   }
-  .gallery-track::-webkit-scrollbar { display: none; }
+  .gallery-track::-webkit-scrollbar {
+    display: none;
+  }
 
   .gallery-card {
     flex: 0 0 var(--card-w);
@@ -991,11 +1296,11 @@ const themes = [
     border-radius: 18px;
     overflow: hidden;
     position: relative;
-    background: rgba(255,255,255,0.04);
+    background: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.08);
-    transition: transform 0.3s cubic-bezier(0.22,1,0.36,1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     display: flex;
     flex-direction: column;
     container-type: inline-size;
@@ -1026,7 +1331,7 @@ const themes = [
   }
 
   .gallery-card-date-badge .badge-week {
-    font-family: 'Poppins', sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 0.52rem;
     font-weight: 700;
     color: var(--accent, #de9a49);
@@ -1041,7 +1346,7 @@ const themes = [
   }
 
   .gallery-card-date-badge .badge-month {
-    font-family: 'Poppins', sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 0.58rem;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.75);
@@ -1049,7 +1354,7 @@ const themes = [
     line-height: 1;
   }
   .gallery-card-date-badge .badge-day {
-    font-family: 'Poppins', sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 0.95rem;
     font-weight: 800;
     color: #fff;
@@ -1128,7 +1433,7 @@ const themes = [
   }
 
   .card-code-tag {
-    font-family: 'Poppins', sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 0.55rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -1141,7 +1446,7 @@ const themes = [
   }
 
   .card-theme-tag {
-    font-family: 'Poppins', sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 0.55rem;
     font-weight: 700;
     letter-spacing: 0.05em;
@@ -1150,7 +1455,7 @@ const themes = [
   }
 
   .gallery-card-title {
-    font-family: 'TD-Sulog', serif;
+    font-family: "TD-Sulog", serif;
     font-weight: 700;
     font-size: clamp(0.95rem, 2.2vw, 1.2rem);
     line-height: 1.15;
@@ -1162,7 +1467,13 @@ const themes = [
     letter-spacing: 0.01em;
     margin: 0;
     text-align: left;
-    background: linear-gradient(180deg, #fff5c4 0%, #fae185 35%, #de9a49 75%, #b07820 100%);
+    background: linear-gradient(
+      180deg,
+      #fff5c4 0%,
+      #fae185 35%,
+      #de9a49 75%,
+      #b07820 100%
+    );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -1178,7 +1489,7 @@ const themes = [
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-family: 'DM Sans', sans-serif;
+    font-family: "DM Sans", sans-serif;
     font-size: 0.72rem;
     line-height: 1.2;
   }
@@ -1204,7 +1515,7 @@ const themes = [
   }
 
   .slots-badge {
-    font-family: 'Poppins', sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 0.65rem;
     font-weight: 700;
     height: 1.35rem;
@@ -1247,7 +1558,7 @@ const themes = [
     padding: 0.3rem 0.65rem;
     border-radius: 9999px;
     cursor: pointer;
-    font-family: 'Poppins', sans-serif;
+    font-family: "Poppins", sans-serif;
     font-size: 0.62rem;
     font-weight: 700;
     color: #fff;
@@ -1314,7 +1625,7 @@ const themes = [
     -webkit-appearance: none;
     /* Shrink: smooth ease-out — no spring twitch back to circle */
     transition:
-      width      0.3s ease-out,
+      width 0.3s ease-out,
       background 0.3s ease;
   }
 
@@ -1327,14 +1638,17 @@ const themes = [
     background: rgba(255, 255, 255, 0.88);
     /* Expand: bouncy spring */
     transition:
-      width      0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+      width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
       background 0.3s ease;
   }
 
   @media (max-width: 768px) {
-    .home-featured, .home-classes, .home-subthemes, .home-leapdays {
+    .home-featured,
+    .home-classes,
+    .home-subthemes,
+    .home-leapdays {
       padding-top: calc(1.5rem + var(--nav-space-top)) !important;
-      padding-bottom: calc(1.5rem + var(--nav-space-bottom)) !important;
+      padding-bottom: calc(6rem + var(--nav-space-bottom)) !important;
     }
     .gallery-outer {
       padding: 0 0.5rem;
@@ -1398,22 +1712,29 @@ const themes = [
     :root {
       --card-w: min(240px, 70vw, 36vh);
     }
-    .featured-desc, .section-desc {
+    .featured-desc,
+    .section-desc {
       display: none;
     }
-    .featured-title, .section-title {
+    .featured-title,
+    .section-title {
       font-size: clamp(1.6rem, 8vh, 2.5rem);
       margin-top: 0;
       margin-bottom: 0.25rem;
     }
-    .gallery-card-date-badge, .gallery-card-org-logo {
+    .gallery-card-date-badge,
+    .gallery-card-org-logo {
       display: none;
     }
     .gallery-dots {
       padding: 0.35rem 0 0.2rem;
     }
-    .home-featured, .home-classes, .home-subthemes, .home-leapdays {
-      padding: calc(0.5rem + var(--nav-space-top)) 1rem calc(0.5rem + var(--nav-space-bottom)) !important;
+    .home-featured,
+    .home-classes,
+    .home-subthemes,
+    .home-leapdays {
+      padding: calc(0.5rem + var(--nav-space-top)) 1rem
+        calc(0.5rem + var(--nav-space-bottom)) !important;
       min-height: 100dvh;
       justify-content: center;
     }

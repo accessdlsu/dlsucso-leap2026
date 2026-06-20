@@ -1,9 +1,10 @@
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { Loader2, Bookmark } from 'lucide-react';
+import { Bookmark } from 'lucide-react';
 import type { LeapEvent } from '../services/leapify';
 import { useAllSlots } from '../hooks/useAllSlots';
 import { useAllEvents } from '../hooks/useAllEvents';
 import ClassCard, { computeSlotStatus } from './ClassCard';
+import { SkeletonCarousel } from './skeletons';
 import { useBookmarks } from '../hooks/useBookmarks';
 import ClassDrawer from './ClassDrawer';
 
@@ -263,19 +264,7 @@ export default function GalleryCarousel() {
   }, [loading, N]);
 
   if (loading) {
-    return (
-      <>
-        <style>{`
-          @keyframes carousel-spin {
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '4rem 0', fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>
-          <Loader2 size={20} strokeWidth={1.75} style={{ animation: 'carousel-spin 0.8s linear infinite' }} />
-          Loading events...
-        </div>
-      </>
-    );
+    return <SkeletonCarousel count={4} />;
   }
 
 

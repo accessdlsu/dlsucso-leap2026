@@ -1,0 +1,163 @@
+/* ── Skeleton shimmer animation ── */
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.10) 50%,
+    rgba(255, 255, 255, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.skeleton-text {
+  height: 0.85em;
+  border-radius: 4px;
+}
+
+.skeleton-text-sm {
+  height: 0.65em;
+  width: 60%;
+  border-radius: 4px;
+}
+
+.skeleton-circle {
+  border-radius: 50%;
+}
+
+/* Card skeleton — matches .gallery-card shape */
+.skeleton-card {
+  flex: 0 0 var(--card-w);
+  aspect-ratio: 1080 / 1350;
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+}
+
+.classes-grid .skeleton-card {
+  flex: none;
+  width: 100%;
+}
+
+.skeleton-card-img {
+  position: absolute;
+  inset: 0;
+}
+
+.skeleton-card-badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  width: 50px;
+  height: 68px;
+  border-radius: 10px;
+}
+
+.skeleton-card-logo {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  width: 68px;
+  height: 68px;
+  border-radius: 22.37%;
+}
+
+.skeleton-card-body {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.skeleton-card-tag {
+  width: 70px;
+  height: 16px;
+  border-radius: 5px;
+}
+
+.skeleton-card-title {
+  height: 1.4em;
+  width: 85%;
+  border-radius: 4px;
+}
+
+.skeleton-card-info {
+  height: 0.7em;
+  width: 70%;
+  border-radius: 4px;
+}
+
+.skeleton-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.skeleton-card-badge-sm {
+  width: 60px;
+  height: 20px;
+  border-radius: 6px;
+}
+
+.skeleton-card-btn {
+  width: 72px;
+  height: 22px;
+  border-radius: 9999px;
+}
+
+@media (max-width: 768px) {
+  .skeleton-card-badge { width: 42px; height: 58px; }
+  .skeleton-card-logo { width: 52px; height: 52px; }
+}
+
+/* Page-level skeleton blocks */
+.skeleton-block {
+  border-radius: 12px;
+}
+
+.skeleton-heading {
+  height: 2.5rem;
+  width: 40%;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.skeleton-paragraph {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.skeleton-line {
+  height: 0.85em;
+  border-radius: 4px;
+}
+
+.skeleton-line:last-child {
+  width: 70%;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}

@@ -7,12 +7,18 @@ import Footer from "../components/navigation/Footer.astro";
 <Layout title="FAQs | LEAP 2026" description="Frequently asked questions about LEAP 2026.">
   <div class="faq-bg">
     <div class="faq-content">
-      <h1 class="faq-title">FAQs</h1>
+      <h1 class="faq-title" transition:name="page-title">FAQs</h1>
       <p class="faq-desc">
         Got questions? We&rsquo;ve got answers. Browse common inquiries about
         LEAP 2026.
       </p>
-      <FaqAccordion client:only="react" />
+      <FaqAccordion client:only="react">
+        <div slot="fallback" style="width: 100%; max-width: 720px; margin: 0 auto;" aria-label="Loading FAQs" role="status">
+          {Array.from({ length: 5 }, (_, i) => (
+            <div class="skeleton" style={`height: 52px; border-radius: 14px; margin-bottom: 10px; opacity: ${1 - i * 0.1};`} />
+          ))}
+        </div>
+      </FaqAccordion>
       <Footer />
     </div>
   </div>
