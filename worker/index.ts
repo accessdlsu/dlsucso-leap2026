@@ -428,6 +428,12 @@ async function handleApiRequest(
     }
     const backendPath = `/api/uploads/${filename}`;
 
+    // Use a synthetic https:// URL as the cache key (required by the Cache API)
+    const cacheKey = new Request(`https://data-cache/${filename}`);
+    const cache = caches.default;
+    const cached = await cache.match(cacheKey);
+    if (cached) return cached;
+
     let upstream: Response;
     try {
       upstream = await backendFetch(env, backendPath, { method: "GET", signal: AbortSignal.timeout(15_000) }, baseOrigin);
@@ -443,7 +449,14 @@ async function handleApiRequest(
     const etag = upstream.headers.get("etag");
     if (etag) respHeaders.set("ETag", etag);
 
-    return new Response(upstream.body, { status: upstream.status, headers: respHeaders });
+    const response = new Response(upstream.body, { status: upstream.status, headers: respHeaders });
+
+    // Only cache successful responses with a cacheable Cache-Control
+    if (upstream.status === 200 && cc) {
+      ctx.waitUntil(cache.put(cacheKey, response.clone()));
+    }
+
+    return response;
   }
 
   // GET /api/config — public config (used by countdown before WS is ready)
