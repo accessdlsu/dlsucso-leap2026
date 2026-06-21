@@ -620,26 +620,29 @@ export default function ClassesFilter() {
       <section className="classes-filters">
         <div className="filter-group">
           <FilterDropdown
-            label="Subtheme"
+            label={t('filter_subtheme')}
+            allLabel={t('filter_subtheme_all')}
             options={themeOptions}
             value={selectedTheme}
             onChange={setSelectedTheme}
           />
           <FilterDropdown
-            label="Date"
+            label={t('filter_date')}
+            allLabel={t('filter_date_all')}
             options={dateOptions}
             value={selectedDate}
             onChange={setSelectedDate}
           />
           <FilterDropdown
-            label="Organization"
+            label={t('filter_org')}
+            allLabel={t('filter_org_all')}
             options={orgOptions}
             value={selectedOrg}
             onChange={setSelectedOrg}
           />
           <FilterDropdown
-            label="Availability"
-            allLabel="All Availability"
+            label={t('filter_avail')}
+            allLabel={t('filter_avail_all')}
             options={availabilityOptions}
             value={selectedAvailability}
             onChange={setSelectedAvailability}

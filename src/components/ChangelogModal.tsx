@@ -166,6 +166,12 @@ export default function ChangelogModal() {
     }
   }, []);
 
+  useEffect(() => {
+    const handler = () => setVisible(true);
+    window.addEventListener('leap:open-changelog', handler);
+    return () => window.removeEventListener('leap:open-changelog', handler);
+  }, []);
+
   function dismiss() {
     localStorage.setItem(SEEN_KEY, '1');
     setVisible(false);

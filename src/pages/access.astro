@@ -4,8 +4,14 @@ import { Globe } from "lucide-react";
 import Footer from "../components/navigation/Footer.astro";
 ---
 
-<Layout title="ACCESS DLSU | LEAP 2026" description="Association of Computer Engineering Students (ACCESS) DLSU — Developers of the LEAP 2026 Website.">
+<Layout title="ACCESS DLSU | LEAP 2026" description="Association of Computer Engineering Students (ACCESS) DLSU — Developers of the LEAP 2026 Website." showNavbar={false}>
   <div class="access-bg">
+    <a href="/" class="access-back-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+      Back to LEAP 2026
+    </a>
     <div class="access-content">
       <div class="access-logo-wrap">
         <img
@@ -240,8 +246,7 @@ import Footer from "../components/navigation/Footer.astro";
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem
-      calc(2rem + var(--nav-space-bottom));
+    padding: 3rem 1.5rem 3rem;
     min-height: 100dvh;
     box-sizing: border-box;
   }
@@ -257,6 +262,36 @@ import Footer from "../components/navigation/Footer.astro";
     height: auto;
     object-fit: contain;
     display: block;
+  }
+
+  .access-back-btn {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    z-index: 1001;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 58px;
+    padding: 0 24px;
+    border-radius: 9999px;
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(var(--blur, 0px));
+    -webkit-backdrop-filter: blur(var(--blur, 0px));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    color: rgba(255, 255, 255, 0.7);
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+  }
+  .access-back-btn:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    color: #fff;
   }
 
   /* ── Cards ── */

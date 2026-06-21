@@ -12,7 +12,7 @@ const en = {
   day_label: 'Day {n}',
   time_label: 'TIME',
   venue_label: 'VENUE',
-  class_code_label: 'CODE',
+  class_code_label: 'CRN',
   day_filter_label: 'DAY',
   view_more: 'View More',
   event_ended_badge: 'EVENT ENDED',
@@ -28,13 +28,26 @@ const en = {
   saved_filter: 'Saved',
   clear_all: 'Clear All',
   filter_subtheme: 'Subtheme',
+  filter_subtheme_all: 'All Subthemes',
   filter_date: 'Date',
+  filter_date_all: 'All Dates',
   filter_org: 'Organization',
+  filter_org_all: 'All Organizations',
   filter_avail: 'Availability',
   filter_avail_all: 'All Availability',
   avail_open: 'Open',
   avail_full: 'Full',
   registered_badge: '✓ REGISTERED',
+
+  // StatsSection
+  stats_tagline_fil: 'Piliin ang iyong landas.',
+  stats_tagline_fil2: 'Palawakin ang iyong mundo.',
+  stats_quote: '"Choose your path. Expand your world."',
+  stats_subtitle_browse: 'Browse the classes below and register for the ones that call to you.',
+  stats_more_coming: 'More LEAP classes to be announced soon.',
+  stats_label_classes: 'Classes',
+  stats_label_subthemes: 'Subthemes',
+  stats_label_days: 'Days',
 
   // SearchOverlay
   search_classes_placeholder: 'Search LEAP 2026 classes…',
@@ -102,7 +115,14 @@ const en = {
   // Profile dropdown
   profile_access: 'ACCESS DLSU',
   profile_saved: 'Saved Classes',
+  profile_announcements: 'Announcements',
+  profile_changelog: 'What\'s New',
   profile_signout: 'Sign Out',
+
+  // About page
+  about_title: 'About Us',
+  about_p1: 'LEAP 2026: Isang Nayon, Isang Layunin is derived from the Lasallian value of service, emphasizing that growth and success are achieved through collaboration, empathy, and a shared commitment to the common good. LEAP 2026 encourages Lasallians to contribute their strengths, support one another, and recognize that meaningful learning happens when individuals work together toward a common purpose.',
+  about_p2: 'Guided by the value of service, LEAP 2026 reminds students that leadership is about uplifting others, education is a gift meant to be shared, and true development comes from choosing community over competition. Through active participation and cooperation, Lasallians are called to build a stronger, more united community that reflects the values of bayanihan and collective growth.',
 } as const;
 
 const fil: Strings = {
@@ -114,7 +134,7 @@ const fil: Strings = {
   day_label: 'Araw {n}',
   time_label: 'ORAS',
   venue_label: 'LUGAR',
-  class_code_label: 'CODE',
+  class_code_label: 'CRN',
   day_filter_label: 'ARAW',
   view_more: 'Tingnan',
   event_ended_badge: 'TAPOS NA',
@@ -129,13 +149,25 @@ const fil: Strings = {
   saved_filter: 'Naka-save',
   clear_all: 'I-clear Lahat',
   filter_subtheme: 'Subtema',
+  filter_subtheme_all: 'Lahat ng Subtema',
   filter_date: 'Petsa',
+  filter_date_all: 'Lahat ng Petsa',
   filter_org: 'Organisasyon',
+  filter_org_all: 'Lahat ng Organisasyon',
   filter_avail: 'Availability',
   filter_avail_all: 'Lahat ng Availability',
   avail_open: 'Bukas',
   avail_full: 'Puno',
   registered_badge: '✓ NAKALISTA',
+
+  stats_tagline_fil: 'Piliin ang iyong landas.',
+  stats_tagline_fil2: 'Palawakin ang iyong mundo.',
+  stats_quote: '"Piliin ang iyong landas. Palawakin ang iyong mundo."',
+  stats_subtitle_browse: 'I-browse ang mga klase sa ibaba at mag-rehistro sa mga gusto mo.',
+  stats_more_coming: 'Marami pang mga klase ang darating.',
+  stats_label_classes: 'Mga Klase',
+  stats_label_subthemes: 'Mga Subtema',
+  stats_label_days: 'Mga Araw',
 
   search_classes_placeholder: 'Maghanap ng mga klase sa LEAP 2026…',
   no_search_results: 'Walang klase na nakatugma sa iyong paghahanap.',
@@ -195,7 +227,13 @@ const fil: Strings = {
 
   profile_access: 'ACCESS DLSU',
   profile_saved: 'Mga Naka-save na Klase',
+  profile_announcements: 'Mga Anunsyo',
+  profile_changelog: 'Mga Bagong Feature',
   profile_signout: 'Mag-sign Out',
+
+  about_title: 'Tungkol Sa Amin',
+  about_p1: "Ang LEAP 2026: Isang Nayon, Isang Layunin ay nagmula sa Lasalyanong pagpapahalaga ng serbisyo, na nagbibigay-diin na ang paglago at tagumpay ay nakamit sa pamamagitan ng pakikipagtulungan, empatiya, at isang shared na pangako sa kabutihang panlahat. Hinihikayat ng LEAP 2026 ang mga Lasalyanong mag-ambag ng kanilang mga lakas, suportahan ang isa't isa, at kilalanin na ang makabuluhang pag-aaral ay nangyayari kapag ang mga indibidwal ay nagtutulungan tungo sa isang karaniwang layunin.",
+  about_p2: "Gabay ng pagpapahalaga ng serbisyo, pinapaalalahanan ng LEAP 2026 ang mga estudyante na ang pamumuno ay tungkol sa pag-angat ng iba, ang edukasyon ay isang regalo na dapat ibahagi, at ang tunay na pag-unlad ay nagmumula sa pagpili ng komunidad kaysa kompetisyon. Sa pamamagitan ng aktibong pakikilahok at kooperasyon, ang mga Lasalyano ay tinawag upang bumuo ng isang mas malakas, mas nagkakaisang komunidad na sumasalamin sa mga pagpapahalaga ng bayanihan at kolektibong paglago.",
 };
 
 const zhHans: Strings = {
@@ -222,13 +260,25 @@ const zhHans: Strings = {
   saved_filter: '已收藏',
   clear_all: '清除全部',
   filter_subtheme: '子主题',
+  filter_subtheme_all: '全部子主题',
   filter_date: '日期',
+  filter_date_all: '全部日期',
   filter_org: '组织',
+  filter_org_all: '全部组织',
   filter_avail: '可用性',
   filter_avail_all: '全部可用性',
   avail_open: '开放',
   avail_full: '已满',
   registered_badge: '✓ 已报名',
+
+  stats_tagline_fil: 'Piliin ang iyong landas.',
+  stats_tagline_fil2: 'Palawakin ang iyong mundo.',
+  stats_quote: '"选择你的道路。拓展你的世界。"',
+  stats_subtitle_browse: '浏览下方课程，报名参加感兴趣的课程。',
+  stats_more_coming: '更多 LEAP 课程即将公布。',
+  stats_label_classes: '课程',
+  stats_label_subthemes: '子主题',
+  stats_label_days: '天',
 
   search_classes_placeholder: '搜索 LEAP 2026 课程…',
   no_search_results: '没有符合搜索条件的课程。',
@@ -288,7 +338,13 @@ const zhHans: Strings = {
 
   profile_access: 'ACCESS DLSU',
   profile_saved: '已收藏的课程',
+  profile_announcements: '公告',
+  profile_changelog: '新功能',
   profile_signout: '退出登录',
+
+  about_title: '关于我们',
+  about_p1: 'LEAP 2026: Isang Nayon, Isang Layunin 源于拉萨尔服务精神，强调成长与成功需通过合作、同理心以及对共同善的共同承诺来实现。LEAP 2026 鼓励拉萨尔人贡献各自的力量、相互支持，并认识到当个人为共同目标携手合作时，才能实现真正有意义的学习。',
+  about_p2: '在服务精神的引导下，LEAP 2026 提醒学生：领导力在于提升他人，教育是一份需要分享的礼物，而真正的发展来自选择社区而非竞争。通过积极参与和合作，拉萨尔人被召唤去建设一个更强大、更团结的社区，体现 bayanihan 和集体成长的价值观。',
 };
 
 const zhHant: Strings = {
@@ -315,13 +371,25 @@ const zhHant: Strings = {
   saved_filter: '已收藏',
   clear_all: '清除全部',
   filter_subtheme: '子主題',
+  filter_subtheme_all: '全部子主題',
   filter_date: '日期',
+  filter_date_all: '全部日期',
   filter_org: '組織',
+  filter_org_all: '全部組織',
   filter_avail: '可用性',
   filter_avail_all: '全部可用性',
   avail_open: '開放',
   avail_full: '已滿',
   registered_badge: '✓ 已報名',
+
+  stats_tagline_fil: 'Piliin ang iyong landas.',
+  stats_tagline_fil2: 'Palawakin ang iyong mundo.',
+  stats_quote: '"選擇你的道路。拓展你的世界。"',
+  stats_subtitle_browse: '瀏覽下方課程，報名參加感興趣的課程。',
+  stats_more_coming: '更多 LEAP 課程即將公布。',
+  stats_label_classes: '課程',
+  stats_label_subthemes: '子主題',
+  stats_label_days: '天',
 
   search_classes_placeholder: '搜尋 LEAP 2026 課程…',
   no_search_results: '沒有符合搜尋條件的課程。',
@@ -381,7 +449,13 @@ const zhHant: Strings = {
 
   profile_access: 'ACCESS DLSU',
   profile_saved: '已收藏的課程',
+  profile_announcements: '公告',
+  profile_changelog: '新功能',
   profile_signout: '登出',
+
+  about_title: '關於我們',
+  about_p1: 'LEAP 2026: Isang Nayon, Isang Layunin 源於拉薩爾服務精神，強調成長與成功需通過合作、同理心以及對共同善的共同承諾來實現。LEAP 2026 鼓勵拉薩爾人貢獻各自的力量、相互支持，並認識到當個人為共同目標攜手合作時，才能實現真正有意義的學習。',
+  about_p2: '在服務精神的引導下，LEAP 2026 提醒學生：領導力在於提升他人，教育是一份需要分享的禮物，而真正的發展來自選擇社區而非競爭。透過積極參與和合作，拉薩爾人被召喚去建設一個更強大、更團結的社區，體現 bayanihan 和集體成長的價值觀。',
 };
 
 const ko: Strings = {
@@ -408,13 +482,25 @@ const ko: Strings = {
   saved_filter: '저장됨',
   clear_all: '전체 초기화',
   filter_subtheme: '하위 주제',
+  filter_subtheme_all: '전체 하위 주제',
   filter_date: '날짜',
+  filter_date_all: '전체 날짜',
   filter_org: '단체',
+  filter_org_all: '전체 단체',
   filter_avail: '가용성',
   filter_avail_all: '전체 가용성',
   avail_open: '열림',
   avail_full: '마감',
   registered_badge: '✓ 등록됨',
+
+  stats_tagline_fil: 'Piliin ang iyong landas.',
+  stats_tagline_fil2: 'Palawakin ang iyong mundo.',
+  stats_quote: '"당신의 길을 선택하세요. 당신의 세계를 넓히세요."',
+  stats_subtitle_browse: '아래 수업을 둘러보고 관심 있는 수업에 등록하세요.',
+  stats_more_coming: '더 많은 LEAP 수업이 곧 공개됩니다.',
+  stats_label_classes: '수업',
+  stats_label_subthemes: '하위 주제',
+  stats_label_days: '일',
 
   search_classes_placeholder: 'LEAP 2026 수업 검색…',
   no_search_results: '검색 조건에 맞는 수업이 없습니다.',
@@ -474,7 +560,13 @@ const ko: Strings = {
 
   profile_access: 'ACCESS DLSU',
   profile_saved: '저장된 수업',
+  profile_announcements: '공지사항',
+  profile_changelog: '새 기능',
   profile_signout: '로그아웃',
+
+  about_title: '소개',
+  about_p1: 'LEAP 2026: Isang Nayon, Isang Layunin은 라살리안 봉사 정신에서 비롯되었으며, 성장과 성공은 협력, 공감, 그리고 공동선에 대한 헌신을 통해 이루어진다는 것을 강조합니다. LEAP 2026은 라살리안들이 각자의 강점을 기여하고 서로를 지지하며, 개인이 공동의 목표를 위해 협력할 때 의미 있는 배움이 일어난다는 것을 인식하도록 장려합니다.',
+  about_p2: '봉사의 가치에 이끌려 LEAP 2026은 학생들에게 리더십은 타인을 높이는 것이고, 교육은 나눔을 위한 선물이며, 진정한 발전은 경쟁보다 공동체를 선택하는 데서 온다는 것을 상기시킵니다. 적극적인 참여와 협력을 통해 라살리안들은 bayanihan과 집단적 성장의 가치를 반영하는 더 강하고 단결된 공동체를 건설하도록 부름받았습니다.',
 };
 
 const ja: Strings = {
@@ -501,13 +593,25 @@ const ja: Strings = {
   saved_filter: '保存済み',
   clear_all: 'すべてリセット',
   filter_subtheme: 'サブテーマ',
+  filter_subtheme_all: 'すべてのサブテーマ',
   filter_date: '日程',
+  filter_date_all: 'すべての日程',
   filter_org: '団体',
+  filter_org_all: 'すべての団体',
   filter_avail: '空き状況',
   filter_avail_all: 'すべての空き状況',
   avail_open: '空きあり',
   avail_full: '満席',
   registered_badge: '✓ 登録済み',
+
+  stats_tagline_fil: 'Piliin ang iyong landas.',
+  stats_tagline_fil2: 'Palawakin ang iyong mundo.',
+  stats_quote: '"あなたの道を選んでください。あなたの世界を広げましょう。"',
+  stats_subtitle_browse: '下のクラスを見て、気になるものに登録してください。',
+  stats_more_coming: 'さらに多くの LEAP クラスが近日公開予定です。',
+  stats_label_classes: 'クラス',
+  stats_label_subthemes: 'サブテーマ',
+  stats_label_days: '日間',
 
   search_classes_placeholder: 'LEAP 2026のクラスを検索…',
   no_search_results: '検索条件に一致するクラスがありません。',
@@ -567,7 +671,13 @@ const ja: Strings = {
 
   profile_access: 'ACCESS DLSU',
   profile_saved: '保存済みクラス',
+  profile_announcements: 'お知らせ',
+  profile_changelog: '新機能',
   profile_signout: 'サインアウト',
+
+  about_title: '私たちについて',
+  about_p1: 'LEAP 2026: Isang Nayon, Isang Layunin は、ラ・サール教育の奉仕の精神に由来し、成長と成功は協力、共感、そして共通善への共同のコミットメントを通じて達成されるという考えを強調しています。LEAP 2026 はラ・サリアンたちが各自の強みを発揮し、互いを支え合い、個人が共通の目的に向かって協力するときに意味のある学びが生まれることを認識するよう促しています。',
+  about_p2: '奉仕の価値観に導かれ、LEAP 2026 は学生たちに、リーダーシップとは他者を高めること、教育は分かち合うべき贈り物、そして真の発展は競争よりもコミュニティを選ぶことから生まれると思い起こさせます。積極的な参加と協力を通じて、ラ・サリアンたちは bayanihan と集合的な成長の価値を体現する、より強く団結したコミュニティを築くよう呼ばれています。',
 };
 
 const LOCALE_MAP: Record<LocaleCode, Strings> = {

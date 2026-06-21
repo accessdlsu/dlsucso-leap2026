@@ -295,9 +295,9 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
 
           {/* Filter row */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <OverlayFilter label={t('filter_subtheme')} value={selectedTheme} options={themeOptions} onChange={setSelectedTheme} />
-            <OverlayFilter label={t('filter_date')} value={selectedDate} options={dateOptions} onChange={setSelectedDate} />
-            <OverlayFilter label={t('filter_org')} value={selectedOrg} options={orgOptions} onChange={setSelectedOrg} />
+            <OverlayFilter label={t('filter_subtheme')} allLabel={t('filter_subtheme_all')} value={selectedTheme} options={themeOptions} onChange={setSelectedTheme} />
+            <OverlayFilter label={t('filter_date')} allLabel={t('filter_date_all')} value={selectedDate} options={dateOptions} onChange={setSelectedDate} />
+            <OverlayFilter label={t('filter_org')} allLabel={t('filter_org_all')} value={selectedOrg} options={orgOptions} onChange={setSelectedOrg} />
             <OverlayFilter label={t('filter_avail')} allLabel={t('filter_avail_all')} value={selectedAvail} options={availOptions} onChange={setSelectedAvail} />
           </div>
         </div>

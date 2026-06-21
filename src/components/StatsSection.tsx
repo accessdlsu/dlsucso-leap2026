@@ -12,22 +12,22 @@ export default function StatsSection({ subthemeCount, dayCount }: Props) {
   const classCount = allEvents.length > 0 ? allEvents.length : null;
 
   const stats = [
-    { value: classCount, label: "Classes" },
-    { value: subthemeCount, label: "Subthemes" },
-    { value: dayCount, label: "Days" },
+    { value: classCount, label: t('stats_label_classes') },
+    { value: subthemeCount, label: t('stats_label_subthemes') },
+    { value: dayCount, label: t('stats_label_days') },
   ];
 
   return (
     <div className="stats-section">
       <div className="stats-tagline-wrap">
         <h2 className="stats-tagline">
-          Piliin ang iyong landas.<br />
-          Palawakin ang iyong mundo.
+          {t('stats_tagline_fil')}<br />
+          {t('stats_tagline_fil2')}
         </h2>
         <p className="stats-subtitle">
-          <em>"Choose your path. Expand your world."</em>
+          <em>{t('stats_quote')}</em>
           <br />
-          Browse the classes below and register for the ones that call to you.
+          {t('stats_subtitle_browse')}
         </p>
       </div>
       <div className="stats-counters">
@@ -48,7 +48,7 @@ export default function StatsSection({ subthemeCount, dayCount }: Props) {
           margin: 0,
           fontStyle: "italic",
         }}>
-          More LEAP classes to be announced soon.
+          {t('stats_more_coming')}
         </p>
         <a href="/classes" className="stats-cta">{t('stats_browse_classes')}</a>
       </div>

@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Footer from "../components/navigation/Footer.astro";
+import AboutText from "../components/AboutText";
 ---
 
 <link rel="preload" as="image" href="/assets/background.jpeg" fetchpriority="high" />
@@ -19,13 +20,7 @@ import Footer from "../components/navigation/Footer.astro";
         />
       </div>
       <span class="about-tagline">Isang Nayon, Isang Layunin</span>
-      <h1 class="about-title">About Us</h1>
-      <p class="about-desc" style="margin-bottom: 1.25rem;">
-        LEAP 2026: Isang Nayon, Isang Layunin is derived from the Lasallian value of service, emphasizing that growth and success are achieved through collaboration, empathy, and a shared commitment to the common good. LEAP 2026 encourages Lasallians to contribute their strengths, support one another, and recognize that meaningful learning happens when individuals work together toward a common purpose.
-      </p>
-      <p class="about-desc">
-        Guided by the value of service, LEAP 2026 reminds students that leadership is about uplifting others, education is a gift meant to be shared, and true development comes from choosing community over competition. Through active participation and cooperation, Lasallians are called to build a stronger, more united community that reflects the values of bayanihan and collective growth.
-      </p>
+      <AboutText client:load />
 
 
       <Footer />
@@ -95,7 +90,7 @@ import Footer from "../components/navigation/Footer.astro";
       drop-shadow(0 0 24px rgba(222, 154, 73, 0.35));
   }
 
-  .about-title {
+  :global(.about-title) {
     font-family: "TD-Sulog", serif;
     font-weight: 700;
     font-size: clamp(2.5rem, 7vh, 4.5rem);
@@ -106,7 +101,7 @@ import Footer from "../components/navigation/Footer.astro";
     filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.5));
   }
 
-  .about-desc {
+  :global(.about-desc) {
     font-family: "DM Sans", sans-serif;
     font-size: clamp(0.9rem, 2vh, 1.2rem);
     color: rgba(255, 255, 255, 0.65);
@@ -115,7 +110,7 @@ import Footer from "../components/navigation/Footer.astro";
     margin: 0 0 2.5rem;
     max-width: 640px;
   }
-  .about-desc em {
+  :global(.about-desc) em {
     color: rgba(250, 225, 133, 0.8);
     font-style: italic;
   }

@@ -18,6 +18,8 @@ import {
   Bookmark,
   LogOut,
   User,
+  Bell,
+  Zap,
 } from "lucide-react";
 import type { UserProfile } from "leapify/types";
 import { getCachedProfile, restoreSession, signOutUser } from "../../services/auth";
@@ -650,6 +652,36 @@ export default function Navbar() {
             />
             {t('profile_access')}
           </a>
+          <button
+            style={menuItemStyle}
+            onClick={() => { toggleProfile(); window.dispatchEvent(new CustomEvent('leap:open-announcements')); }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.1)";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.16)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+            }}
+          >
+            <Bell size={18} strokeWidth={1.75} />
+            {t('profile_announcements')}
+          </button>
+          <button
+            style={menuItemStyle}
+            onClick={() => { toggleProfile(); window.dispatchEvent(new CustomEvent('leap:open-changelog')); }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.1)";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.16)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+              e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+            }}
+          >
+            <Zap size={18} strokeWidth={1.75} />
+            {t('profile_changelog')}
+          </button>
           {/* Locale selector */}
           <div style={{
             padding: "8px 10px 6px",

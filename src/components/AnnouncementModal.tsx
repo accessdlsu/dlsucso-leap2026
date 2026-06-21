@@ -59,6 +59,7 @@ function formatDate(unix: number): string {
 
 export default function AnnouncementModal() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [allAnnouncements, setAllAnnouncements] = useState<Announcement[]>([]);
   const [idx, setIdx] = useState(0);
   const [mounted, setMounted] = useState(false);
   const { locale, t } = useLocale();
@@ -67,12 +68,25 @@ export default function AnnouncementModal() {
     setMounted(true);
     leapifyApi.getAnnouncements()
       .then(list => {
+        const active = list.filter(a => a.isActive);
+        setAllAnnouncements(active);
         // Only show unacknowledged active announcements
-        const pending = list.filter(a => a.isActive && !isAcked(a.id));
+        const pending = active.filter(a => !isAcked(a.id));
         setAnnouncements(pending);
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    const handler = () => {
+      if (allAnnouncements.length > 0) {
+        setAnnouncements(allAnnouncements);
+        setIdx(0);
+      }
+    };
+    window.addEventListener('leap:open-announcements', handler);
+    return () => window.removeEventListener('leap:open-announcements', handler);
+  }, [allAnnouncements]);
 
   const current = announcements[idx] ?? null;
 
