@@ -154,8 +154,8 @@ import "../styles/gallery-card.css";
     margin-top: 3rem;
     padding: 2rem;
     background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(var(--blur, 0px));
+    -webkit-backdrop-filter: blur(var(--blur, 0px));
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
@@ -210,3 +210,4 @@ import "../styles/gallery-card.css";
     }
   }
 </style>
+

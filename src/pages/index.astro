@@ -639,8 +639,8 @@ const themes = [
     padding: 1rem 0.5rem;
     text-decoration: none;
     background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(var(--blur, 0px));
+    -webkit-backdrop-filter: blur(var(--blur, 0px));
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     cursor: pointer;
@@ -1060,8 +1060,8 @@ const themes = [
     width: 10%;
     z-index: 4;
     pointer-events: none;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(var(--blur, 0px));
+    -webkit-backdrop-filter: blur(var(--blur, 0px));
   }
 
   .gallery-outer::before {
@@ -1121,8 +1121,8 @@ const themes = [
     overflow: hidden;
     position: relative;
     background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(var(--blur, 0px));
+    -webkit-backdrop-filter: blur(var(--blur, 0px));
     border: 1px solid rgba(255, 255, 255, 0.08);
     transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     display: flex;
@@ -1143,8 +1143,8 @@ const themes = [
     padding: 0.6rem 0.35rem 0.5rem;
     border-radius: 10px;
     background: rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(var(--blur, 0px));
+    -webkit-backdrop-filter: blur(var(--blur, 0px));
     border: 1px solid rgba(255, 255, 255, 0.12);
     text-align: center;
     min-width: 34px;
@@ -1198,8 +1198,8 @@ const themes = [
     padding: 6px;
     border-radius: 22.37%;
     background: rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(var(--blur, 0px));
+    -webkit-backdrop-filter: blur(var(--blur, 0px));
     border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     pointer-events: none;
@@ -1241,8 +1241,8 @@ const themes = [
     flex-direction: column;
     gap: 0.3rem;
     background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(var(--blur, 0px));
+    -webkit-backdrop-filter: blur(var(--blur, 0px));
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
@@ -1306,8 +1306,8 @@ const themes = [
   .gallery-card-info-row {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    margin: 0.2rem 0 0.5rem;
+    gap: 0.18rem;
+    margin: 0.15rem 0 0;
   }
   .info-item {
     display: flex;
@@ -1333,9 +1333,8 @@ const themes = [
     align-items: center;
     flex-wrap: nowrap;
     gap: 0.25rem;
-    margin-top: 0.3rem;
-    padding-top: 0.45rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: 0.15rem;
+    padding-top: 0;
   }
 
   .slots-badge {
@@ -1350,8 +1349,8 @@ const themes = [
     align-items: center;
     justify-content: center;
     line-height: normal;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(var(--blur, 0px));
+    -webkit-backdrop-filter: blur(var(--blur, 0px));
     white-space: nowrap;
     flex-shrink: 1;
     min-width: 0;
@@ -1389,8 +1388,8 @@ const themes = [
     text-decoration: none;
     transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(var(--blur, 0px));
+    -webkit-backdrop-filter: blur(var(--blur, 0px));
     white-space: nowrap;
     flex-shrink: 0;
   }

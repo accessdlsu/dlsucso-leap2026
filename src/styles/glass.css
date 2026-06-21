@@ -1,14 +1,13 @@
 /* ── Glass Utility ── */
-/* Reusable glassmorphic base. Apply background separately per-element. */
+/* Reusable glassmorphic base. Blur via CSS var — progressive enhancement. */
 .glass {
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(var(--blur, 0px));
+  -webkit-backdrop-filter: blur(var(--blur, 0px));
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  /* GPU compositing — isolates blur to its own layer */
   transform: translateZ(0);
 }
 
-.glass--blur-sm  { backdrop-filter: blur(8px);  -webkit-backdrop-filter: blur(8px); }
-.glass--blur-md  { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
-.glass--blur-lg  { backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+.glass--blur-sm  { backdrop-filter: blur(var(--blur-sm, 0px));  -webkit-backdrop-filter: blur(var(--blur-sm, 0px)); }
+.glass--blur-md  { backdrop-filter: blur(var(--blur, 0px));     -webkit-backdrop-filter: blur(var(--blur, 0px)); }
+.glass--blur-lg  { backdrop-filter: blur(var(--blur-lg, 0px));  -webkit-backdrop-filter: blur(var(--blur-lg, 0px)); }

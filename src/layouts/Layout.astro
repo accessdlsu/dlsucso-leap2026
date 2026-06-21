@@ -48,6 +48,20 @@ const {
       :root {
         --nav-space-top: 88px;
         --nav-space-bottom: 0px;
+        /* Blur disabled by default — enabled only on capable devices */
+        --blur: 0px;
+        --blur-sm: 0px;
+        --blur-lg: 0px;
+      }
+      /* Progressive: apply blur only when browser supports it AND user hasn't requested reduced motion */
+      @supports (backdrop-filter: blur(1px)) {
+        @media (prefers-reduced-motion: no-preference) {
+          :root {
+            --blur: 14px;
+            --blur-sm: 6px;
+            --blur-lg: 20px;
+          }
+        }
       }
       @media (max-width: 768px) {
         :root {
@@ -293,13 +307,33 @@ const {
             events_cta_btn: 'すべてのクラスを見る',
           },
         };
-        var strings = T[locale];
-        if (!strings) return;
-        document.addEventListener('DOMContentLoaded', function() {
+        function applyI18n(lang) {
+          var s = T[lang];
+          if (!s) s = {};
           document.querySelectorAll('[data-i18n]').forEach(function(el) {
             var key = el.getAttribute('data-i18n');
-            if (strings[key]) el.textContent = strings[key];
+            // For English or missing key, restore original from data-i18n-default
+            var def = el.getAttribute('data-i18n-default');
+            if (s[key]) {
+              if (!def) el.setAttribute('data-i18n-default', el.textContent.trim());
+              el.textContent = s[key];
+            } else if (def) {
+              el.textContent = def;
+            }
           });
+        }
+
+        // Run on initial load
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function() { applyI18n(locale); });
+        } else {
+          applyI18n(locale);
+        }
+
+        // Re-run whenever locale changes (fired by setStoredLocale in locale.ts)
+        window.addEventListener('leap:locale-changed', function() {
+          var newLocale = localStorage.getItem('leap-locale') || 'en';
+          applyI18n(newLocale);
         });
       })();
     </script>

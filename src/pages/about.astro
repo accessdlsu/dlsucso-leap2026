@@ -127,8 +127,8 @@ import Footer from "../components/navigation/Footer.astro";
     padding: 1.75rem 2rem;
     margin-bottom: 1rem;
     background: rgba(0, 0, 0, 0.25);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(var(--blur, 0px));
+    -webkit-backdrop-filter: blur(var(--blur, 0px));
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
@@ -176,3 +176,4 @@ import Footer from "../components/navigation/Footer.astro";
     }
   }
 </style>
+

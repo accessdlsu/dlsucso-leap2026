@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef, memo, startTransition } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, X, Bookmark, Clock } from 'lucide-react';
 import { useLocale } from '../hooks/useLocale';
 import { useProgressiveRender } from '../hooks/useProgressiveRender';
@@ -435,6 +436,14 @@ export default function ClassesFilter() {
         if (!haystack.includes(q)) return false;
       }
       return true;
+    }).sort((a, b) => {
+      const slotPriority = (c: typeof a) => {
+        const status = computeSlotStatus(c, slotsMap.get(c.slug));
+        const regClosed = c.registrationEnabled === false || (c.registrationClosesAt != null && c.registrationClosesAt * 1000 < nowMs);
+        if (regClosed || status === 'full') return 1;
+        return 0;
+      };
+      return slotPriority(a) - slotPriority(b);
     });
   }, [activeClasses, showOnlyBookmarked, bookmarkedIds, selectedTheme, selectedDate, selectedOrg, selectedAvailability, slotsMap, q, nowMs]);
 
@@ -729,7 +738,7 @@ export default function ClassesFilter() {
                       {myRegistrations.some(r => r.slug === c.slug) && (
                         <div style={{
                           position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
-                          zIndex: 10, background: 'rgba(42,98,52,0.85)', backdropFilter: 'blur(8px)',
+                          zIndex: 10, background: 'rgba(42,98,52,0.85)', backdropFilter: 'blur(var(--blur-sm, 0px))',
                           border: '1px solid rgba(139,229,155,0.4)', borderRadius: 9999,
                           padding: '3px 12px', fontFamily: "'Poppins', sans-serif",
                           fontSize: '0.6rem', fontWeight: 700, color: '#8be59b',
@@ -789,7 +798,7 @@ export default function ClassesFilter() {
                           paddingTop: 12,
                         }}>
                           <span style={{
-                            background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)',
+                            background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(var(--blur-sm, 0px))',
                             border: '1px solid rgba(255,255,255,0.15)', borderRadius: 9999,
                             padding: '3px 12px', fontFamily: "'Poppins', sans-serif",
                             fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)',
@@ -820,11 +829,11 @@ export default function ClassesFilter() {
       )}
 
       {/* My Registrations Dialog */}
-      {myRegsDialogOpen && (
+      {myRegsDialogOpen && createPortal(
         <div
           style={{
-            position: 'fixed', inset: 0, zIndex: 9999,
-            background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)',
+            position: 'fixed', inset: 0, zIndex: 10001,
+            background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(var(--blur-sm, 0px))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: '1rem',
           }}
@@ -893,7 +902,8 @@ export default function ClassesFilter() {
               })}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -91,14 +91,20 @@ import Footer from "../components/navigation/Footer.astro";
         <!-- QA Testers Category -->
         <div class="team-category">
           <h3 class="category-title">Special Thanks to QA Testers</h3>
-          <div class="qa-names-list">
-            <div class="qa-name-item"><span class="qa-name">Arhela Maxine Drapiza</span></div>
-            <div class="qa-name-item"><span class="qa-name">Paul Josef Agbuya</span></div>
-            <div class="qa-name-item"><span class="qa-name">Miguel James Martinez</span></div>
-            <div class="qa-name-item"><span class="qa-name">Lucas Antonio V Tujan</span></div>
-            <div class="qa-name-item"><span class="qa-name">Ron John Galvez</span></div>
-            <div class="qa-name-item"><span class="qa-name">Zamanttha Zyrah Sahidulla</span></div>
-            <div class="qa-name-item"><span class="qa-name">Dr. Melvin K. Cabatuan</span></div>
+          <div class="frontend-names-list">
+            {[
+              'Arhela Maxine Drapiza',
+              'Paul Josef Agbuya',
+              'Miguel James Martinez',
+              'Lucas Antonio V Tujan',
+              'Ron John Galvez',
+              'Zamanttha Zyrah Sahidulla',
+              'Dr. Melvin K. Cabatuan',
+            ].map(name => (
+              <div class="frontend-name-item">
+                <span class="frontend-name">{name}</span>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -259,8 +265,8 @@ import Footer from "../components/navigation/Footer.astro";
     padding: 1.75rem 2rem;
     margin-bottom: 1.25rem;
     background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(var(--blur, 0px));
+    -webkit-backdrop-filter: blur(var(--blur, 0px));
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
@@ -469,8 +475,8 @@ import Footer from "../components/navigation/Footer.astro";
     gap: 1rem;
     padding: 1.75rem;
     background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(var(--blur, 0px));
+    -webkit-backdrop-filter: blur(var(--blur, 0px));
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px;
     width: 100%;
@@ -527,31 +533,40 @@ import Footer from "../components/navigation/Footer.astro";
     line-height: 1.4;
   }
 
-  /* QA Testers */
-  .qa-names-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.65rem 1.25rem;
-    max-width: 900px;
+  /* QA Testers grid — 2 per row */
+  .qa-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+    width: 100%;
+    justify-items: stretch;
   }
-  .qa-name-item {
+
+  .qa-card {
+    flex-direction: row;
+    text-align: left;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    max-width: none;
+    align-items: center;
+  }
+
+  .qa-avatar-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: rgba(250, 225, 133, 0.07);
+    border: 1px solid rgba(250, 225, 133, 0.15);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-  }
-  .qa-name-item::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(250, 225, 133, 0.7);
+    justify-content: center;
     flex-shrink: 0;
   }
-  .qa-name {
-    font-family: "DM Sans", sans-serif;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.85);
+
+  @media (max-width: 600px) {
+    .qa-grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   /* Developers Sub-layout Grid */
@@ -588,8 +603,8 @@ import Footer from "../components/navigation/Footer.astro";
     align-items: center;
     padding: 0.85rem 1.5rem;
     background: rgba(255, 255, 255, 0.01);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(var(--blur, 0px));
+    -webkit-backdrop-filter: blur(var(--blur, 0px));
     border: 1px solid rgba(255, 255, 255, 0.04);
     border-radius: 12px;
     transition: border-color 0.25s, background 0.25s;
@@ -607,3 +622,4 @@ import Footer from "../components/navigation/Footer.astro";
     color: rgba(255, 255, 255, 0.85);
   }
 </style>
+

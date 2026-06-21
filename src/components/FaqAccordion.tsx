@@ -6,8 +6,8 @@ import type { Faq } from "leapify/types";
 
 const glassCard: CSSProperties = {
   background: "rgba(0, 0, 0, 0.25)",
-  backdropFilter: "blur(20px)",
-  WebkitBackdropFilter: "blur(20px)",
+  backdropFilter: "blur(var(--blur, 0px))",
+  WebkitBackdropFilter: "blur(var(--blur, 0px))",
   borderRadius: 16,
   border: "1px solid rgba(255, 255, 255, 0.06)",
   overflow: "hidden",

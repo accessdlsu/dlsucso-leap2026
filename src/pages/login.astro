@@ -276,7 +276,7 @@ import Fireflies from "../components/Fireflies.astro";
     gap: 10px;
     padding: 10px 18px;
     background: rgba(185, 28, 28, 0.35); /* red glassmorphism */
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(var(--blur, 0px));
     border: 1px solid rgba(239, 68, 68, 0.4); /* soft red border */
     border-radius: 20px; /* robust corner radius that looks clean when wrapped */
     font-family: "DM Sans", sans-serif;
@@ -504,14 +504,14 @@ import Fireflies from "../components/Fireflies.astro";
     max-width: 480px;
     width: 90vw;
     background: rgba(0, 0, 0, 0.25);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(var(--blur, 0px));
+    -webkit-backdrop-filter: blur(var(--blur, 0px));
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     cursor: url("/assets/cursor.png"), auto;
   }
   .legal-dialog::backdrop {
     background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(var(--blur, 0px));
   }
   .legal-dialog-content {
     padding: 2rem;
@@ -753,3 +753,4 @@ import Fireflies from "../components/Fireflies.astro";
   });
 
 </script>
+

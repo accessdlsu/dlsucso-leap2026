@@ -146,9 +146,6 @@ function ClassCard({
 
       <div className="gallery-card-body">
         <div className="card-tags-row">
-          {event.classCode && (
-            <span className="card-code-tag">{event.classCode}</span>
-          )}
           <span
             className="card-theme-tag"
             style={{
@@ -172,10 +169,10 @@ function ClassCard({
             <span className="info-label">{t('venue_label')}</span>
             <span className="info-val">{shortenVenue(event.venue)}</span>
           </div>
-          {dayNumber != null && (
+          {event.classCode && (
             <div className="info-item">
-              <span className="info-label">{t('day_filter_label')}</span>
-              <span className="info-val">{t('day_label', { n: dayNumber })}</span>
+              <span className="info-label">{t('class_code_label')}</span>
+              <span className="info-val">{event.classCode}</span>
             </div>
           )}
         </div>

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Zap, Search, Bell, Wrench, Clock, TrendingUp, Globe } from 'lucide-react';
+import { Zap, Search, Bell, LayoutGrid, SortAsc, Clock, Wrench, TrendingUp, Globe } from 'lucide-react';
 
 // Bump this ID whenever a new changelog should re-show for all users
-const CHANGELOG_ID = 'monday-feature-drop-2026-06-23-v3';
+const CHANGELOG_ID = 'feature-drop-2026-06-22-v6';
 const SEEN_KEY = `leap-changelog-seen-${CHANGELOG_ID}`;
 
 const CHANGES: {
@@ -13,66 +13,77 @@ const CHANGES: {
   items: string[];
 }[] = [
   {
-    icon: <Bell size={14} strokeWidth={2} />,
-    label: 'Announcements',
-    color: '#fbbf24',
-    items: [
-      'Site announcements now appear in one dialog with timestamp and navigation between multiple',
-      'Links in announcements are clickable — no need to copy-paste URLs',
-      'Each announcement tracked separately — dismissing one keeps others visible',
-      'Available in English, Filipino, 简体中文, 繁體中文, 한국어, 日本語',
-    ],
-  },
-  {
-    icon: <Clock size={14} strokeWidth={2} />,
-    label: 'Classes Ended Section',
-    color: '#94a3b8',
-    items: [
-      'Past events now grouped in a collapsible "Classes Ended" section on the Classes page',
-      'Search no longer shows ended events in results',
-      'Saved classes that have ended appear in a separate "Event Ended" section',
-    ],
-  },
-  {
-    icon: <Wrench size={14} strokeWidth={2} />,
-    label: 'Enhancements Page',
+    icon: <LayoutGrid size={14} strokeWidth={2} />,
+    label: 'Class Card Redesign',
     color: '#a78bfa',
     items: [
-      'A new page may appear during scheduled improvements with a live countdown to when the site returns',
+      'Class code moved below Venue — now shown as a text label row (CODE · S1006) instead of a badge',
+      'Day number row removed from cards — cleaner layout',
+      'Theme tag no longer wraps to a second line — truncates with ellipsis when too long',
+      'Divider line between class info and footer removed',
+      'Card body padding tightened — less overlap with date and org logo badges',
     ],
   },
   {
-    icon: <TrendingUp size={14} strokeWidth={2} />,
-    label: 'Speed Improvements',
+    icon: <SortAsc size={14} strokeWidth={2} />,
+    label: 'Smarter Sorting',
     color: '#34d399',
     items: [
-      'Pages load faster — logos and class images prioritized earlier',
-      'Searching and filtering classes feels more responsive',
-      'Opening class details is noticeably snappier',
-      'Homepage sections now snap and center correctly on desktop',
+      'Classes with available slots now appear first',
+      'Full and registration-closed classes automatically pushed to the bottom of the list',
     ],
   },
   {
     icon: <Zap size={14} strokeWidth={2} />,
-    label: 'Smoother UI',
+    label: 'Navigation',
     color: '#f97316',
     items: [
-      'Removed unnecessary animations that were slowing down the site',
-      'All interactions feel faster — drawers, overlays, and menus respond instantly',
+      'Desktop navbar links now show icon above label — same compact style as mobile',
+      'Navbar pill width capped at 680px — no longer stretches across the full screen',
     ],
   },
   {
-    icon: <Globe size={14} strokeWidth={2} />,
-    label: 'Language Support',
-    color: '#38bdf8',
+    icon: <Bell size={14} strokeWidth={2} />,
+    label: 'ACCESS DLSU Page',
+    color: '#fbbf24',
     items: [
-      'The entire UI now adapts to your chosen language — slot labels, filters, buttons, and messages',
-      'Switch languages anytime from the profile menu — detected automatically on first visit',
+      'QA Testers now displayed as clean name cards — profile icon and "QA Tester" label removed',
+      'Layout matches the Developers section for consistency',
     ],
   },
   {
     icon: <Search size={14} strokeWidth={2} />,
     label: 'Fixes',
+    color: '#60a5fa',
+    items: [
+      '"Your Registered Class" dialog now appears above the class drawer — no longer hidden behind it',
+    ],
+  },
+  {
+    icon: <Bell size={14} strokeWidth={2} />,
+    label: 'Navigation (v4)',
+    color: '#fbbf24',
+    items: [
+      'Saved Classes bookmark moved to a dedicated icon in the top navigation bar',
+      'Faster access to saved classes — no longer buried in the profile menu',
+    ],
+  },
+  {
+    icon: <Globe size={14} strokeWidth={2} />,
+    label: 'More Languages (v4)',
+    color: '#38bdf8',
+    items: [
+      'Language switcher now visible directly in the navigation bar — no need to open a menu',
+      'Switching language now instantly updates page titles and section descriptions too',
+      'Class drawer (Code, Theme, Date, Time, Venue, Slots) fully translated',
+      'Section titles and descriptions on all pages adapt to your language',
+      '"Browse All Classes", "See Details", "View More" — all translated',
+      'QA Testers credited on the ACCESS DLSU page with individual cards',
+    ],
+  },
+  {
+    icon: <Search size={14} strokeWidth={2} />,
+    label: 'Fixes (v3)',
     color: '#60a5fa',
     items: [
       'Classes with a passed registration deadline now correctly show "Reg. Closed"',
@@ -86,14 +97,60 @@ const CHANGES: {
   },
   {
     icon: <Globe size={14} strokeWidth={2} />,
-    label: 'More Languages',
+    label: 'Language Support (v3)',
     color: '#38bdf8',
     items: [
-      'Language switcher now visible directly in the navigation bar — no need to open a menu',
-      'Class drawer (Code, Theme, Date, Time, Venue, Slots) fully translated',
-      'Section titles and descriptions on all pages adapt to your language',
-      '"Browse All Classes", "See Details", "View More" — all translated',
-      'QA Testers and Developers credited on the ACCESS DLSU page',
+      'The entire UI now adapts to your chosen language — slot labels, filters, buttons, and messages',
+      'Switch languages anytime from the profile menu — detected automatically on first visit',
+    ],
+  },
+  {
+    icon: <Zap size={14} strokeWidth={2} />,
+    label: 'Smoother UI (v2)',
+    color: '#f97316',
+    items: [
+      'Removed unnecessary animations that were slowing down the site',
+      'All interactions feel faster — drawers, overlays, and menus respond instantly',
+    ],
+  },
+  {
+    icon: <TrendingUp size={14} strokeWidth={2} />,
+    label: 'Speed Improvements (v2)',
+    color: '#34d399',
+    items: [
+      'Pages load faster — logos and class images prioritized earlier',
+      'Searching and filtering classes feels more responsive',
+      'Opening class details is noticeably snappier',
+      'Homepage sections now snap and center correctly on desktop',
+    ],
+  },
+  {
+    icon: <Wrench size={14} strokeWidth={2} />,
+    label: 'Enhancements Page (v1)',
+    color: '#a78bfa',
+    items: [
+      'A new page may appear during scheduled improvements with a live countdown to when the site returns',
+    ],
+  },
+  {
+    icon: <Clock size={14} strokeWidth={2} />,
+    label: 'Classes Ended Section (v1)',
+    color: '#94a3b8',
+    items: [
+      'Past events now grouped in a collapsible "Classes Ended" section on the Classes page',
+      'Search no longer shows ended events in results',
+      'Saved classes that have ended appear in a separate "Event Ended" section',
+    ],
+  },
+  {
+    icon: <Bell size={14} strokeWidth={2} />,
+    label: 'Announcements (v1)',
+    color: '#fbbf24',
+    items: [
+      'Site announcements now appear in one dialog with timestamp and navigation between multiple',
+      'Links in announcements are clickable — no need to copy-paste URLs',
+      'Each announcement tracked separately — dismissing one keeps others visible',
+      'Available in English, Filipino, 简体中文, 繁體中文, 한국어, 日本語',
     ],
   },
 ];
@@ -132,8 +189,8 @@ export default function ChangelogModal() {
         style={{
           position: 'absolute', inset: 0,
           background: 'rgba(0,0,0,0.7)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
+          backdropFilter: 'blur(var(--blur-sm, 0px))',
+          WebkitBackdropFilter: 'blur(var(--blur-sm, 0px))',
         }}
         aria-hidden="true"
         onClick={dismiss}
@@ -149,7 +206,7 @@ export default function ChangelogModal() {
           boxShadow: '0 32px 96px rgba(0,0,0,0.7)',
           width: '100%',
           maxWidth: 560,
-          maxHeight: '88vh',
+          maxHeight: '65vh',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
@@ -190,7 +247,7 @@ export default function ChangelogModal() {
                 fontSize: '0.72rem',
                 color: 'rgba(255,255,255,0.3)',
               }}>
-                June 23, 2026 · v3
+                June 22, 2026 · v6
               </span>
             </div>
             <h2
@@ -203,7 +260,7 @@ export default function ChangelogModal() {
                 margin: 0,
               }}
             >
-              Monday Feature Drop
+              Sunday Feature Drop
             </h2>
           </div>
         </div>

@@ -81,8 +81,8 @@ export default function SavedClassesOverlay({ open, onClose }: Props) {
         <div
           style={{
             background: 'rgba(8,14,24,0.90)',
-            backdropFilter: 'blur(28px)',
-            WebkitBackdropFilter: 'blur(28px)',
+            backdropFilter: 'blur(var(--blur-lg, 0px))',
+            WebkitBackdropFilter: 'blur(var(--blur-lg, 0px))',
             borderBottom: '1px solid rgba(255,255,255,0.08)',
             padding: '18px 20px 14px',
             display: 'flex', flexDirection: 'column', gap: 10,
@@ -115,8 +115,8 @@ export default function SavedClassesOverlay({ open, onClose }: Props) {
           style={{
             maxHeight: '60vh', overflowY: 'auto',
             background: 'rgba(6,12,22,0.97)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
+            backdropFilter: 'blur(var(--blur, 0px))',
+            WebkitBackdropFilter: 'blur(var(--blur, 0px))',
             borderBottom: '1px solid rgba(255,255,255,0.07)',
             scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.12) transparent',
           }}

@@ -128,8 +128,8 @@ export default function AnnouncementModal() {
         style={{
           position: 'absolute', inset: 0,
           background: 'rgba(0,0,0,0.75)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
+          backdropFilter: 'blur(var(--blur-sm, 0px))',
+          WebkitBackdropFilter: 'blur(var(--blur-sm, 0px))',
         }}
         aria-hidden="true"
         onClick={current.requiresAck ? undefined : handleDismiss}

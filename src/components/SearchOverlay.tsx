@@ -44,8 +44,8 @@ function OverlayFilter({ label, allLabel, value, options, onChange }: FilterProp
   const menu: CSSProperties = {
     position: 'absolute', top: '100%', left: 0, marginTop: 6,
     minWidth: 200, maxHeight: 220, overflowY: 'auto',
-    background: 'rgba(8,14,24,0.96)', backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
+    background: 'rgba(8,14,24,0.96)', backdropFilter: 'blur(var(--blur, 0px))',
+    WebkitBackdropFilter: 'blur(var(--blur, 0px))',
     border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12,
     zIndex: 2100, padding: '4px 0',
     scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.12) transparent',
@@ -251,8 +251,8 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
           style={{
             position: 'relative', zIndex: 1,
             background: 'rgba(8,14,24,0.90)',
-            backdropFilter: 'blur(28px)',
-            WebkitBackdropFilter: 'blur(28px)',
+            backdropFilter: 'blur(var(--blur-lg, 0px))',
+            WebkitBackdropFilter: 'blur(var(--blur-lg, 0px))',
             borderBottom: '1px solid rgba(255,255,255,0.08)',
             padding: '18px 20px 14px',
             display: 'flex', flexDirection: 'column', gap: 10,
@@ -309,8 +309,8 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
               position: 'relative', zIndex: 0,
               maxHeight: '55vh', overflowY: 'auto',
               background: 'rgba(6,12,22,0.97)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
+              backdropFilter: 'blur(var(--blur, 0px))',
+              WebkitBackdropFilter: 'blur(var(--blur, 0px))',
               borderBottom: '1px solid rgba(255,255,255,0.07)',
               scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.12) transparent',
             }}

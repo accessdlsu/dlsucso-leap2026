@@ -230,8 +230,8 @@ export default function Navbar() {
 
   const glassStyle: CSSProperties = {
     background: "rgba(0, 0, 0, 0.25)",
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
+    backdropFilter: "blur(var(--blur, 0px))",
+    WebkitBackdropFilter: "blur(var(--blur, 0px))",
     borderRadius: 9999,
     boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15)",
     border: "1px solid rgba(255, 255, 255, 0.08)",
@@ -256,8 +256,9 @@ export default function Navbar() {
     alignItems: "center",
     height: 58,
     padding: "0 2px",
+    minWidth: 400,
+    maxWidth: "min(680px, calc(100vw - 320px))", // leave room for right cluster
     width: "100%",
-    maxWidth: 680,
     ...glassStyle,
   };
 
@@ -268,7 +269,7 @@ export default function Navbar() {
     fontSize: "1rem",
     fontWeight: 500,
     textDecoration: "none",
-    padding: "17px 0",
+    padding: "6px 0",
     borderRadius: 9999,
     whiteSpace: "nowrap",
     display: "flex",
@@ -287,8 +288,8 @@ export default function Navbar() {
     borderRadius: 16,
     padding: 8,
     background: "rgba(0, 0, 0, 0.25)",
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
+    backdropFilter: "blur(var(--blur, 0px))",
+    WebkitBackdropFilter: "blur(var(--blur, 0px))",
     boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15)",
     border: "1px solid rgba(255, 255, 255, 0.06)",
     display: "flex",
@@ -469,47 +470,43 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Locale quick-switcher — always visible in nav */}
-        <div
-          className="nav-glass-pill"
-          style={{
-            ...pillContainer,
-            position: "relative",
-            top: "auto",
-            left: "auto",
-            height: 58,
-            width: "auto",
-            padding: "0 12px",
-            opacity: mounted ? 1 : 0,
-            transition: "opacity 0.15s ease",
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-          }}
-        >
-          {SUPPORTED_LOCALES.map(({ code, short }) => (
+        {/* Bookmark pill — always visible in nav */}
+        {user && (
+          <div
+            className="nav-glass-pill"
+            style={{
+              ...pillContainer,
+              position: "relative",
+              top: "auto",
+              left: "auto",
+              width: 58,
+              height: 58,
+              padding: 0,
+              opacity: mounted ? 1 : 0,
+              transition: "opacity 0.15s ease",
+            }}
+          >
             <button
-              key={code}
-              onClick={() => setStoredLocale(code)}
-              aria-pressed={locale === code}
+              onClick={() => setSavedOpen(true)}
+              aria-label={t('profile_saved')}
               style={{
-                padding: "3px 7px",
-                borderRadius: 6,
-                border: `1px solid ${locale === code ? "rgba(250,225,133,0.5)" : "rgba(255,255,255,0.1)"}`,
-                background: locale === code ? "rgba(250,225,133,0.12)" : "transparent",
-                color: locale === code ? "rgba(250,225,133,0.95)" : "rgba(255,255,255,0.45)",
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: "0.68rem",
-                fontWeight: locale === code ? 700 : 500,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "none",
+                border: "none",
                 cursor: "pointer",
-                lineHeight: 1.4,
+                color: "rgba(255,255,255,0.7)",
                 WebkitTapHighlightColor: "transparent",
+                width: "100%",
+                height: "100%",
+                borderRadius: 9999,
               }}
             >
-              {short}
+              <Bookmark size={isMobile ? 22 : 24} strokeWidth={1.75} />
             </button>
-          ))}
-        </div>
+          </div>
+        )}
 
         <div
           ref={profileRef}
@@ -653,23 +650,6 @@ export default function Navbar() {
             />
             {t('profile_access')}
           </a>
-          {user && (
-            <button
-              style={menuItemStyle}
-              onClick={() => { toggleProfile(); setSavedOpen(true); }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = "rgba(255,255,255,0.1)";
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.16)";
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
-              }}
-            >
-              <Bookmark size={18} strokeWidth={1.75} />
-              {t('profile_saved')}
-            </button>
-          )}
           {/* Locale selector */}
           <div style={{
             padding: "8px 10px 6px",
@@ -777,8 +757,8 @@ export default function Navbar() {
               borderRadius: 9999,
               overflow: "hidden",
               background: "rgba(0, 0, 0, 0.25)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
+              backdropFilter: "blur(var(--blur, 0px))",
+              WebkitBackdropFilter: "blur(var(--blur, 0px))",
               boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
               border: "1px solid rgba(255, 255, 255, 0.08)",
               opacity: (mounted && !atBottom) ? 1 : 0,
@@ -912,8 +892,10 @@ export default function Navbar() {
                 style={{
                   ...linkStyle,
                   flex: 1,
-                  fontSize: `${desktopFontSize}rem`,
-                  gap: "6px",
+                  minWidth: 0,
+                  flexDirection: "column",
+                  gap: "3px",
+                  fontSize: "0.65rem",
                   color: isActive
                     ? "rgba(255, 255, 255, 0.95)"
                     : hoveredIndex === i
