@@ -1,5 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import ScrollIndicator from "../components/ScrollIndicator";
 import GalleryCarousel from "../components/GalleryCarousel";
 import StatsSection from "../components/StatsSection";
 import Footer from "../components/navigation/Footer.astro";
@@ -64,36 +65,17 @@ const themes = [
     <Fireflies />
 
     <!-- Sidebar Scroll-Snap Dots -->
-    <div class="scroll-indicator">
-      <button
-        class="indicator-dot active"
-        data-target="hero-section"
-        aria-label="Go to Hero Section"></button>
-      <button
-        class="indicator-dot"
-        data-target="featured-section"
-        aria-label="Go to Featured Section"></button>
-      <button
-        class="indicator-dot"
-        data-target="classes-section"
-        aria-label="Go to Classes Section"></button>
-      <button
-        class="indicator-dot"
-        data-target="subthemes"
-        aria-label="Go to Subthemes Section"></button>
-      <button
-        class="indicator-dot"
-        data-target="leapdays"
-        aria-label="Go to LEAP Days Section"></button>
-    </div>
+    <ScrollIndicator client:only="react" />
 
-    <div class="home-hero" id="hero-section" transition:name="hero">
+    <div class="home-hero" id="hero-section">
       <div class="home-content">
         <div class="logo-wrapper anim-in">
           <img
             src="/logo/logo-hd.png"
             alt="LEAP 2026"
             loading="eager"
+            fetchpriority="high"
+            decoding="sync"
             style="width: min(600px, 85vw, 50vh); height: auto; max-height: 50vh; object-fit: contain; display: block;"
             draggable="false"
           />
@@ -118,8 +100,8 @@ const themes = [
     </div>
 
     <section class="home-featured" id="featured-section">
-      <h2 class="featured-title">Main Events</h2>
-      <p class="featured-desc">
+      <h2 class="featured-title" data-i18n="section_main_events">Main Events</h2>
+      <p class="featured-desc" data-i18n="section_main_events_desc">
         Discover what makes LEAP 2026 a celebration of community, culture, and
         shared purpose.
       </p>
@@ -171,8 +153,8 @@ const themes = [
     </section>
 
     <section class="home-subthemes" id="subthemes">
-      <h2 class="section-title">Subthemes</h2>
-      <p class="section-desc">
+      <h2 class="section-title" data-i18n="section_subthemes">Subthemes</h2>
+      <p class="section-desc" data-i18n="section_subthemes_desc">
         Explore the six pillars of LEAP 2026 — each representing a unique facet
         of community and growth.
       </p>
@@ -195,8 +177,8 @@ const themes = [
     </section>
 
     <section class="home-leapdays" id="leapdays">
-      <h2 class="section-title">LEAP Days</h2>
-      <p class="section-desc">
+      <h2 class="section-title" data-i18n="section_leapdays">LEAP Days</h2>
+      <p class="section-desc" data-i18n="section_leapdays_desc">
         Six days of celebration, learning, and community — pick your day.
       </p>
       <div class="leapdays-row">
@@ -353,21 +335,16 @@ const themes = [
     gap: clamp(0.5rem, 3vh, 1.25rem);
     max-width: min(520px, 90vw);
     padding: 0;
-    transition:
-      opacity 0.3s ease-out,
-      transform 0.3s ease-out;
     box-sizing: border-box;
+  }
+  .home-content.scroll-hide {
+    display: none;
   }
   .home-content .logo-wrapper img {
     filter: drop-shadow(0 0 50px rgba(222, 154, 73, 0.18));
     user-select: none;
     -webkit-user-select: none;
     -webkit-user-drag: none;
-  }
-  .home-content.scroll-hide {
-    opacity: 0;
-    transform: translateY(-12px);
-    pointer-events: none;
   }
 
   @media (min-width: 969px) and (min-height: 500px) {
@@ -477,16 +454,7 @@ const themes = [
   }
 
   .anim-in {
-    animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
-  }
-  .anim-in:nth-child(2) {
-    animation-delay: 0.15s;
-  }
-  .anim-in:nth-child(3) {
-    animation-delay: 0.2s;
-  }
-  .anim-in:nth-child(4) {
-    animation-delay: 0.25s;
+    /* animations removed for performance */
   }
 
   /* ── Landscape ── */
@@ -499,13 +467,9 @@ const themes = [
     z-index: 1;
     pointer-events: none;
     line-height: 0;
-    transition:
-      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-      opacity 0.6s ease;
   }
   .landscape.scroll-hide {
-    opacity: 0;
-    transform: translateY(40px);
+    display: none;
   }
 
   /* ── Subthemes Section ── */
@@ -516,13 +480,11 @@ const themes = [
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem
-      calc(1.5rem + var(--nav-space-bottom));
+    padding: 1.5rem;
     text-align: center;
     min-height: 100dvh;
     box-sizing: border-box;
     scroll-snap-align: start;
-    scroll-margin-top: var(--nav-space-top);
   }
 
   .subthemes-scroll {
@@ -582,29 +544,6 @@ const themes = [
     display: block;
     user-select: none;
     -webkit-user-drag: none;
-  }
-
-  @keyframes wiggle {
-    0%,
-    100% {
-      transform: rotate(0deg);
-    }
-    20% {
-      transform: rotate(-7deg);
-    }
-    40% {
-      transform: rotate(5deg);
-    }
-    60% {
-      transform: rotate(-3deg);
-    }
-    80% {
-      transform: rotate(2deg);
-    }
-  }
-
-  .subtheme-card:hover .subtheme-img-wrap {
-    animation: wiggle 0.5s ease;
   }
 
   .subtheme-card:hover .subtheme-name {
@@ -668,13 +607,11 @@ const themes = [
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem
-      calc(1.5rem + var(--nav-space-bottom));
+    padding: 1.5rem;
     text-align: center;
     min-height: 100dvh;
     box-sizing: border-box;
     scroll-snap-align: start;
-    scroll-margin-top: var(--nav-space-top);
   }
 
   /* ── Below-the-fold: skip layout/paint until near viewport ── */
@@ -768,14 +705,12 @@ const themes = [
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem
-      calc(1.5rem + var(--nav-space-bottom));
+    padding: 1.5rem;
     text-align: center;
     min-height: 100dvh;
     justify-content: center;
     box-sizing: border-box;
     scroll-snap-align: start;
-    scroll-margin-top: var(--nav-space-top);
   }
 
   /* ── Classes / Stats Section ── */
@@ -786,12 +721,10 @@ const themes = [
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: calc(1.5rem + var(--nav-space-top)) 1.5rem
-      calc(1.5rem + var(--nav-space-bottom));
+    padding: 1.5rem;
     min-height: 100dvh;
     box-sizing: border-box;
     scroll-snap-align: start;
-    scroll-margin-top: var(--nav-space-top);
   }
 
   /* ── Responsive ── */
@@ -882,63 +815,13 @@ const themes = [
     }
   }
   .scroll-cue.scroll-hide {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  .scroll-cue svg {
-    animation: bounce 2s infinite;
-  }
-  @keyframes bounce {
-    0%,
-    20%,
-    50%,
-    80%,
-    100% {
-      transform: translateY(0);
-    }
-    40% {
-      transform: translateY(-6px);
-    }
-    60% {
-      transform: translateY(-3px);
-    }
+    display: none;
   }
 
   /* ── Sidebar Scroll Indicator ── */
-  .scroll-indicator {
-    position: fixed;
-    right: 2rem;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    z-index: 1002;
-  }
+  /* Rendered by ScrollIndicator.tsx (client:only) */
   @media (max-width: 768px) {
-    .scroll-indicator {
-      display: none;
-    }
-  }
-  .indicator-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.25);
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    transition:
-      height 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-      background 0.3s ease;
-  }
-  .indicator-dot:hover {
-    background: rgba(255, 255, 255, 0.5);
-  }
-  .indicator-dot.active {
-    height: 24px;
-    background: #fae185;
-    box-shadow: 0 0 8px rgba(250, 225, 133, 0.6);
+    /* ScrollIndicator hides itself on mobile via JS */
   }
 
   /* ── Subtheme Grid Viewport Adjustment ── */
@@ -994,81 +877,22 @@ const themes = [
     const content = document.querySelector(".home-content");
     const landscape = document.querySelector(".landscape");
     const cue = document.querySelector(".scroll-cue");
-    const dots = document.querySelectorAll(".indicator-dot");
 
     if (!bg) return;
-
-    const reduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-
-    // Dot navigation click handler
-    dots.forEach((dot) => {
-      dot.addEventListener("click", () => {
-        const targetId = dot.getAttribute("data-target");
-        const target = document.getElementById(targetId);
-        if (target) {
-          bg.scrollTo({
-            top: target.offsetTop,
-            behavior: "smooth",
-          });
-        }
-      });
-    });
-
-    // Section IntersectionObserver for active dot (root = scroll container)
-    const sectionIds = [
-      "hero-section",
-      "featured-section",
-      "classes-section",
-      "subthemes",
-      "leapdays",
-    ];
-    const sectionRatios = new Map<string, number>(
-      sectionIds.map((id) => [id, 0]),
-    );
-    const sectionObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          sectionRatios.set(entry.target.id, entry.intersectionRatio);
-        });
-        // Pick the section with the highest intersection ratio
-        let bestId = "";
-        let bestRatio = 0;
-        sectionRatios.forEach((ratio, id) => {
-          if (ratio > bestRatio) {
-            bestRatio = ratio;
-            bestId = id;
-          }
-        });
-        if (bestId && bestRatio > 0) {
-          const idx = sectionIds.indexOf(bestId);
-          if (idx !== -1)
-            dots.forEach((d, i) => d.classList.toggle("active", i === idx));
-        }
-      },
-      { root: bg, threshold: [0, 0.25, 0.5, 0.75, 1] },
-    );
-    sectionIds.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) sectionObserver.observe(el);
-    });
 
     /* ── Hero scroll listener (hide/show hero elements only) ── */
     bg.addEventListener(
       "scroll",
       () => {
         const st = bg.scrollTop;
-        if (!reduced) {
-          if (st > 80) {
-            if (content) content.classList.add("scroll-hide");
-            if (landscape) landscape.classList.add("scroll-hide");
-            if (cue) cue.classList.add("scroll-hide");
-          } else {
-            if (content) content.classList.remove("scroll-hide");
-            if (landscape) landscape.classList.remove("scroll-hide");
-            if (cue) cue.classList.remove("scroll-hide");
-          }
+        if (st > 80) {
+          if (content) content.classList.add("scroll-hide");
+          if (landscape) landscape.classList.add("scroll-hide");
+          if (cue) cue.classList.add("scroll-hide");
+        } else {
+          if (content) content.classList.remove("scroll-hide");
+          if (landscape) landscape.classList.remove("scroll-hide");
+          if (cue) cue.classList.remove("scroll-hide");
         }
       },
       { passive: true },
@@ -1733,9 +1557,7 @@ const themes = [
     .home-classes,
     .home-subthemes,
     .home-leapdays {
-      padding: calc(0.5rem + var(--nav-space-top)) 1rem
-        calc(0.5rem + var(--nav-space-bottom)) !important;
-      min-height: 100dvh;
+      padding: 0.5rem 1rem calc(0.5rem + var(--nav-space-bottom)) !important;
       justify-content: center;
     }
     .subthemes-scroll {

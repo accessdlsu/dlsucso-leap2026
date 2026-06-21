@@ -36,15 +36,6 @@
     font-family: "DM Sans", sans-serif;
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.5);
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(20px) scale(0.98);
-    transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .app-footer.footer-visible {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0) scale(1);
   }
 
   .footer-left {
@@ -124,25 +115,3 @@
   }
 </style>
 
-<script>
-  function initFooter() {
-    const footer = document.querySelector('.app-footer');
-    if (!footer) return;
-    footer.classList.remove('footer-visible');
-    // Use the scroll container as root if page uses one (e.g. home-bg)
-    const scrollRoot = document.querySelector('.home-bg') || null;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          footer.classList.add('footer-visible');
-          io.disconnect();
-        }
-      },
-      { root: scrollRoot, threshold: 0 }
-    );
-    io.observe(footer);
-  }
-
-  initFooter();
-  document.addEventListener('astro:page-load', initFooter);
-</script>

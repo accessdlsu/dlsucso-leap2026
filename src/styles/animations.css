@@ -39,12 +39,7 @@
   position: absolute;
   border-radius: 50%;
   background: #fae185;
-  will-change: opacity;
   box-shadow: 0 0 6px 4px rgba(250, 225, 133, 0.5);
   pointer-events: none;
-  animation: fireflyBlink 4s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .firefly { animation: none; opacity: 0.3; }
+  opacity: 0.25;
 }

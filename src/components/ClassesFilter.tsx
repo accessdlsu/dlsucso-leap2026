@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { Search, X, Bookmark } from 'lucide-react';
+import { useState, useEffect, useMemo, useCallback, useRef, memo, startTransition } from 'react';
+import { Search, X, Bookmark, Clock } from 'lucide-react';
+import { useLocale } from '../hooks/useLocale';
 import { useProgressiveRender } from '../hooks/useProgressiveRender';
 import { leapifyApi } from '../services/leapify';
 import type { LeapEvent, SlotInfo, MyRegistration } from '../services/leapify';
@@ -202,10 +203,12 @@ function FilterDropdown<T extends string>({
 }
 
 export default function ClassesFilter() {
+  const { t } = useLocale();
   const classes = useAllEvents();
   const loading = classes.length === 0;
   const slotsMap = useAllSlots();
   const [search, setSearch] = useState('');
+  const [deferredSearch, setDeferredSearch] = useState('');
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
@@ -232,7 +235,7 @@ export default function ClassesFilter() {
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
-      if (detail.search) setSearch(detail.search);
+      if (detail.search) { setSearch(detail.search); setDeferredSearch(detail.search); }
       if (detail.theme) setSelectedTheme(detail.theme);
       if (detail.date) setSelectedDate(detail.date);
       if (detail.org) setSelectedOrg(detail.org);
@@ -251,7 +254,7 @@ export default function ClassesFilter() {
     const q = params.get('search');
     const org = params.get('org');
     if (theme) setSelectedTheme(theme);
-    if (q) setSearch(q);
+    if (q) { setSearch(q); setDeferredSearch(q); }
     if (day) setPendingDay(parseInt(day, 10));
     if (org) setSelectedOrg(org);
   }, []);
@@ -304,7 +307,8 @@ export default function ClassesFilter() {
     return () => { if (registrationPollRef.current) clearInterval(registrationPollRef.current); };
   }, []);
 
-  const handleCloseDrawer = useCallback(() => setDrawerClass(null), []);
+  const handleCloseDrawer = useCallback(() => startTransition(() => setDrawerClass(null)), []);
+  const handleOpenDrawer = useCallback((ev: LeapEvent) => startTransition(() => setDrawerClass(ev)), []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -357,7 +361,7 @@ export default function ClassesFilter() {
     [],
   );
 
-  const q = search.trim().toLowerCase();
+  const q = deferredSearch.trim().toLowerCase();
   const todayDate = new Date().toISOString().split('T')[0];
   const hasClassesToday = useMemo(() => classes.some(c => c.date === todayDate), [classes, todayDate]);
 
@@ -379,8 +383,32 @@ export default function ClassesFilter() {
     return conflicts;
   }, [classes, bookmarkedIds]);
 
+  const nowMs = useMemo(() => Date.now(), []);
+
+  // Manila midnight today as a unix ms timestamp for date comparisons
+  const manilaToday = useMemo(() => {
+    const now = new Date();
+    // Reconstruct midnight Manila time
+    const manilaDateStr = now.toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' }); // YYYY-MM-DD
+    return new Date(manilaDateStr + 'T00:00:00+08:00').getTime();
+  }, []);
+
+  const { activeClasses, endedClasses } = useMemo(() => {
+    const active: typeof classes = [];
+    const ended: typeof classes = [];
+    for (const c of classes) {
+      const d = c.date ? new Date(c.date).getTime() : Infinity;
+      if (!isNaN(d) && d < manilaToday) {
+        ended.push(c);
+      } else {
+        active.push(c);
+      }
+    }
+    return { activeClasses: active, endedClasses: ended };
+  }, [classes, manilaToday]);
+
   const filtered = useMemo(() => {
-    return classes.filter((c) => {
+    return activeClasses.filter((c) => {
       if (showOnlyBookmarked && !bookmarkedIds.has(c.id)) return false;
       if (selectedTheme && c.theme.path !== selectedTheme) return false;
       if (selectedDate && c.date !== selectedDate) return false;
@@ -388,8 +416,9 @@ export default function ClassesFilter() {
       if (selectedAvailability) {
         const status = computeSlotStatus(c, slotsMap.get(c.slug));
         const isFull = status === 'full';
-        if (selectedAvailability === 'full' && !isFull) return false;
-        if (selectedAvailability === 'open' && isFull) return false;
+        const isRegClosed = c.registrationEnabled === false || (c.registrationClosesAt != null && c.registrationClosesAt * 1000 < nowMs);
+        if (selectedAvailability === 'full' && !isFull && !isRegClosed) return false;
+        if (selectedAvailability === 'open' && (isFull || isRegClosed)) return false;
       }
       if (q) {
         const haystack = [
@@ -407,9 +436,31 @@ export default function ClassesFilter() {
       }
       return true;
     });
-  }, [classes, showOnlyBookmarked, bookmarkedIds, selectedTheme, selectedDate, selectedOrg, selectedAvailability, slotsMap, q]);
+  }, [activeClasses, showOnlyBookmarked, bookmarkedIds, selectedTheme, selectedDate, selectedOrg, selectedAvailability, slotsMap, q, nowMs]);
 
   const hasFilters = !!(selectedTheme || selectedDate || selectedOrg || selectedAvailability || search || showOnlyBookmarked);
+
+  const [showEndedSection, setShowEndedSection] = useState(false);
+
+  // Filter ended classes by same criteria (except availability)
+  const filteredEnded = useMemo(() => {
+    return endedClasses.filter((c) => {
+      if (showOnlyBookmarked && !bookmarkedIds.has(c.id)) return false;
+      if (selectedTheme && c.theme.path !== selectedTheme) return false;
+      // selectedDate is YYYY-MM-DD but c.date is "May 15, 2026" — match by parsing
+      if (selectedDate) {
+        const cd = new Date(c.date ?? '');
+        const sd = new Date(selectedDate);
+        if (isNaN(cd.getTime()) || isNaN(sd.getTime()) || cd.toDateString() !== sd.toDateString()) return false;
+      }
+      if (selectedOrg && c.organization.acronym !== selectedOrg) return false;
+      if (q) {
+        const haystack = [c.title, c.classCode, c.organization.name, c.organization.acronym, c.venue, c.theme.name, c.description].join(' ').toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [endedClasses, showOnlyBookmarked, bookmarkedIds, selectedTheme, selectedDate, selectedOrg, q]);
 
   // Progressive rendering — mount cards in batches as the user scrolls
   const { visibleCount, sentinelRef, hasMore } = useProgressiveRender(filtered.length);
@@ -420,7 +471,9 @@ export default function ClassesFilter() {
     setSelectedOrg(null);
     setSelectedAvailability(null);
     setSearch('');
+    setDeferredSearch('');
     setShowOnlyBookmarked(false);
+    setShowEndedSection(false);
   };
 
   if (loading) {
@@ -463,7 +516,10 @@ export default function ClassesFilter() {
         {(() => {
           const si = slotsMap.get(drawerClass.slug);
           const status = computeSlotStatus(drawerClass, si);
-          if (drawerClass.registrationEnabled === false) {
+          const regClosed =
+            drawerClass.registrationEnabled === false ||
+            (drawerClass.registrationClosesAt != null && drawerClass.registrationClosesAt * 1000 < Date.now());
+          if (regClosed) {
             return (
               <button className="drawer-enroll" disabled style={{ opacity: 0.5, cursor: 'not-allowed', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
                 Registration Closed
@@ -536,9 +592,13 @@ export default function ClassesFilter() {
           ref={searchRef}
           type="text"
           className="search-input"
-          placeholder="Search by title, code, organization, venue…"
+          placeholder={t('search_placeholder')}
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+          const v = e.target.value;
+          setSearch(v);
+          startTransition(() => setDeferredSearch(v));
+        }}
         />
         {search && (
           <button className="search-clear" onClick={() => { setSearch(''); searchRef.current?.focus(); }} aria-label="Clear search">
@@ -590,12 +650,12 @@ export default function ClassesFilter() {
               onClick={() => setShowOnlyBookmarked(v => !v)}
               style={showOnlyBookmarked ? { background: 'rgba(255,255,255,0.12)', color: '#fff', borderColor: 'rgba(255,255,255,0.3)' } : {}}
             >
-              Saved{bookmarkedIds.size > 0 ? ` (${bookmarkedIds.size})` : ''}
+              {t('saved_filter')}{bookmarkedIds.size > 0 ? ` (${bookmarkedIds.size})` : ''}
             </button>
           )}
           {hasFilters && (
             <button className="clear-btn" onClick={clearAll}>
-              Clear All
+              {t('clear_all')}
             </button>
           )}
         </div>
@@ -653,41 +713,96 @@ export default function ClassesFilter() {
 
       {/* Results */}
       <section className="classes-results">
-        {filtered.length === 0 ? (
-          <p className="no-results">No classes match your filters.</p>
+        {filtered.length === 0 && endedClasses.length === 0 ? (
+          <p className="no-results">{t('no_results')}</p>
         ) : (
           <>
-            <p className="results-count">
-              {filtered.length} class{filtered.length !== 1 ? 'es' : ''} found
-            </p>
-            <p className="results-note">More LEAP classes to be announced soon.</p>
-            <div className="classes-grid">
-              {filtered.slice(0, visibleCount).map((c) => (
-                <div key={c.id} style={{ position: 'relative' }}>
-                  {myRegistrations.some(r => r.slug === c.slug) && (
-                    <div style={{
-                      position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
-                      zIndex: 10, background: 'rgba(42,98,52,0.85)', backdropFilter: 'blur(8px)',
-                      border: '1px solid rgba(139,229,155,0.4)', borderRadius: 9999,
-                      padding: '3px 12px', fontFamily: "'Poppins', sans-serif",
-                      fontSize: '0.6rem', fontWeight: 700, color: '#8be59b',
-                      letterSpacing: '0.06em', whiteSpace: 'nowrap', pointerEvents: 'none',
-                    }}>
-                      ✓ REGISTERED
+            {filtered.length > 0 ? (
+              <>
+                <p className="results-count">
+                  {filtered.length === 1 ? t('results_count', { n: filtered.length }) : t('results_count_plural', { n: filtered.length })}
+                </p>
+                <p className="results-note">{t('more_coming')}</p>
+                <div className="classes-grid">
+                  {filtered.slice(0, visibleCount).map((c, idx) => (
+                    <div key={c.id} style={{ position: 'relative' }}>
+                      {myRegistrations.some(r => r.slug === c.slug) && (
+                        <div style={{
+                          position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
+                          zIndex: 10, background: 'rgba(42,98,52,0.85)', backdropFilter: 'blur(8px)',
+                          border: '1px solid rgba(139,229,155,0.4)', borderRadius: 9999,
+                          padding: '3px 12px', fontFamily: "'Poppins', sans-serif",
+                          fontSize: '0.6rem', fontWeight: 700, color: '#8be59b',
+                          letterSpacing: '0.06em', whiteSpace: 'nowrap', pointerEvents: 'none',
+                        }}>
+                          {t('registered_badge')}
+                        </div>
+                      )}
+                      <ClassCard
+                        event={c}
+                        slotInfo={slotsMap.get(c.slug)}
+                        dayNumber={dayMap.get(c.date)}
+                        onAction={() => handleOpenDrawer(c)}
+                        actionLabel={t('view_more')}
+                        imageLoading={idx < 4 ? 'eager' : 'lazy'}
+                      />
                     </div>
-                  )}
-                  <ClassCard
-                    event={c}
-                    slotInfo={slotsMap.get(c.slug)}
-                    dayNumber={dayMap.get(c.date)}
-                    onAction={() => setDrawerClass(c)}
-                    actionLabel="View More"
-                  />
+                  ))}
                 </div>
-              ))}
-            </div>
-            {hasMore && (
-              <div ref={sentinelRef} style={{ height: 1 }} />
+                {hasMore && (
+                  <div ref={sentinelRef} style={{ height: 1 }} />
+                )}
+              </>
+            ) : (
+              <p className="no-results">{t('no_results')}</p>
+            )}
+
+            {/* Event Ended section */}
+            {filteredEnded.length > 0 && (
+              <div className="ended-section">
+                <button
+                  className="ended-toggle"
+                  onClick={() => setShowEndedSection(v => !v)}
+                  aria-expanded={showEndedSection}
+                >
+                  <Clock size={14} strokeWidth={2} />
+                  <span>{t('event_ended_section', { n: filteredEnded.length })}</span>
+                  <svg width="10" height="6" viewBox="0 0 10 6" fill="none"
+                    style={{ transform: showEndedSection ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', opacity: 0.5 }}>
+                    <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+
+                {showEndedSection && (
+                  <div className="classes-grid ended-grid">
+                    {filteredEnded.map((c) => (
+                      <div key={c.id} style={{ position: 'relative', opacity: 0.5, pointerEvents: 'none' }}>
+                        <ClassCard
+                          event={c}
+                          slotInfo={slotsMap.get(c.slug)}
+                          dayNumber={dayMap.get(c.date)}
+                          imageLoading="lazy"
+                        />
+                        <div style={{
+                          position: 'absolute', inset: 0, zIndex: 5,
+                          display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+                          paddingTop: 12,
+                        }}>
+                          <span style={{
+                            background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)',
+                            border: '1px solid rgba(255,255,255,0.15)', borderRadius: 9999,
+                            padding: '3px 12px', fontFamily: "'Poppins', sans-serif",
+                            fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)',
+                            letterSpacing: '0.08em', whiteSpace: 'nowrap',
+                          }}>
+                            {t('event_ended_badge')}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </>
         )}

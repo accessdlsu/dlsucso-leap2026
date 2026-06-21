@@ -1,7 +1,8 @@
 ---
-import { ClientRouter, fade } from "astro:transitions";
 import Navbar from "../components/navigation/Navbar";
 import BackToTop from "../components/navigation/BackToTop.astro";
+import AnnouncementModal from "../components/AnnouncementModal";
+import ChangelogModal from "../components/ChangelogModal";
 
 interface Props {
   title?: string;
@@ -36,8 +37,8 @@ const {
       rel="stylesheet"
       media="print" onload="this.media='all'"
     />
+    <link rel="preload" as="image" href="/logo/logo-hd.png" fetchpriority="high" />
     <link rel="preload" as="image" href="/logo/access/access-logo.png" fetchpriority="high" />
-    <ClientRouter persist-fonts />{/* scroll-behavior: instant avoids transition lag */}
     <style is:global>
       @import '../styles/glass.css';
       @import '../styles/animations.css';
@@ -61,6 +62,11 @@ const {
         padding: 0;
         overscroll-behavior: none;
         font-family: 'DM Sans', sans-serif;
+        cursor: url('/assets/cursor.png'), auto;
+      }
+
+      a, button, [role="button"], input, select, textarea, label[for] {
+        cursor: url('/assets/cursor.png'), pointer;
       }
 
       * { -webkit-tap-highlight-color: transparent; }
@@ -105,50 +111,29 @@ const {
       body.search-open .nav-bottom-bar {
         opacity: 0 !important;
         pointer-events: none !important;
-        transform: translateY(-8px) scale(0.97) !important;
-        transition: opacity 0.2s ease, transform 0.2s ease !important;
-      }
-      body.drawer-open .nav-bottom-bar,
-      body.search-open .nav-bottom-bar {
-        transform: translateY(8px) scale(0.97) !important;
+        transition: opacity 0.1s ease !important;
       }
 
       @keyframes searchSlideIn {
-        from { transform: translateY(-16px); opacity: 0; }
-        to   { transform: translateY(0);     opacity: 1; }
+        from { transform: translateY(-8px); opacity: 0; }
+        to   { transform: translateY(0);    opacity: 1; }
       }
 
       /* ── Profile Dropdown Animation ── */
       .profile-popup {
-        animation: profileMenuIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        animation: profileMenuIn 0.12s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         transform-origin: top right;
       }
       .profile-popup.closing {
-        animation: profileMenuOut 0.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        animation: profileMenuOut 0.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
       }
       @keyframes profileMenuIn {
-        from {
-          opacity: 0;
-          transform: translateY(-30px);
-          clip-path: inset(0 0 100% 0);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-          clip-path: inset(0 0 0 0);
-        }
+        from { opacity: 0; transform: translateY(-8px); }
+        to   { opacity: 1; transform: translateY(0); }
       }
       @keyframes profileMenuOut {
-        from {
-          opacity: 1;
-          transform: translateY(0);
-          clip-path: inset(0 0 0 0);
-        }
-        to {
-          opacity: 0;
-          transform: translateY(-30px);
-          clip-path: inset(0 0 100% 0);
-        }
+        from { opacity: 1; transform: translateY(0); }
+        to   { opacity: 0; transform: translateY(-8px); }
       }
     </style>
     <script>
@@ -181,6 +166,7 @@ const {
 
               const maintenanceMode = !!data.maintenanceMode;
               const comingSoonUntil = data.comingSoonUntil;
+              const enhancementsMode = !!data.enhancementsMode;
               const now = (data.now || Math.floor(Date.now() / 1000)) * 1000;
               const isCountdownActive = comingSoonUntil && comingSoonUntil * 1000 > now;
 
@@ -194,6 +180,8 @@ const {
                 gateState = "maintenance";
               } else if (isCountdownActive) {
                 gateState = "countdown";
+              } else if (enhancementsMode) {
+                gateState = "enhancements";
               } else {
                 gateState = "open";
               }
@@ -221,17 +209,110 @@ const {
         };
       }
 
-      // Support page transitions via Astro ClientRouter
-      document.addEventListener("astro:page-load", initConfigListener);
+      initConfigListener();
+    </script>
+    <script is:inline>
+      // Translate static Astro content based on stored locale (runs before paint)
+      (function() {
+        var locale = (typeof localStorage !== 'undefined' && localStorage.getItem('leap-locale')) || 'en';
+        if (locale === 'en') return;
+        var T = {
+          fil: {
+            section_main_events: 'Mga Pangunahing Event',
+            section_main_events_desc: 'Alamin kung ano ang nagpapaespesyal sa LEAP 2026 bilang isang pagdiriwang ng komunidad, kultura, at layunin.',
+            section_events_page_desc: 'Tuklasin ang mga tampok na event na nagpapaging hindi malilimutan ang LEAP 2026.',
+            section_subthemes: 'Mga Subtema',
+            section_subthemes_desc: 'Tuklasin ang anim na haligi ng LEAP 2026 — bawat isa ay kumakatawan sa natatanging aspeto ng komunidad.',
+            section_leapdays: 'Mga Araw ng LEAP',
+            section_leapdays_desc: 'Anim na araw ng pagdiriwang, pag-aaral, at komunidad — piliin ang iyong araw.',
+            section_classes: 'Mga Klase',
+            section_classes_desc: 'Tuklasin ang mga workshop at sesyon sa lahat ng subtema ng LEAP 2026.',
+            faq_title: 'Mga Katanungan',
+            faq_desc: 'May mga tanong? Mayroon kaming mga sagot. I-browse ang mga karaniwang katanungan tungkol sa LEAP 2026.',
+            events_cta: 'Gusto mo bang makita ang lahat ng workshop at sesyon?',
+            events_cta_btn: 'I-browse ang Lahat ng Klase',
+          },
+          'zh-hans': {
+            section_main_events: '主要活动',
+            section_main_events_desc: '探索让 LEAP 2026 成为社区、文化与共同目标庆典的亮点。',
+            section_events_page_desc: '发现让 LEAP 2026 成为难忘体验的焦点活动，这些主要活动不容错过。',
+            section_subthemes: '子主题',
+            section_subthemes_desc: '探索 LEAP 2026 的六大支柱——每个代表社区与成长的独特方面。',
+            section_leapdays: 'LEAP 日程',
+            section_leapdays_desc: '六天庆典、学习与社区交流——选择你的日程。',
+            section_classes: '课程',
+            section_classes_desc: '探索 LEAP 2026 所有子主题的工作坊和课程。',
+            faq_title: '常见问题',
+            faq_desc: '有疑问？我们有答案。浏览关于 LEAP 2026 的常见问题。',
+            events_cta: '想查看所有工作坊和课程吗？',
+            events_cta_btn: '浏览所有课程',
+          },
+          'zh-hant': {
+            section_main_events: '主要活動',
+            section_main_events_desc: '探索讓 LEAP 2026 成為社區、文化與共同目標慶典的亮點。',
+            section_events_page_desc: '發現讓 LEAP 2026 成為難忘體驗的焦點活動，這些主要活動不容錯過。',
+            section_subthemes: '子主題',
+            section_subthemes_desc: '探索 LEAP 2026 的六大支柱——每個代表社區與成長的獨特方面。',
+            section_leapdays: 'LEAP 日程',
+            section_leapdays_desc: '六天慶典、學習與社區交流——選擇你的日程。',
+            section_classes: '課程',
+            section_classes_desc: '探索 LEAP 2026 所有子主題的工作坊和課程。',
+            faq_title: '常見問題',
+            faq_desc: '有疑問？我們有答案。瀏覽關於 LEAP 2026 的常見問題。',
+            events_cta: '想查看所有工作坊和課程嗎？',
+            events_cta_btn: '瀏覽所有課程',
+          },
+          ko: {
+            section_main_events: '주요 행사',
+            section_main_events_desc: 'LEAP 2026을 커뮤니티, 문화, 공동 목적의 축제로 만드는 하이라이트를 살펴보세요.',
+            section_events_page_desc: 'LEAP 2026을 잊지 못할 경험으로 만드는 주요 행사를 발견하세요.',
+            section_subthemes: '하위 주제',
+            section_subthemes_desc: 'LEAP 2026의 여섯 가지 기둥을 탐험하세요 — 각각 커뮤니티와 성장의 독특한 면을 나타냅니다.',
+            section_leapdays: 'LEAP 일정',
+            section_leapdays_desc: '6일간의 축제, 학습, 커뮤니티 — 원하는 날짜를 선택하세요.',
+            section_classes: '수업',
+            section_classes_desc: 'LEAP 2026의 모든 하위 주제에 걸친 워크숍과 세션을 탐험하세요.',
+            faq_title: '자주 묻는 질문',
+            faq_desc: '질문이 있으신가요? LEAP 2026에 대한 일반적인 문의를 살펴보세요.',
+            events_cta: '모든 워크숍과 세션을 보고 싶으신가요?',
+            events_cta_btn: '모든 수업 보기',
+          },
+          ja: {
+            section_main_events: 'メインイベント',
+            section_main_events_desc: 'LEAP 2026をコミュニティ、文化、共有された目的の祝典にするハイライトを探りましょう。',
+            section_events_page_desc: 'LEAP 2026を忘れられない体験にする主要イベントをご覧ください。',
+            section_subthemes: 'サブテーマ',
+            section_subthemes_desc: 'LEAP 2026の六つの柱を探索しましょう — それぞれがコミュニティと成長の独自の側面を表しています。',
+            section_leapdays: 'LEAPの日程',
+            section_leapdays_desc: '6日間の祝典、学習、コミュニティ — あなたの日程を選んでください。',
+            section_classes: 'クラス',
+            section_classes_desc: 'LEAP 2026のすべてのサブテーマにわたるワークショップとセッションを探索しましょう。',
+            faq_title: 'よくある質問',
+            faq_desc: 'ご質問がありますか？LEAP 2026に関するよくある問い合わせをご覧ください。',
+            events_cta: 'すべてのワークショップとセッションをご覧になりたいですか？',
+            events_cta_btn: 'すべてのクラスを見る',
+          },
+        };
+        var strings = T[locale];
+        if (!strings) return;
+        document.addEventListener('DOMContentLoaded', function() {
+          document.querySelectorAll('[data-i18n]').forEach(function(el) {
+            var key = el.getAttribute('data-i18n');
+            if (strings[key]) el.textContent = strings[key];
+          });
+        });
+      })();
     </script>
   </head>
   <body>
     {showNavbar && <Navbar client:only="react" />}
     {showNavbar && <BackToTop />}
+    {!noSession && <AnnouncementModal client:only="react" />}
+    {!noSession && <ChangelogModal client:only="react" />}
     {!noSession && (
       <div id="turnstile-widget" style="position:fixed;bottom:-120px;left:0;pointer-events:none;z-index:-1" aria-hidden="true"></div>
     )}
-    <main transition:animate={fade({ duration: 100 })}>
+    <main>
       <slot />
     </main>
   </body>

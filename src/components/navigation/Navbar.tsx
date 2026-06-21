@@ -24,13 +24,15 @@ import { getCachedProfile, restoreSession, signOutUser } from "../../services/au
 import { leapifyApi } from "../../services/leapify";
 import SearchOverlay from "../SearchOverlay";
 import SavedClassesOverlay from "../SavedClassesOverlay";
+import { SUPPORTED_LOCALES, setStoredLocale, type LocaleCode } from "../../lib/locale";
+import { useLocale } from "../../hooks/useLocale";
 
-const links = [
-  { href: "/", label: "Home", icon: House },
-  { href: "/about", label: "About Us", icon: BookOpen },
-  { href: "/main-events", label: "Main Events", icon: Star },
-  { href: "/classes", label: "Classes", icon: GraduationCap },
-  { href: "/faq", label: "FAQs", icon: MessageCircleQuestion },
+const NAV_LINK_DEFS = [
+  { href: "/",           key: "nav_home"   as const, icon: House },
+  { href: "/about",      key: "nav_about"  as const, icon: BookOpen },
+  { href: "/main-events",key: "nav_events" as const, icon: Star },
+  { href: "/classes",    key: "nav_classes"as const, icon: GraduationCap },
+  { href: "/faq",        key: "nav_faq"    as const, icon: MessageCircleQuestion },
 ];
 
 const cubicBezier = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -74,6 +76,8 @@ export default function Navbar() {
   const [atBottom, setAtBottom] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [savedOpen, setSavedOpen] = useState(false);
+  const { locale, t } = useLocale();
+  const links = NAV_LINK_DEFS.map(def => ({ ...def, label: t(def.key) }));
   const isMobile = windowWidth <= 968;
 
   useEffect(() => {
@@ -187,6 +191,7 @@ export default function Navbar() {
     });
   }, []);
 
+
   useEffect(() => {
     const check = () => setDrawerOpen(document.documentElement.getAttribute('data-drawer-open') === 'true');
     check();
@@ -211,9 +216,9 @@ export default function Navbar() {
   const clamp = (min: number, val: number, max: number) =>
     Math.max(min, Math.min(val, max));
   const denom = 1400 - 769;
-  const t = clamp(0, (windowWidth - 769) / denom, 1);
-  const desktopFontSize = (0.8 + t * 0.2).toFixed(2);
-  const desktopIconSize = Math.round(14 + t * 2);
+  const lerp = clamp(0, (windowWidth - 769) / denom, 1);
+  const desktopFontSize = (0.8 + lerp * 0.2).toFixed(2);
+  const desktopIconSize = Math.round(14 + lerp * 2);
 
 
 
@@ -230,7 +235,7 @@ export default function Navbar() {
     borderRadius: 9999,
     boxShadow: "0 8px 32px rgba(0, 0, 0, 0.15)",
     border: "1px solid rgba(255, 255, 255, 0.08)",
-    transition: "border-color 0.25s ease, box-shadow 0.25s ease, opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)",
+    transition: "border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease, transform 0.2s ease",
   };
 
   const pillContainer: CSSProperties = {
@@ -272,7 +277,7 @@ export default function Navbar() {
     cursor: "pointer",
     background: "none",
     border: "none",
-    transition: "color 0.25s",
+    transition: "color 0.1s",
   };
 
   const profileMenuStyle: CSSProperties = {
@@ -374,7 +379,7 @@ export default function Navbar() {
     <div className="nav-top-pills">
       <style dangerouslySetInnerHTML={{ __html: `
         .nav-glass-pill {
-          transition: border-color 0.25s ease, box-shadow 0.25s ease, opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) !important;
+          transition: border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease, transform 0.2s ease !important;
         }
         .nav-glass-pill:hover {
           border-color: rgba(255, 255, 255, 0.3) !important;
@@ -398,7 +403,7 @@ export default function Navbar() {
           opacity: (mounted && showNavLogo && (!isMobile || !atBottom)) ? 1 : 0,
           pointerEvents: (showNavLogo && (!isMobile || !atBottom)) ? "auto" : "none",
           transform: (mounted && showNavLogo && (!isMobile || !atBottom)) ? "translateY(0) scale(1)" : "translateY(-15px) scale(0.9)",
-          transition: "opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)",
+          transition: "opacity 0.15s ease, transform 0.15s ease",
         } as CSSProperties}
       >
         <a
@@ -441,7 +446,7 @@ export default function Navbar() {
             padding: 0,
             opacity: mounted ? 1 : 0,
             transform: mounted ? "translateY(0) scale(1)" : "translateY(-20px) scale(0.9)",
-            transition: "opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.1s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.1s",
+            transition: "opacity 0.15s ease, transform 0.15s ease",
           }}
         >
               <button
@@ -464,6 +469,48 @@ export default function Navbar() {
           </button>
         </div>
 
+        {/* Locale quick-switcher — always visible in nav */}
+        <div
+          className="nav-glass-pill"
+          style={{
+            ...pillContainer,
+            position: "relative",
+            top: "auto",
+            left: "auto",
+            height: 58,
+            width: "auto",
+            padding: "0 12px",
+            opacity: mounted ? 1 : 0,
+            transition: "opacity 0.15s ease",
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+          }}
+        >
+          {SUPPORTED_LOCALES.map(({ code, short }) => (
+            <button
+              key={code}
+              onClick={() => setStoredLocale(code)}
+              aria-pressed={locale === code}
+              style={{
+                padding: "3px 7px",
+                borderRadius: 6,
+                border: `1px solid ${locale === code ? "rgba(250,225,133,0.5)" : "rgba(255,255,255,0.1)"}`,
+                background: locale === code ? "rgba(250,225,133,0.12)" : "transparent",
+                color: locale === code ? "rgba(250,225,133,0.95)" : "rgba(255,255,255,0.45)",
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "0.68rem",
+                fontWeight: locale === code ? 700 : 500,
+                cursor: "pointer",
+                lineHeight: 1.4,
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              {short}
+            </button>
+          ))}
+        </div>
+
         <div
           ref={profileRef}
           className="nav-glass-pill"
@@ -477,7 +524,7 @@ export default function Navbar() {
             padding: 0,
             opacity: mounted ? 1 : 0,
             marginTop: mounted ? 0 : -20,
-            transition: "opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s, margin-top 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s",
+            transition: "opacity 0.15s ease, margin-top 0.15s ease",
           }}
         >
           <button
@@ -604,7 +651,7 @@ export default function Navbar() {
               fetchPriority="high"
               style={{ width: 18, height: 18, objectFit: "contain", flexShrink: 0 }}
             />
-            ACCESS DLSU
+            {t('profile_access')}
           </a>
           {user && (
             <button
@@ -620,9 +667,53 @@ export default function Navbar() {
               }}
             >
               <Bookmark size={18} strokeWidth={1.75} />
-              Saved Classes
+              {t('profile_saved')}
             </button>
           )}
+          {/* Locale selector */}
+          <div style={{
+            padding: "8px 10px 6px",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+          }}>
+            <div style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "0.65rem",
+              fontWeight: 600,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.3)",
+              marginBottom: 6,
+              paddingLeft: 4,
+            }}>
+              {t('language_label')}
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+              {SUPPORTED_LOCALES.map(({ code, short, label }) => (
+                <button
+                  key={code}
+                  title={label}
+                  aria-pressed={locale === code}
+                  onClick={() => setStoredLocale(code)}
+                  style={{
+                    padding: "3px 8px",
+                    borderRadius: 6,
+                    border: `1px solid ${locale === code ? "rgba(250,225,133,0.5)" : "rgba(255,255,255,0.1)"}`,
+                    background: locale === code ? "rgba(250,225,133,0.12)" : "transparent",
+                    color: locale === code ? "rgba(250,225,133,0.95)" : "rgba(255,255,255,0.45)",
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: "0.72rem",
+                    fontWeight: locale === code ? 700 : 500,
+                    cursor: "pointer",
+                    transition: "background 0.1s, color 0.1s, border-color 0.1s",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {short}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div style={{
             height: "1px",
             background: "rgba(255, 255, 255, 0.06)",
@@ -641,7 +732,7 @@ export default function Navbar() {
             }}
           >
             <LogOut size={18} strokeWidth={1.75} />
-            Sign Out
+            {t('profile_signout')}
           </button>
         </div>,
         document.body
@@ -669,6 +760,8 @@ export default function Navbar() {
             padding: "0 12px",
             boxSizing: "border-box",
             width: "100%",
+            willChange: "transform",
+            contain: "layout style",
           }}
         >
           <div
@@ -691,7 +784,7 @@ export default function Navbar() {
               opacity: (mounted && !atBottom) ? 1 : 0,
               pointerEvents: (mounted && !atBottom) ? "auto" : "none",
               transform: (mounted && !atBottom) ? "translateY(0) scale(1)" : "translateY(20px) scale(0.95)",
-              transition: "border-color 0.25s ease, box-shadow 0.25s ease, opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.15s",
+              transition: "border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.2s ease, transform 0.2s ease",
             }}
             onMouseLeave={() => setHoveredIndex(null)}
           >
@@ -709,7 +802,7 @@ export default function Navbar() {
                 background: "rgba(255, 255, 255, 0.05)",
                 opacity:
                   hoveredIndex !== null && hoveredIndex !== activeIndex ? 1 : 0,
-                transition: `opacity 0.2s, left 0.15s ${cubicBezier}, top 0.15s ${cubicBezier}, width 0.15s ${cubicBezier}, height 0.15s ${cubicBezier}`,
+                transition: `opacity 0.1s, left 0.1s ease, top 0.1s ease, width 0.1s ease, height 0.1s ease`,
               }}
             />
 
@@ -802,7 +895,7 @@ export default function Navbar() {
               background: "rgba(255, 255, 255, 0.05)",
               opacity:
                 hoveredIndex !== null && hoveredIndex !== activeIndex ? 1 : 0,
-              transition: `opacity 0.2s, left 0.3s ${cubicBezier}, top 0.3s ${cubicBezier}, width 0.3s ${cubicBezier}, height 0.3s ${cubicBezier}`,
+              transition: `opacity 0.1s, left 0.1s ease, top 0.1s ease, width 0.1s ease, height 0.1s ease`,
             }}
           />
 

@@ -8,9 +8,9 @@ import "../styles/gallery-card.css";
 <Layout title="Main Events | LEAP 2026" description="Discover the featured main events of LEAP 2026.">
   <div class="events-bg">
     <div class="events-content">
-      <h1 class="events-title" transition:name="page-title">Main Events</h1>
-      <p class="events-desc">
-        Discover the spotlight events that make LEAP&nbsp;2026 an unforgettable
+      <h1 class="events-title" data-i18n="section_main_events">Main Events</h1>
+      <p class="events-desc" data-i18n="section_events_page_desc">
+        Discover the spotlight events that make LEAP 2026 an unforgettable
         celebration. These main events are not to be missed.
       </p>
       <FeaturedEvents client:only="react">
@@ -34,10 +34,10 @@ import "../styles/gallery-card.css";
         </div>
       </FeaturedEvents>
       <div class="events-cta">
-        <p class="events-cta-text">
+        <p class="events-cta-text" data-i18n="events_cta">
           Want to see all workshops and sessions?
         </p>
-        <a href="/classes" class="events-cta-btn">Browse All Classes</a>
+        <a href="/classes" class="events-cta-btn" data-i18n="events_cta_btn">Browse All Classes</a>
       </div>
       <Footer />
     </div>

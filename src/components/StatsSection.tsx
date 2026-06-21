@@ -1,4 +1,5 @@
 import { useAllEvents } from "../hooks/useAllEvents";
+import { useLocale } from "../hooks/useLocale";
 
 interface Props {
   subthemeCount: number;
@@ -6,6 +7,7 @@ interface Props {
 }
 
 export default function StatsSection({ subthemeCount, dayCount }: Props) {
+  const { t } = useLocale();
   const allEvents = useAllEvents();
   const classCount = allEvents.length > 0 ? allEvents.length : null;
 
@@ -48,7 +50,7 @@ export default function StatsSection({ subthemeCount, dayCount }: Props) {
         }}>
           More LEAP classes to be announced soon.
         </p>
-        <a href="/classes" className="stats-cta">Browse All Classes</a>
+        <a href="/classes" className="stats-cta">{t('stats_browse_classes')}</a>
       </div>
     </div>
   );

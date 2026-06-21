@@ -4,6 +4,7 @@ import { computeSlotStatus } from './ClassCard';
 import { formatTime } from '../services/utils';
 import { getDayNumber } from '../constants/leapDays';
 import OrgLogo from './OrgLogo';
+import { useLocale } from '../hooks/useLocale';
 
 interface ClassDrawerProps {
   event: LeapEvent;
@@ -16,27 +17,28 @@ interface ClassDrawerProps {
   footer?: React.ReactNode;
 }
 
-function SlotsDisplay({ event, slotsMap }: { event: LeapEvent; slotsMap?: Map<string, SlotInfo> }) {
+function SlotsDisplay({ event, slotsMap, t }: { event: LeapEvent; slotsMap?: Map<string, SlotInfo>; t: (k: string) => string }) {
   if (!slotsMap) {
-    return <>{event.maxSlots === 0 ? 'Unlimited' : `${event.maxSlots} Slots`}</>;
+    return <>{event.maxSlots === 0 ? t('drawer_unlimited') : `${event.maxSlots} ${t('drawer_slots_label')}`}</>;
   }
   const ds = slotsMap.get(event.slug);
-  if (!ds) return <>{event.maxSlots === 0 ? 'Unlimited' : `${event.maxSlots} Slots`}</>;
-  if (ds.total === 0) return <>Unlimited</>;
+  if (!ds) return <>{event.maxSlots === 0 ? t('drawer_unlimited') : `${event.maxSlots} ${t('drawer_slots_label')}`}</>;
+  if (ds.total === 0) return <>{t('drawer_unlimited')}</>;
   const avail = Math.max(0, ds.total - ds.registered);
-  return <>{avail === 0 ? 'Full' : `${avail} Slots Left`}</>;
+  return <>{avail === 0 ? t('slots_full') : t('slots_left', { n: avail })}</>;
 }
 
 export default function ClassDrawer({ event, onClose, slotsMap, footer }: ClassDrawerProps) {
+  const { t } = useLocale();
   const dayNumber = getDayNumber(event.date);
-  
+
   return createPortal(
     <div
       className="drawer-overlay"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="drawer">
-        <button className="drawer-close" onClick={onClose} aria-label="Close">&times;</button>
+        <button className="drawer-close" onClick={onClose} aria-label={t('drawer_close')}>&times;</button>
 
         {/* Hero: poster + header */}
         <div className="drawer-hero">
@@ -51,7 +53,7 @@ export default function ClassDrawer({ event, onClose, slotsMap, footer }: ClassD
               <span className="class-day-tag">{event.date}</span>
               {event.isSpotlight && (
                 <span className="class-theme-tag" style={{ background: 'rgba(250,225,133,0.15)', color: '#fae185', borderColor: 'rgba(250,225,133,0.3)' }}>
-                  ★ Main Event
+                  {t('drawer_main_event')}
                 </span>
               )}
             </div>
@@ -70,33 +72,33 @@ export default function ClassDrawer({ event, onClose, slotsMap, footer }: ClassD
           <div className="drawer-meta">
             {event.classCode && (
               <div className="drawer-meta-row">
-                <span className="drawer-meta-label">Code</span>
+                <span className="drawer-meta-label">{t('drawer_code')}</span>
                 <span className="drawer-meta-val">{event.classCode}</span>
               </div>
             )}
             <div className="drawer-meta-row">
-              <span className="drawer-meta-label">Theme</span>
+              <span className="drawer-meta-label">{t('drawer_theme')}</span>
               <span className="drawer-meta-val">{event.theme.name}</span>
             </div>
             <div className="drawer-meta-row">
-              <span className="drawer-meta-label">Date</span>
+              <span className="drawer-meta-label">{t('drawer_date_label')}</span>
               <span className="drawer-meta-val">
                 {event.date}
-                {dayNumber != null ? ` (Day ${dayNumber})` : ''}
+                {dayNumber != null ? ` (${t('day_label', { n: dayNumber })})` : ''}
               </span>
             </div>
             <div className="drawer-meta-row">
-              <span className="drawer-meta-label">Time</span>
+              <span className="drawer-meta-label">{t('drawer_time_label')}</span>
               <span className="drawer-meta-val">{formatTime(event.startTime)} – {formatTime(event.endTime)}</span>
             </div>
             <div className="drawer-meta-row">
-              <span className="drawer-meta-label">Venue</span>
+              <span className="drawer-meta-label">{t('drawer_venue_label')}</span>
               <span className="drawer-meta-val">{event.venue}</span>
             </div>
             <div className="drawer-meta-row">
-              <span className="drawer-meta-label">Slots</span>
+              <span className="drawer-meta-label">{t('drawer_slots_label')}</span>
               <span className="drawer-meta-val">
-                <SlotsDisplay event={event} slotsMap={slotsMap} />
+                <SlotsDisplay event={event} slotsMap={slotsMap} t={t as (k: string) => string} />
               </span>
             </div>
           </div>

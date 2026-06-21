@@ -534,6 +534,8 @@ async function isAdminUser(env: Env, cookie: string, baseOrigin?: string): Promi
 interface SiteConfig {
   maintenanceMode: boolean;
   comingSoonUntil: number | null;
+  enhancementsMode: boolean;
+  enhancementsUntil: number | null;
   now: number;
 }
 
@@ -613,6 +615,13 @@ async function routeIndex(
   // Admin enter bypass: ?_enter on / re-verifies admin and serves the site.
   const wantsEnter = new URL(request.url).searchParams.has("_enter");
 
+  // If admin already clicked "Enter Site", bypass all gates for subsequent navigations.
+  // Without ClientRouter, every page nav is a full request — this prevents gate loops.
+  const adminEntered = cookie.includes("_admin_entered=1");
+  if (adminEntered && hasSession) {
+    return null; // fall through to ASSETS
+  }
+
   if (config.maintenanceMode && !dev) {
     if (hasSession) {
       const isAdmin = await isAdminUser(env, cookie, baseOrigin);
@@ -653,6 +662,26 @@ async function routeIndex(
       return new Response(res.body, { status: res.status, headers });
     }
     return env.ASSETS.fetch(new Request(new URL("/countdown/", request.url).toString()));
+  }
+
+  if (config.enhancementsMode && !dev) {
+    if (hasSession) {
+      const isAdmin = await isAdminUser(env, cookie, baseOrigin);
+      if (isAdmin && wantsEnter) {
+        const res = await env.ASSETS.fetch(request);
+        const headers = new Headers(res.headers);
+        headers.append("Set-Cookie", "_admin_entered=1; Path=/; SameSite=Strict");
+        return new Response(res.body, { status: res.status, headers });
+      }
+      const gatePage = new URL("/enhancements/", request.url).toString();
+      const res = await env.ASSETS.fetch(new Request(gatePage));
+      const headers = new Headers(res.headers);
+      headers.append("Set-Cookie", isAdmin
+        ? "_admin_gate=1; Path=/; SameSite=Strict; Max-Age=300"
+        : "_non_admin=1; Path=/; SameSite=Strict; Max-Age=300");
+      return new Response(res.body, { status: res.status, headers });
+    }
+    return env.ASSETS.fetch(new Request(new URL("/enhancements/", request.url).toString()));
   }
 
   // ── Session gate ──────────────────────────────────────────────────────
@@ -719,7 +748,7 @@ export default {
     // so they fall through and get the actual HTML — keeping astro build working with one config.
     if (
       request.method === "GET" &&
-      (pathname.startsWith("/countdown") || pathname.startsWith("/maintenance")) &&
+      (pathname.startsWith("/countdown") || pathname.startsWith("/maintenance") || pathname.startsWith("/enhancements")) &&
       (request.headers.get("Accept") ?? "").includes("text/html")
     ) {
       return Response.redirect(new URL("/", request.url).toString(), 302);

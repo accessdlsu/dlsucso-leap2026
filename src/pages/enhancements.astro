@@ -2,7 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Countdown | LEAP 2026" showNavbar={false} noSession={true}>
+<Layout title="Enhancements Incoming | LEAP 2026" showNavbar={false} noSession={true}>
   <div class="cnt-bg">
     <img
       src="/assets/background.jpeg"
@@ -14,17 +14,17 @@ import Layout from "../layouts/Layout.astro";
     />
 
     <div class="cnt-content">
-      <div class="cnt-logo anim-in" style="">
+      <div class="cnt-logo anim-in">
         <img
           src="/logo/logo-hd.png"
           alt="LEAP 2026"
           loading="eager"
-          style="width: min(320px, 60vw); height: auto; display: block;"
+          style="width: min(280px, 55vw); height: auto; display: block;"
         />
       </div>
-      <span class="tagline anim-in"        >Isang Nayon, Isang Layunin</span
-      >
-      <div class="cnt-timer" id="countdown">
+      <span class="cnt-headline anim-in">Enhancements Incoming</span>
+      <span class="tagline anim-in">We're improving your experience</span>
+      <div class="cnt-timer" id="enhancement-countdown">
         <div class="cnt-unit">
           <div class="cnt-card-wrapper">
             <span class="cnt-num" id="cnt-days">00</span>
@@ -53,15 +53,10 @@ import Layout from "../layouts/Layout.astro";
           <span class="cnt-label" id="label-secs">Seconds</span>
         </div>
       </div>
-      <p class="cnt-desc anim-in" style="">
-        Step into a nayon built on bayanihan, shared purpose, and collective
-        growth.
+      <p class="cnt-desc anim-in">
+        LEAP 2026 is undergoing scheduled improvements. We'll be back shortly — better than ever.
       </p>
-      <p
-        class="cnt-date anim-in"
-        id="cnt-date-line"
-             >
-      </p>
+      <p class="cnt-date anim-in" id="cnt-date-line"></p>
     </div>
 
     <footer class="cnt-footer">
@@ -89,7 +84,7 @@ import Layout from "../layouts/Layout.astro";
   </div>
   <div id="non-admin-notice" style="display:none">
     <span class="bp-tag bp-tag-non-admin">DENIED</span>
-    <span class="bp-label">Admins only. Public access is coming soon.</span>
+    <span class="bp-label">Admins only. Site back soon.</span>
   </div>
   <div id="auth-bar" style="display:none">
     <span class="bp-tag bp-tag-auth">AUTH</span>
@@ -107,9 +102,7 @@ import Layout from "../layouts/Layout.astro";
     -webkit-user-select: none;
     user-select: none;
   }
-  main {
-    padding: 0;
-  }
+  main { padding: 0; }
 
   .cnt-bg {
     display: flex;
@@ -138,70 +131,58 @@ import Layout from "../layouts/Layout.astro";
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    background: linear-gradient(
-      to bottom,
-      transparent 40%,
-      rgba(0, 0, 0, 0.55) 100%
-    );
+    background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.65) 100%);
   }
 
-  /* ── Content ── */
   .cnt-content {
     position: relative;
     z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(0.75rem, 2.5vh, 1.75rem);
+    gap: clamp(0.6rem, 2vh, 1.5rem);
     text-align: center;
     padding: 2rem;
   }
-  .cnt-content .cnt-logo img {
-    filter: drop-shadow(0 0 50px rgba(222, 154, 73, 0.18));
+
+  .cnt-headline {
+    font-family: "DM Sans", sans-serif;
+    font-size: clamp(1.1rem, 3.5vmin, 1.6rem);
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    margin: 0;
   }
 
-  /* ── Tagline ── */
   .tagline {
     margin-top: clamp(-0.5rem, -1.5vh, 0rem);
     padding: 0.2em 0.5em;
     font-family: "TD-Sulog", serif;
     font-weight: 700;
-    font-size: clamp(1.2rem, 5vmin, 2.4rem);
+    font-size: clamp(1rem, 4vmin, 2rem);
     letter-spacing: 0.015em;
     line-height: 1.25;
     text-align: center;
-    background: linear-gradient(
-      180deg,
-      #fff5c4 0%,
-      #fae185 35%,
-      #de9a49 75%,
-      #b07820 100%
-    );
+    background: linear-gradient(180deg, #fff5c4 0%, #fae185 35%, #de9a49 75%, #b07820 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow:
-      0 2px 0 rgba(80, 40, 10, 0.4),
-      0 4px 24px rgba(0, 0, 0, 0.55),
-      0 0 48px rgba(222, 154, 73, 0.4),
-      0 0 96px rgba(250, 225, 133, 0.2);
-    filter: drop-shadow(0 3px 12px rgba(0, 0, 0, 0.5))
-      drop-shadow(0 0 24px rgba(222, 154, 73, 0.35));
+    filter: drop-shadow(0 3px 12px rgba(0,0,0,0.5)) drop-shadow(0 0 24px rgba(222,154,73,0.35));
   }
 
   .cnt-desc {
     font-family: "DM Sans", sans-serif;
-    font-size: clamp(0.85rem, 2vw, 1rem);
-    color: rgba(255, 255, 255, 0.82);
+    font-size: clamp(0.8rem, 1.8vw, 0.95rem);
+    color: rgba(255,255,255,0.75);
     text-align: center;
-    line-height: 1.5;
+    line-height: 1.55;
     margin: 0;
-    letter-spacing: 0.04em;
-    max-width: 500px;
-    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+    max-width: 480px;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.5);
   }
 
-  /* ── Countdown Timer ── */
   .cnt-timer {
     display: flex;
     align-items: center;
@@ -223,16 +204,16 @@ import Layout from "../layouts/Layout.astro";
     padding: 0.75rem 1.2rem;
     min-width: 3.6ch;
     text-align: center;
-    background: rgba(0, 0, 0, 0.25);
+    background: rgba(0,0,0,0.25);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
     border-radius: 14px;
   }
 
   .cnt-num {
     font-family: "DM Sans", sans-serif;
-    font-size: clamp(2.6rem, 10vw, 4.2rem);
+    font-size: clamp(2.4rem, 9vw, 3.8rem);
     font-weight: 700;
     color: #fff;
     line-height: 1;
@@ -244,9 +225,9 @@ import Layout from "../layouts/Layout.astro";
 
   .cnt-sep {
     font-family: "DM Sans", sans-serif;
-    font-size: clamp(1.8rem, 6vw, 2.8rem);
+    font-size: clamp(1.6rem, 5vw, 2.6rem);
     font-weight: 300;
-    color: rgba(255, 255, 255, 0.35);
+    color: rgba(255,255,255,0.35);
     line-height: 1;
     margin-top: -1.4rem;
   }
@@ -255,103 +236,51 @@ import Layout from "../layouts/Layout.astro";
     font-family: "DM Sans", sans-serif;
     font-size: clamp(0.6rem, 1.4vw, 0.72rem);
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255,255,255,0.4);
     text-transform: uppercase;
     letter-spacing: 0.12em;
   }
 
-  /* ── Target Date ── */
   .cnt-date {
     font-family: "DM Sans", sans-serif;
-    font-size: clamp(0.78rem, 1.8vw, 0.9rem);
-    color: rgba(255, 255, 255, 0.6);
+    font-size: clamp(0.75rem, 1.6vw, 0.88rem);
+    color: rgba(255,255,255,0.55);
     text-align: center;
     letter-spacing: 0.06em;
-    margin: 0.25rem 0 0;
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+    margin: 0;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.5);
   }
 
-  .anim-in, .anim-in-fade {
-    /* animations removed for performance */
+  .anim-in { animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both; }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
-  /* ── Landscape ── */
-  .landscape {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 55%;
-    z-index: 1;
-    pointer-events: none;
-    line-height: 0;
-  }
-
-  /* Bubbles and bio-dots removed for performance */
-  .bubble { display: none; }
-  .bio-dot { display: none; }
-
-
-  /* ── Footer ── */
   .cnt-footer {
     position: absolute;
     bottom: 1rem;
-    left: 0;
-    right: 0;
+    left: 0; right: 0;
     font-family: "DM Sans", sans-serif;
     font-size: 0.68rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255,255,255,0.6);
     text-align: center;
     letter-spacing: 0.06em;
     z-index: 2;
     pointer-events: none;
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.5);
   }
 
-  /* ── Responsive ── */
   @media (max-width: 768px) {
-    .landscape {
-      height: 30%;
-    }
-    .cnt-content {
-      gap: clamp(0.85rem, 2.2vh, 1.35rem);
-      padding: 1rem;
-    }
-    .cnt-timer {
-      gap: clamp(0.35rem, 1.8vw, 0.6rem);
-      margin: 0;
-    }
-    .cnt-card-wrapper {
-      padding: 0.6rem 0.85rem;
-      min-width: 3.2ch;
-    }
-    .cnt-num {
-      font-size: clamp(2.4rem, 8.5vw, 3rem);
-    }
-    .cnt-sep {
-      font-size: clamp(1.5rem, 5vw, 2rem);
-      margin-top: -1.2rem;
-    }
-    .cnt-label {
-      font-size: 0.6rem;
-      letter-spacing: 0.08em;
-    }
-    .cnt-date {
-      font-size: 0.75rem;
-      margin: 0;
-    }
-    .cnt-desc {
-      max-width: 85vw;
-      font-size: 0.82rem;
-      line-height: 1.45;
-    }
+    .cnt-card-wrapper { padding: 0.6rem 0.85rem; min-width: 3.2ch; }
+    .cnt-num { font-size: clamp(2.2rem, 8vw, 2.8rem); }
+    .cnt-sep { font-size: clamp(1.4rem, 4.5vw, 1.8rem); margin-top: -1.1rem; }
+    .cnt-label { font-size: 0.6rem; letter-spacing: 0.08em; }
   }
 
-  /* ── Bypass bars (shared) ── */
-  #dev-bypass,
-  #admin-bypass,
-  #non-admin-notice,
-  #auth-bar {
+  /* Bypass bars */
+  #dev-bypass, #admin-bypass, #non-admin-notice, #auth-bar {
     position: fixed;
     top: 16px;
     left: 50%;
@@ -361,9 +290,9 @@ import Layout from "../layouts/Layout.astro";
     align-items: center;
     gap: 8px;
     padding: 6px 14px;
-    background: rgba(0, 0, 0, 0.55);
+    background: rgba(0,0,0,0.55);
     backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255,255,255,0.12);
     border-radius: 9999px;
     font-family: "DM Sans", sans-serif;
     font-size: 0.72rem;
@@ -372,79 +301,31 @@ import Layout from "../layouts/Layout.astro";
     -webkit-user-select: none;
     user-select: none;
   }
-  .bp-tag {
-    font-size: 0.6rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    border-radius: 4px;
-    padding: 1px 5px;
-  }
-  .bp-tag-dev {
-    color: #fbbf24;
-    background: rgba(251, 191, 36, 0.15);
-    border: 1px solid rgba(251, 191, 36, 0.3);
-  }
-  .bp-tag-admin {
-    color: #34d399;
-    background: rgba(52, 211, 153, 0.15);
-    border: 1px solid rgba(52, 211, 153, 0.3);
-  }
-  .bp-tag-non-admin {
-    color: #94a3b8;
-    background: rgba(148, 163, 184, 0.15);
-    border: 1px solid rgba(148, 163, 184, 0.3);
-  }
-  .bp-tag-auth {
-    color: #60a5fa;
-    background: rgba(96, 165, 250, 0.15);
-    border: 1px solid rgba(96, 165, 250, 0.3);
-  }
-  #non-admin-notice {
-    pointer-events: none;
-  }
-  .bp-label {
-    color: rgba(255, 255, 255, 0.5);
-    font-weight: 500;
-  }
-  .bp-divider {
-    width: 1px;
-    height: 12px;
-    background: rgba(255, 255, 255, 0.15);
-  }
+  .bp-tag { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; border-radius: 4px; padding: 1px 5px; }
+  .bp-tag-dev { color: #fbbf24; background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3); }
+  .bp-tag-admin { color: #34d399; background: rgba(52,211,153,0.15); border: 1px solid rgba(52,211,153,0.3); }
+  .bp-tag-non-admin { color: #94a3b8; background: rgba(148,163,184,0.15); border: 1px solid rgba(148,163,184,0.3); }
+  .bp-tag-auth { color: #60a5fa; background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.3); }
+  #non-admin-notice { pointer-events: none; }
+  .bp-label { color: rgba(255,255,255,0.5); font-weight: 500; }
+  .bp-divider { width: 1px; height: 12px; background: rgba(255,255,255,0.15); }
   .bp-link {
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(255,255,255,0.75);
     text-decoration: none;
     font-weight: 500;
     padding: 2px 6px;
     border-radius: 6px;
-    transition:
-      background 0.15s,
-      color 0.15s;
+    transition: background 0.15s, color 0.15s;
     cursor: pointer;
     border: none;
     background: none;
     font-family: inherit;
     font-size: inherit;
   }
-  .bp-link:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-  }
+  .bp-link:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
   @media (prefers-reduced-motion: reduce) {
-    .bubble {
-      display: none;
-    }
-    .bio-dot {
-      animation: none;
-      opacity: 0.15;
-    }
-    .anim-in,
-    .anim-in-fade {
-      animation: none;
-      opacity: 1;
-      transform: none;
-    }
+    .anim-in { animation: none; opacity: 1; transform: none; }
   }
 </style>
 
@@ -465,16 +346,16 @@ import Layout from "../layouts/Layout.astro";
     days: { singular: "Day", plural: "Days" },
     hours: { singular: "Hour", plural: "Hours" },
     mins: { singular: "Minute", plural: "Minutes" },
-    secs: { singular: "Second", plural: "Seconds" }
+    secs: { singular: "Second", plural: "Seconds" },
   };
   const prev = { days: "", hours: "", mins: "", secs: "" };
-  let target = 0; // ms epoch, set after config fetch
-  let targetSet = false; // don't redirect on zero until config has loaded
-  let ticker = null;
+  let target = 0;
+  let targetSet = false;
+  let ticker: ReturnType<typeof setInterval> | null = null;
 
-  function pad(n) {
-    return n.toString().padStart(2, "0");
-  }
+  function pad(n: number) { return n.toString().padStart(2, "0"); }
+
+
 
   function tick() {
     let diff = target - Date.now();
@@ -482,38 +363,24 @@ import Layout from "../layouts/Layout.astro";
     if (zero) diff = 0;
 
     const days = Math.floor(diff / 86400000);
-    const daysRemainder = diff - days * 86400000;
-    const hours = Math.floor(daysRemainder / 3600000);
-    const hoursRemainder = daysRemainder - hours * 3600000;
-    const mins = Math.floor(hoursRemainder / 60000);
-    const minsRemainder = hoursRemainder - mins * 60000;
-    const secs = Math.floor(minsRemainder / 1000);
-
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const mins = Math.floor((diff % 3600000) / 60000);
+    const secs = Math.floor((diff % 60000) / 1000);
     const rawVals = { days, hours, mins, secs };
-    const vals = {
-      days: pad(days),
-      hours: pad(hours),
-      mins: pad(mins),
-      secs: pad(secs),
-    };
-    for (const key of ["days", "hours", "mins", "secs"]) {
-      if (vals[key] !== prev[key]) {
-        els[key].textContent = vals[key];
-        
-        // Update singular/plural label text if 0 or 1
-        const count = rawVals[key];
-        const labelText = (count === 0 || count === 1) ? labelNames[key].singular : labelNames[key].plural;
-        if (labels[key]) {
-          labels[key].textContent = labelText;
-        }
+    const vals = { days: pad(days), hours: pad(hours), mins: pad(mins), secs: pad(secs) };
 
+    for (const key of ["days", "hours", "mins", "secs"] as const) {
+      if (vals[key] !== prev[key]) {
+        (els[key] as HTMLElement).textContent = vals[key];
+        const count = rawVals[key];
+        const lbl = count === 1 ? labelNames[key].singular : labelNames[key].plural;
+        if (labels[key]) (labels[key] as HTMLElement).textContent = lbl;
         prev[key] = vals[key];
       }
     }
 
-    // Countdown expired — navigate to / so the worker re-evaluates the gate
     if (zero && targetSet) {
-      clearInterval(ticker);
+      if (ticker) clearInterval(ticker);
       window.location.replace("/");
     }
   }
@@ -522,29 +389,23 @@ import Layout from "../layouts/Layout.astro";
     try {
       const res = await fetch("/api/config");
       if (!res.ok) throw new Error("config fetch failed");
-      const json = await res.json();
-      const comingSoonUntil = json?.data?.comingSoonUntil;
-      if (comingSoonUntil) {
-        target = comingSoonUntil * 1000; // epoch seconds → ms
+      const json = await res.json() as { data?: { enhancementsUntil?: number | null } };
+      const enhancementsUntil = json?.data?.enhancementsUntil;
+      if (enhancementsUntil) {
+        target = enhancementsUntil * 1000;
         targetSet = true;
         const date = new Date(target);
         const formattedDate = date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          timeZone: "Asia/Manila",
+          year: "numeric", month: "long", day: "numeric", timeZone: "Asia/Manila",
         });
         const formattedTime = date.toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-          timeZone: "Asia/Manila",
+          hour: "numeric", minute: "2-digit", hour12: true, timeZone: "Asia/Manila",
         });
         const dateLine = document.getElementById("cnt-date-line");
-        if (dateLine) dateLine.textContent = `Launch Date: ${formattedDate}, ${formattedTime}`;
+        if (dateLine) dateLine.textContent = `Expected: ${formattedDate}, ${formattedTime}`;
       }
     } catch {
-      // Config unavailable — ticker stays at zeros, date line stays empty
+      // silent
     }
     tick();
     ticker = setInterval(tick, 1000);
@@ -552,118 +413,80 @@ import Layout from "../layouts/Layout.astro";
 
   init();
 
-  function handleNewConfig(cfg: any) {
+  type EnhConfig = { maintenanceMode?: boolean; enhancementsMode?: boolean; comingSoonUntil?: number | null; now?: number } | null;
+
+  function handleNewConfig(cfg: EnhConfig) {
     if (!cfg) return;
-    if (cfg.maintenanceMode) {
+    if (cfg.maintenanceMode || cfg.comingSoonUntil) {
       window.location.replace("/");
       return;
     }
-    const serverNow = cfg.now * 1000;
-    if (!cfg.comingSoonUntil || cfg.comingSoonUntil * 1000 <= serverNow) {
+    if (!cfg.enhancementsMode) {
       window.location.replace("/");
     }
   }
 
-  // Poll config every 30s as a fallback — redirect to / if the gate state changes
-  // (maintenance turns on, countdown date updated, or countdown expires early)
   const pollInterval = setInterval(async () => {
     try {
       const res = await fetch("/api/config");
-      if (res.status === 503) {
-        window.location.replace("/");
-        return;
-      }
+      if (res.status === 503) { window.location.replace("/"); return; }
       if (!res.ok) return;
-      const json = await res.json();
-      handleNewConfig(json?.data);
+      const json = await res.json() as { data?: EnhConfig };
+      handleNewConfig(json?.data ?? null);
     } catch {}
   }, 30_000);
 
-  // Real-time updates via WebSocket (exponential backoff on reconnect)
   let wsRetryDelay = 5000;
   function connectWebSocket() {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const ws = new WebSocket(
-      `${protocol}//${window.location.host}/api?type=config`,
-    );
-
+    const ws = new WebSocket(`${protocol}//${window.location.host}/api?type=config`);
     ws.onopen = () => { wsRetryDelay = 5000; };
-
     ws.onmessage = (event) => {
       try {
-        const msg = JSON.parse(event.data);
-        if (msg.type === "config_update") {
-          handleNewConfig(msg.data);
-        }
+        const msg = JSON.parse(event.data as string) as { type: string; data?: unknown };
+        if (msg.type === "config_update") handleNewConfig(msg.data as EnhConfig);
       } catch {}
     };
-
     ws.onclose = () => {
       setTimeout(connectWebSocket, wsRetryDelay);
       wsRetryDelay = Math.min(wsRetryDelay * 2, 60_000);
     };
   }
-
   connectWebSocket();
 
   window.addEventListener("pagehide", () => {
     clearInterval(pollInterval);
-    clearInterval(ticker);
+    if (ticker) clearInterval(ticker);
   }, { once: true });
-</script>
 
-<script>
-  // Dev bypass bar: shown when the worker sets _dev=1 cookie (local dev only)
+  // Bypass bars
   const isDev = document.cookie.indexOf("_dev=1") !== -1;
-  if (isDev) {
-    const bar = document.getElementById("dev-bypass");
-    if (bar) bar.style.display = "flex";
-
-  }
-
-  // Admin bypass bar: shown when worker sets _admin_gate=1 cookie (admin user, gate active)
-  if (document.cookie.indexOf("_admin_gate=1") !== -1) {
-    const bar = document.getElementById("admin-bypass");
-    if (bar) bar.style.display = "flex";
-  }
-
-  // Non-admin notice: shown when worker sets _non_admin=1 cookie (logged in but not admin)
-  if (document.cookie.indexOf("_non_admin=1") !== -1) {
-    const bar = document.getElementById("non-admin-notice");
-    if (bar) bar.style.display = "flex";
-  }
-
-  // Auth bar: shown when not logged in (no admin/non-admin cookie) and not in dev mode
+  if (isDev) { const bar = document.getElementById("dev-bypass"); if (bar) bar.style.display = "flex"; }
+  if (document.cookie.indexOf("_admin_gate=1") !== -1) { const bar = document.getElementById("admin-bypass"); if (bar) bar.style.display = "flex"; }
+  if (document.cookie.indexOf("_non_admin=1") !== -1) { const bar = document.getElementById("non-admin-notice"); if (bar) bar.style.display = "flex"; }
   const hasAdminCookie = document.cookie.indexOf("_admin_gate=1") !== -1;
   const hasNonAdminCookie = document.cookie.indexOf("_non_admin=1") !== -1;
-  if (!isDev && !hasAdminCookie && !hasNonAdminCookie) {
-    const bar = document.getElementById("auth-bar");
-    if (bar) bar.style.display = "flex";
-  }
+  if (!isDev && !hasAdminCookie && !hasNonAdminCookie) { const bar = document.getElementById("auth-bar"); if (bar) bar.style.display = "flex"; }
 
-  // Google sign-in button — triggers OAuth directly without going through /login
   const googleBtn = document.getElementById("auth-google-btn");
   if (googleBtn) {
     googleBtn.addEventListener("click", async () => {
       googleBtn.textContent = "Redirecting…";
-      googleBtn.style.opacity = "0.6";
-      googleBtn.style.pointerEvents = "none";
+      (googleBtn as HTMLButtonElement).style.opacity = "0.6";
+      (googleBtn as HTMLButtonElement).style.pointerEvents = "none";
       try {
         const res = await fetch("/api/auth/sign-in/social", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ provider: "google", callbackURL: "/" }),
         });
-        const data = await res.json();
-        if (data?.url) {
-          window.location.href = data.url;
-        } else {
-          throw new Error("No redirect URL returned");
-        }
+        const data = await res.json() as { url?: string };
+        if (data?.url) { window.location.href = data.url; }
+        else throw new Error("No redirect URL");
       } catch {
         googleBtn.textContent = "Sign in with Google";
-        googleBtn.style.opacity = "";
-        googleBtn.style.pointerEvents = "";
+        (googleBtn as HTMLButtonElement).style.opacity = "";
+        (googleBtn as HTMLButtonElement).style.pointerEvents = "";
       }
     });
   }

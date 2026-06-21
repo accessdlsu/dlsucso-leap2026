@@ -88,6 +88,20 @@ import Footer from "../components/navigation/Footer.astro";
           </div>
         </div>
 
+        <!-- QA Testers Category -->
+        <div class="team-category">
+          <h3 class="category-title">Special Thanks to QA Testers</h3>
+          <div class="qa-names-list">
+            <div class="qa-name-item"><span class="qa-name">Arhela Maxine Drapiza</span></div>
+            <div class="qa-name-item"><span class="qa-name">Paul Josef Agbuya</span></div>
+            <div class="qa-name-item"><span class="qa-name">Miguel James Martinez</span></div>
+            <div class="qa-name-item"><span class="qa-name">Lucas Antonio V Tujan</span></div>
+            <div class="qa-name-item"><span class="qa-name">Ron John Galvez</span></div>
+            <div class="qa-name-item"><span class="qa-name">Zamanttha Zyrah Sahidulla</span></div>
+            <div class="qa-name-item"><span class="qa-name">Dr. Melvin K. Cabatuan</span></div>
+          </div>
+        </div>
+
         <!-- Developers Category -->
         <div class="team-category">
           <h3 class="category-title">Developers</h3>
@@ -511,6 +525,33 @@ import Footer from "../components/navigation/Footer.astro";
     color: rgba(255, 255, 255, 0.55);
     margin: 0;
     line-height: 1.4;
+  }
+
+  /* QA Testers */
+  .qa-names-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem 1.25rem;
+    max-width: 900px;
+  }
+  .qa-name-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .qa-name-item::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(250, 225, 133, 0.7);
+    flex-shrink: 0;
+  }
+  .qa-name {
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
   }
 
   /* Developers Sub-layout Grid */

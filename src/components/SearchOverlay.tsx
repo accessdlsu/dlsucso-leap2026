@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef, useCallback, type CSSProperties } from 'react';
+import { useLocale } from '../hooks/useLocale';
 import { createPortal } from 'react-dom';
 import { Search, X, ArrowRight } from 'lucide-react';
 import { leapifyApi } from '../services/leapify';
@@ -101,6 +102,7 @@ function OverlayFilter({ label, allLabel, value, options, onChange }: FilterProp
 
 export default function SearchOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
   const events = useAllEvents();
+  const { t } = useLocale();
   const [query, setQuery] = useState('');
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -108,10 +110,10 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
   const [selectedAvail, setSelectedAvail] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const availOptions = [
-    { value: 'open', label: 'Open' },
-    { value: 'full', label: 'Full' },
-  ];
+  const availOptions = useMemo(() => [
+    { value: 'open', label: t('avail_open') },
+    { value: 'full', label: t('avail_full') },
+  ], [t]);
 
   useEffect(() => {
     if (!open) {
@@ -174,6 +176,12 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
   const q = query.trim().toLowerCase();
   const hasFilter = !!(q || selectedTheme || selectedDate || selectedOrg || selectedAvail);
 
+  // Manila midnight today in ms for ended detection
+  const manilaToday = useMemo(() => {
+    const d = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' });
+    return new Date(d + 'T00:00:00+08:00').getTime();
+  }, []);
+
   // If already on /classes, dispatch a custom event instead of navigating
   const handleResultClick = useCallback((e: React.MouseEvent, ev?: LeapEvent) => {
     if (window.location.pathname === '/classes') {
@@ -194,13 +202,15 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
   const filtered = useMemo(() => {
     if (!hasFilter) return [];
     return events.filter(c => {
+      if (c.date && new Date(c.date).getTime() < manilaToday) return false; // exclude ended events
       if (selectedTheme && c.theme.path !== selectedTheme) return false;
       if (selectedDate && c.date !== selectedDate) return false;
       if (selectedOrg && c.organization.acronym !== selectedOrg) return false;
       if (selectedAvail) {
         const isFull = computeSlotStatus(c) === 'full';
-        if (selectedAvail === 'full' && !isFull) return false;
-        if (selectedAvail === 'open' && isFull) return false;
+        const isRegClosed = c.registrationEnabled === false || (c.registrationClosesAt != null && c.registrationClosesAt * 1000 < Date.now());
+        if (selectedAvail === 'full' && !isFull && !isRegClosed) return false;
+        if (selectedAvail === 'open' && (isFull || isRegClosed)) return false;
       }
       if (q) {
         const hay = [c.title, c.classCode, c.organization.name, c.organization.acronym, c.venue, c.theme.name]
@@ -209,7 +219,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
       }
       return true;
     });
-  }, [events, q, selectedTheme, selectedDate, selectedOrg, selectedAvail, hasFilter]);
+  }, [events, q, selectedTheme, selectedDate, selectedOrg, selectedAvail, hasFilter, manilaToday]);
 
   const classesHref = useMemo(() => {
     const p = new URLSearchParams();
@@ -258,7 +268,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
               type="text"
               value={query}
               onChange={e => setQuery(e.target.value)}
-              placeholder="Search LEAP 2026 classes…"
+              placeholder={t('search_classes_placeholder')}
               style={{
                 flex: 1, background: 'none', border: 'none', outline: 'none',
                 fontFamily: "'DM Sans', sans-serif", fontSize: '1rem', fontWeight: 500,
@@ -279,16 +289,16 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
                 display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0, whiteSpace: 'nowrap',
               }}
             >
-              <X size={12} strokeWidth={2} /> Close
+              <X size={12} strokeWidth={2} /> {t('close')}
             </button>
           </div>
 
           {/* Filter row */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <OverlayFilter label="Subtheme" value={selectedTheme} options={themeOptions} onChange={setSelectedTheme} />
-            <OverlayFilter label="Date" value={selectedDate} options={dateOptions} onChange={setSelectedDate} />
-            <OverlayFilter label="Organization" value={selectedOrg} options={orgOptions} onChange={setSelectedOrg} />
-            <OverlayFilter label="Availability" allLabel="All Availability" value={selectedAvail} options={availOptions} onChange={setSelectedAvail} />
+            <OverlayFilter label={t('filter_subtheme')} value={selectedTheme} options={themeOptions} onChange={setSelectedTheme} />
+            <OverlayFilter label={t('filter_date')} value={selectedDate} options={dateOptions} onChange={setSelectedDate} />
+            <OverlayFilter label={t('filter_org')} value={selectedOrg} options={orgOptions} onChange={setSelectedOrg} />
+            <OverlayFilter label={t('filter_avail')} allLabel={t('filter_avail_all')} value={selectedAvail} options={availOptions} onChange={setSelectedAvail} />
           </div>
         </div>
 
@@ -307,7 +317,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
           >
             {filtered.length === 0 ? (
               <div style={{ padding: '2rem', textAlign: 'center', fontFamily: "'DM Sans', sans-serif", fontSize: '0.85rem', color: 'rgba(255,255,255,0.3)' }}>
-                No classes match your search.
+                {t('no_search_results')}
               </div>
             ) : (
               <>
@@ -358,7 +368,7 @@ export default function SearchOverlay({ open, onClose }: { open: boolean; onClos
                   onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.85)')}
                   onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)')}
                 >
-                  See all {filtered.length} result{filtered.length !== 1 ? 's' : ''} in Classes
+                  {filtered.length === 1 ? t('see_all_results', { n: filtered.length }) : t('see_all_results_plural', { n: filtered.length })}
                   <ArrowRight size={13} strokeWidth={2} />
                 </a>
               </>

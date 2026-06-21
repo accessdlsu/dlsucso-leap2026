@@ -1,7 +1,9 @@
+import { memo } from 'react';
 import { ArrowRight } from 'lucide-react';
 import type { LeapEvent, SlotInfo } from '../services/leapify';
 import { shortenVenue, formatTime } from '../services/utils';
 import { getDayNumber } from '../constants/leapDays';
+import { useLocale } from '../hooks/useLocale';
 
 export const THEME_ACCENTS: Record<string, string> = {
   'palayan': '#c8e6a0',
@@ -60,15 +62,16 @@ interface ClassCardProps {
   actionLabel?: string;
 }
 
-export default function ClassCard({
+function ClassCard({
   event,
   slotInfo,
   dayNumber: _dayNumberDeprecated,
   imageLoading = 'lazy',
   actionHref,
   onAction,
-  actionLabel = 'View More',
+  actionLabel,
 }: ClassCardProps) {
+  const { t } = useLocale();
   // Compute day number from static LEAP_DAYS constant
   const dayNumber = getDayNumber(event.date);
   
@@ -89,13 +92,18 @@ export default function ClassCard({
   })();
 
   const status = computeSlotStatus(event, slotInfo);
+  const regClosed =
+    event.registrationEnabled === false ||
+    (event.registrationClosesAt != null && event.registrationClosesAt * 1000 < Date.now());
   const available = slotInfo ? Math.max(0, (slotInfo.total || 0) - (slotInfo.registered || 0)) : null;
   const slotsLabel =
-    status === 'unlimited' ? 'Open Slots' :
-    status === 'full' ? 'Full' :
-    slotInfo ? `${available} Slots Left` :
-    event.maxSlots === 0 ? 'Open Slots' : `${event.maxSlots} Slots`;
+    regClosed ? t('reg_closed') :
+    status === 'unlimited' ? t('slots_open') :
+    status === 'full' ? t('slots_full') :
+    slotInfo ? t('slots_left', { n: available ?? 0 }) :
+    event.maxSlots === 0 ? t('slots_open') : t('slots_total', { n: event.maxSlots });
   const slotsClass =
+    regClosed ? 'red' :
     status === 'full' ? 'red' :
     status === 'limited' ? 'yellow' : 'green';
 
@@ -130,8 +138,9 @@ export default function ClassCard({
         className="gallery-card-img"
         width={1080}
         height={1350}
-        decoding="async"
+        decoding={imageLoading === 'eager' ? 'sync' : 'async'}
         loading={imageLoading}
+        fetchPriority={imageLoading === 'eager' ? 'high' : 'auto'}
         draggable="false"
       />
 
@@ -154,19 +163,19 @@ export default function ClassCard({
         <h3 className="gallery-card-title">{event.title}</h3>
         <div className="gallery-card-info-row">
           <div className="info-item">
-            <span className="info-label">TIME</span>
+            <span className="info-label">{t('time_label')}</span>
             <span className="info-val">
               {formatTime(event.startTime)} – {formatTime(event.endTime)}
             </span>
           </div>
           <div className="info-item">
-            <span className="info-label">VENUE</span>
+            <span className="info-label">{t('venue_label')}</span>
             <span className="info-val">{shortenVenue(event.venue)}</span>
           </div>
           {dayNumber != null && (
             <div className="info-item">
-              <span className="info-label">DAY</span>
-              <span className="info-val">Day {dayNumber}</span>
+              <span className="info-label">{t('day_filter_label')}</span>
+              <span className="info-val">{t('day_label', { n: dayNumber })}</span>
             </div>
           )}
         </div>
@@ -178,12 +187,12 @@ export default function ClassCard({
               className="gallery-card-view-more"
               aria-label={`View details for ${event.title}`}
             >
-              <span>{actionLabel}</span>
+              <span>{actionLabel ?? t('view_more')}</span>
               <ArrowRight size={12} strokeWidth={2.5} />
             </a>
           ) : onAction ? (
             <button className="gallery-card-view-more" onClick={onAction}>
-              <span>{actionLabel}</span>
+              <span>{actionLabel ?? t('view_more')}</span>
               <ArrowRight size={12} strokeWidth={2.5} />
             </button>
           ) : null}
@@ -192,3 +201,5 @@ export default function ClassCard({
     </article>
   );
 }
+
+export default memo(ClassCard);

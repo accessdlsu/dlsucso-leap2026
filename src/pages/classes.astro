@@ -11,8 +11,8 @@ import "../styles/gallery-card.css";
 >
   <div class="classes-bg">
     <div class="classes-content">
-      <h1 class="classes-title" transition:name="page-title">Classes</h1>
-      <p class="classes-desc">
+      <h1 class="classes-title" data-i18n="section_classes">Classes</h1>
+      <p class="classes-desc" data-i18n="section_classes_desc">
         Discover workshops and sessions across all subthemes of LEAP 2026.
       </p>
       <ClassesFilter client:only="react">
@@ -746,6 +746,51 @@ import "../styles/gallery-card.css";
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 1rem;
+  }
+
+  /* CLS prevention: reserve space so footer doesn't shift when React mounts */
+  .classes-page {
+    min-height: calc(100svh - var(--nav-space-top) - var(--nav-space-bottom) - 4rem);
+    width: 100%;
+    max-width: 960px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ended-section {
+    margin-top: 2.5rem;
+    width: 100%;
+  }
+
+  .ended-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    color: rgba(255,255,255,0.45);
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s, color 0.15s;
+    letter-spacing: 0.02em;
+  }
+  .ended-toggle:hover {
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.65);
+  }
+  .ended-toggle span {
+    flex: 1;
+  }
+
+  .ended-grid {
+    margin-top: 1rem;
+    filter: grayscale(0.3);
   }
 
 

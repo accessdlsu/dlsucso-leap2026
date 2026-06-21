@@ -35,6 +35,8 @@ import Fireflies from "../components/Fireflies.astro";
           src="/logo/logo-hd.png"
           alt="LEAP 2026"
           loading="eager"
+          fetchpriority="high"
+          decoding="sync"
           style="width: min(500px, 90vw); height: auto; display: block;"
         />
       </div>
@@ -248,18 +250,7 @@ import Fireflies from "../components/Fireflies.astro";
       drop-shadow(0 0 24px rgba(222, 154, 73, 0.35));
   }
 
-  .anim-in {
-    animation: fadeInUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
-  }
-  .anim-in:nth-child(2) {
-    animation-delay: 0.15s;
-  }
-  .anim-in:nth-child(4) {
-    animation-delay: 0.2s;
-  }
-  .anim-in:nth-child(5) {
-    animation-delay: 0.25s;
-  }
+  .anim-in { /* animations removed for performance */ }
 
   /* ── Landscape ── */
   .landscape {

@@ -88,12 +88,28 @@ async function solveTurnstileChallenge(): Promise<boolean> {
 
 // ── API Types ─────────────────────────────────────────────────────────────────
 
+export interface AnnouncementContent {
+  title: string;
+  body: string;
+}
+
+export interface Announcement {
+  id: string;
+  content: Record<string, AnnouncementContent>;
+  requiresAck: boolean;
+  isActive: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface SiteConfig {
   comingSoonUntil: number | null;
   siteEndsAt: number | null;
   siteName: string | null;
   registrationGloballyOpen: boolean;
   maintenanceMode: boolean;
+  enhancementsMode: boolean;
+  enhancementsUntil: number | null;
   allowedOrigins: string[];
   now: number;
 }
@@ -567,6 +583,7 @@ export const leapifyApi = {
   getThemes: () => wsClient.request<Theme[]>("GET", "/themes"),
   getOrganizations: () => wsClient.request<Organization[]>("GET", "/organizations"),
   getFaqs: () => wsClient.request<Faq[]>("GET", "/faqs"),
+  getAnnouncements: () => wsClient.request<Announcement[]>("GET", "/announcements"),
   getHealth: () => fetchHealth(),
 
   // Admin

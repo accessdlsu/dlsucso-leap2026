@@ -10,7 +10,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  animation: overlayIn 0.25s ease;
+  animation: overlayIn 0.1s ease;
 }
 
 .drawer {
@@ -25,7 +25,7 @@
   -webkit-backdrop-filter: blur(20px);
   border-radius: 24px 24px 0 0;
   box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
-  animation: drawerUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: drawerUp 0.15s cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
   margin: 0 1rem;
 }
@@ -43,7 +43,7 @@
     max-width: 560px;
     border-radius: 24px;
     margin: 0;
-    animation: modalIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    animation: modalIn 0.12s cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
 

@@ -7,10 +7,15 @@ import ClassCard, { computeSlotStatus } from './ClassCard';
 import { SkeletonCarousel } from './skeletons';
 import { useBookmarks } from '../hooks/useBookmarks';
 import ClassDrawer from './ClassDrawer';
+import { useLocale } from '../hooks/useLocale';
 
 export default function FeaturedEvents() {
+  const { t } = useLocale();
   const allEvents = useAllEvents();
-  const events = useMemo(() => allEvents.filter(e => e.isSpotlight), [allEvents]);
+  const events = useMemo(() => {
+    const todayMs = new Date(new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' }) + 'T00:00:00+08:00').getTime();
+    return allEvents.filter(e => e.isSpotlight && (!e.date || new Date(e.date).getTime() >= todayMs));
+  }, [allEvents]);
   const loading = allEvents.length === 0;
   const slotsMap = useAllSlots();
   const [drawerClass, setDrawerClass] = useState<LeapEvent | null>(null);
@@ -94,7 +99,7 @@ export default function FeaturedEvents() {
              slotInfo={slotsMap.get(ev.slug)}
              imageLoading={i < 3 ? 'eager' : 'lazy'}
              onAction={() => openDrawer(ev)}
-             actionLabel="See Details"
+             actionLabel={t('see_details')}
            />
          ))}
        </div>
