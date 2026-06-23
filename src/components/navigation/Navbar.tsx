@@ -50,7 +50,7 @@ function pillIndicatorStyle(index: number): CSSProperties {
   };
 }
 
-export default function Navbar() {
+export default function Navbar({ hideSearch = false }: { hideSearch?: boolean }) {
   const [currentPath, setCurrentPath] = useState(() =>
     typeof window !== "undefined" ? window.location.pathname : "/"
   );
@@ -437,6 +437,7 @@ export default function Navbar() {
           gap: isMobile ? 8 : 12,
         }}
       >
+        {!hideSearch && (
         <div
           className="nav-glass-pill"
           style={{
@@ -471,6 +472,7 @@ export default function Navbar() {
                 <Search size={isMobile ? 22 : 24} strokeWidth={1.75} />
           </button>
         </div>
+        )}
 
         {/* Bookmark pill — always visible in nav */}
         {user && (

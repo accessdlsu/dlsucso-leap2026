@@ -8,6 +8,7 @@ interface Props {
   title?: string;
   description?: string;
   showNavbar?: boolean;
+  hideSearch?: boolean;
   /** Skip session init + leapify bundle (gate pages: maintenance, countdown, login) */
   noSession?: boolean;
 }
@@ -16,6 +17,7 @@ const {
   title = "LEAP 2026",
   description = "De La Salle University CSO LEAP 2026: Isang Nayon, Isang Layunin.",
   showNavbar = true,
+  hideSearch = false,
   noSession = false,
 } = Astro.props;
 ---
@@ -339,7 +341,7 @@ const {
     </script>
   </head>
   <body>
-    {showNavbar && <Navbar client:only="react" />}
+    {showNavbar && <Navbar client:only="react" hideSearch={hideSearch} />}
     {showNavbar && <BackToTop />}
     {!noSession && <AnnouncementModal client:only="react" />}
     {!noSession && <ChangelogModal client:only="react" />}
