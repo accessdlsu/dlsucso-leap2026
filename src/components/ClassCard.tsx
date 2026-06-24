@@ -100,7 +100,7 @@ function ClassCard({
     status === 'full' ? t('slots_full') :
     regClosed ? t('reg_closed') :
     status === 'unlimited' ? t('slots_open') :
-    slotInfo ? t('slots_left', { n: available ?? 0 }) :
+    slotInfo ? t(available === 1 ? 'slots_left_singular' : 'slots_left', { n: available ?? 0 }) :
     event.maxSlots === 0 ? t('slots_open') : t('slots_total', { n: event.maxSlots });
   const slotsClass =
     status === 'full' ? 'red' :

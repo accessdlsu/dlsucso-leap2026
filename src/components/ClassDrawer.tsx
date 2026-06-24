@@ -25,7 +25,7 @@ function SlotsDisplay({ event, slotsMap, t }: { event: LeapEvent; slotsMap?: Map
   if (!ds) return <>{event.maxSlots === 0 ? t('drawer_unlimited') : `${event.maxSlots} ${t('drawer_slots_label')}`}</>;
   if (ds.total === 0) return <>{t('drawer_unlimited')}</>;
   const avail = Math.max(0, ds.total - ds.registered);
-  return <>{avail === 0 ? t('slots_full') : t('slots_left', { n: avail })}</>;
+  return <>{avail === 0 ? t('slots_full') : t(avail === 1 ? 'slots_left_singular' : 'slots_left', { n: avail })}</>;
 }
 
 export default function ClassDrawer({ event, onClose, slotsMap, footer }: ClassDrawerProps) {
