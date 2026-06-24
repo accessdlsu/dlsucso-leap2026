@@ -377,14 +377,24 @@ async function handleWebSocketUpgrade(
   });
 
   server.addEventListener("close", (event) => {
-    console.log("[worker] WebSocket closed:", event.code, event.reason);
+    // RFC 6455: 1000 (normal), 1001 (going away/idle) are expected; 1002-1011 are errors
+    const isIdleClose = event.code === 1000 || event.code === 1001 || event.code === 0;
+    const isConfigSocket = configOnlySockets.has(server);
+    const logLevel = isIdleClose ? "debug" : "error";
+    console[logLevel](
+      `[worker] WebSocket closed (code: ${event.code}, reason: "${event.reason}", idle: ${isIdleClose}, config: ${isConfigSocket}, active: ${activeSockets.size})`,
+    );
     activeSockets.delete(server);
     configOnlySockets.delete(server);
     try { server.close(); } catch { /* already closed */ }
   });
 
   server.addEventListener("error", (event) => {
-    console.error("[worker] WebSocket error");
+    const isConfigSocket = configOnlySockets.has(server);
+    console.warn(
+      `[worker] WebSocket error (config: ${isConfigSocket}, active: ${activeSockets.size})`,
+      event instanceof Error ? event.message : event,
+    );
     activeSockets.delete(server);
     configOnlySockets.delete(server);
     try { server.close(); } catch { /* already closed */ }

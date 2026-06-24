@@ -306,7 +306,11 @@ class WsApiClient {
       };
 
       this.ws.onclose = (event) => {
-        console.error("[leapify ws] WebSocket closed:", event.code, event.reason);
+        const isIdleClose = event.code === 1000 || event.code === 1001 || event.code === 0;
+        const logLevel = isIdleClose ? "debug" : "error";
+        console[logLevel](
+          `[leapify ws] WebSocket closed (code: ${event.code}, reason: "${event.reason}", idle: ${isIdleClose}, pending: ${this.pending.size})`,
+        );
         this.ws = null;
         this.connecting = null;
         for (const [id, p] of this.pending) {
@@ -318,10 +322,14 @@ class WsApiClient {
         if (_eventsSubscribers.size > 0 || _slotsSubscribers.size > 0) {
           const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30_000);
           this.reconnectAttempts++;
+          console.debug(
+            `[leapify ws] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}, backoff: ${delay / 1000}s)`,
+          );
           setTimeout(() => {
             if (!this.ws && (_eventsSubscribers.size > 0 || _slotsSubscribers.size > 0)) {
               this.ensureConnected().then(() => {
                 this.reconnectAttempts = 0;
+                console.debug("[leapify ws] Reconnected successfully, resetting backoff counter");
                 // Re-fetch data after reconnect
                 if (_eventsCache) {
                   _eventsCache = null;
@@ -335,7 +343,10 @@ class WsApiClient {
       };
 
       this.ws.onerror = (event) => {
-        console.error("[leapify ws] WebSocket error:", event);
+        console.warn(
+          `[leapify ws] WebSocket error during connection (pending: ${this.pending.size})`,
+          event,
+        );
         this.connecting = null;
         reject(new Error("WebSocket connection failed"));
       };
