@@ -298,10 +298,20 @@ export default function GalleryCarousel() {
         {(() => {
           const ds = slotsMap.get(drawerClass.slug);
           const status = computeSlotStatus(drawerClass, ds);
+          const regClosed =
+            drawerClass.registrationEnabled === false ||
+            (drawerClass.registrationClosesAt != null && drawerClass.registrationClosesAt * 1000 < Date.now());
           if (status === 'full') {
             return (
               <button className="drawer-enroll" disabled style={{ opacity: 0.6, cursor: 'not-allowed', background: 'rgba(180,40,40,0.35)', border: '1px solid rgba(255,136,136,0.25)' }}>
                 Class Full
+              </button>
+            );
+          }
+          if (regClosed) {
+            return (
+              <button className="drawer-enroll" disabled style={{ opacity: 0.5, cursor: 'not-allowed', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                Registration Closed
               </button>
             );
           }

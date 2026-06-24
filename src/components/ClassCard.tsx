@@ -97,14 +97,14 @@ function ClassCard({
     (event.registrationClosesAt != null && event.registrationClosesAt * 1000 < Date.now());
   const available = slotInfo ? Math.max(0, (slotInfo.total || 0) - (slotInfo.registered || 0)) : null;
   const slotsLabel =
+    status === 'full' ? t('slots_full') :
     regClosed ? t('reg_closed') :
     status === 'unlimited' ? t('slots_open') :
-    status === 'full' ? t('slots_full') :
     slotInfo ? t('slots_left', { n: available ?? 0 }) :
     event.maxSlots === 0 ? t('slots_open') : t('slots_total', { n: event.maxSlots });
   const slotsClass =
-    regClosed ? 'red' :
     status === 'full' ? 'red' :
+    regClosed ? 'red' :
     status === 'limited' ? 'yellow' : 'green';
 
   return (
