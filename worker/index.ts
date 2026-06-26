@@ -769,11 +769,16 @@ export default {
     // a user could directly navigate to. routeIndex returns null when the
     // site is open and the user is authenticated (fall through to ASSETS).
     // /login is excluded so admins can authenticate even during maintenance/countdown.
+    // Skip known static-file extensions: opening /logo/logo-hd.png in a new tab
+    // sends Accept: text/html, which would otherwise redirect to the login page
+    // and serve the wrong content type.
     const isLoginPage = pathname === "/login" || pathname === "/login/";
+    const isStaticAsset = /\.[a-zA-Z0-9]+$/.test(pathname);
     if (
       request.method === "GET" &&
       (request.headers.get("Accept") ?? "").includes("text/html") &&
-      !isLoginPage
+      !isLoginPage &&
+      !isStaticAsset
     ) {
       const routed = await routeIndex(request, env);
       if (routed) return routed;
