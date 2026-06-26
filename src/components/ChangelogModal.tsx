@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Zap, Search, Bell, LayoutGrid, SortAsc, Clock, Wrench, TrendingUp, Globe } from 'lucide-react';
+import { useSiteEnded } from '../hooks/useSiteEnded';
 
 // Bump this ID whenever a new changelog should re-show for all users
 const CHANGELOG_ID = 'feature-drop-2026-06-22-v6';
@@ -156,15 +157,18 @@ const CHANGES: {
 ];
 
 export default function ChangelogModal() {
+  const siteEnded = useSiteEnded();
   const [visible, setVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    // Don't auto-show changelog when site is in archive mode
+    if (siteEnded) return;
     if (!localStorage.getItem(SEEN_KEY)) {
       setVisible(true);
     }
-  }, []);
+  }, [siteEnded]);
 
   useEffect(() => {
     const handler = () => setVisible(true);

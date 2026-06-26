@@ -3,6 +3,7 @@ import { Bookmark } from 'lucide-react';
 import type { LeapEvent } from '../services/leapify';
 import { useAllSlots } from '../hooks/useAllSlots';
 import { useAllEvents } from '../hooks/useAllEvents';
+import { useSiteEnded } from '../hooks/useSiteEnded';
 import ClassCard, { computeSlotStatus } from './ClassCard';
 import { SkeletonCarousel } from './skeletons';
 import { useBookmarks } from '../hooks/useBookmarks';
@@ -11,11 +12,13 @@ import { useLocale } from '../hooks/useLocale';
 
 export default function FeaturedEvents() {
   const { t } = useLocale();
+  const siteEnded = useSiteEnded();
   const allEvents = useAllEvents();
   const events = useMemo(() => {
+    if (siteEnded) return allEvents.filter(e => e.isSpotlight); // Show all spotlight events when archived
     const todayMs = new Date(new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Manila' }) + 'T00:00:00+08:00').getTime();
     return allEvents.filter(e => e.isSpotlight && (!e.date || new Date(e.date).getTime() >= todayMs));
-  }, [allEvents]);
+  }, [allEvents, siteEnded]);
   const loading = allEvents.length === 0;
   const slotsMap = useAllSlots();
   const [drawerClass, setDrawerClass] = useState<LeapEvent | null>(null);
@@ -46,7 +49,7 @@ export default function FeaturedEvents() {
     );
   }
 
-  const drawerFooter = drawerClass && (
+  const drawerFooter = drawerClass && !siteEnded && (
     <div style={{ display: 'flex', gap: 8, alignItems: 'stretch' }}>
       {isLoggedIn && (
         <button

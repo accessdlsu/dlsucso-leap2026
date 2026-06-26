@@ -24,6 +24,17 @@ declare global {
       ) => string;
       remove: (widgetId: string) => void;
     };
+    __LEAP_ARCHIVE_DATA__?: {
+      config: Record<string, unknown>;
+      classes: LeapEvent[];
+      slots: Record<string, SlotInfo>;
+      themes: unknown[];
+      organizations: unknown[];
+      faqs: unknown[];
+      announcements: unknown[];
+    };
+    __SITE_ENDED__?: boolean;
+    __configSocketInitialized?: boolean;
   }
 }
 
@@ -355,7 +366,30 @@ class WsApiClient {
     return this.connecting;
   }
 
+  private async httpRequest<T>(method: string, path: string, body?: unknown): Promise<T> {
+    const headers: Record<string, string> = {};
+    if (this.authToken) headers['Authorization'] = `Bearer ${this.authToken}`;
+    if (body) headers['Content-Type'] = 'application/json';
+    const res = await fetch(`/api${path}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status}: ${text.slice(0, 200)}`);
+    }
+    const json = await res.json() as { data?: T };
+    const unwrapped = (json.data ?? json) as unknown;
+    return rewriteUploadUrls(unwrapped) as T;
+  }
+
   async request<T>(method: string, path: string, body?: unknown): Promise<T> {
+    // Use HTTP fallback when site is in archive mode
+    if (_siteEnded) {
+      return this.httpRequest<T>(method, path, body);
+    }
+
     const cacheKey = `${method}:${path}`;
     if (WsApiClient.CACHED_GET_PATHS.has(path) && this.getCache.has(cacheKey)) {
       return this.getCache.get(cacheKey) as T;
@@ -467,7 +501,8 @@ export function subscribeToEvents(fn: EventsSubscriber): () => void {
   if (_eventsCache) {
     fn(_eventsCache);
     // Stale-while-revalidate: emit cached data, then refresh in background
-    if (!_eventsInflight) {
+    // Skip revalidate when site has ended (archive mode)
+    if (!_eventsInflight && !_siteEnded) {
       _eventsInflight = wsClient.request<LeapEvent[]>("GET", "/classes")
         .then(data => {
           const fresh = data ?? [];
@@ -533,7 +568,7 @@ async function fetchAllSlots(): Promise<Record<string, SlotInfo>> {
 }
 
 function startSlotsPolling() {
-  if (_slotsPolling) return;
+  if (_slotsPolling || _siteEnded) return;
   _slotsPolling = true;
   fetchAllSlots().catch(() => {});
   _slotsInterval = setInterval(() => fetchAllSlots().catch(() => {}), _ALL_SLOTS_TTL);
@@ -547,15 +582,35 @@ function stopSlotsPolling() {
   _slotsPolling = false;
 }
 
+// ── Archive (Site-Ended) Mode ─────────────────────────────────────────────────
+// When site has ended, data is injected in HTML and cached locally.
+// API requests fall back to HTTP instead of WebSocket.
+
+let _siteEnded = false;
+
+if (typeof window !== 'undefined' && (window as any).__LEAP_ARCHIVE_DATA__) {
+  _siteEnded = true;
+  const d = (window as any).__LEAP_ARCHIVE_DATA__;
+  if (Array.isArray(d.classes)) {
+    // Rewrite upload URLs (/api/uploads/* → /data/*)
+    _eventsCache = d.classes.map(c => rewriteUploadUrls(c)) as LeapEvent[];
+  }
+  if (d.slots && typeof d.slots === 'object') {
+    for (const [slug, info] of Object.entries(d.slots)) {
+      _slotsStore.set(slug, info as SlotInfo);
+    }
+  }
+}
+
 export function subscribeToSlots(fn: SlotsSubscriber): () => void {
   _slotsSubscribers.add(fn);
-  startSlotsPolling();
+  if (!_siteEnded) startSlotsPolling();
   // Emit current snapshot immediately
   if (_slotsStore.size > 0) fn(new Map(_slotsStore));
   return () => {
     _slotsSubscribers.delete(fn);
-    // Stop polling when no subscribers remain
-    if (_slotsSubscribers.size === 0) stopSlotsPolling();
+    // Stop polling when no subscribers remain (skip if site ended)
+    if (_slotsSubscribers.size === 0 && !_siteEnded) stopSlotsPolling();
   };
 }
 
@@ -618,10 +673,18 @@ export const leapifyApi = {
       "DELETE",
       `/users/me/bookmarks/${encodeURIComponent(eventId)}`,
     ),
-  reconcileSlots: (slug: string) =>
-    wsClient.request<SlotInfo>("POST", `/classes/${encodeURIComponent(slug)}/reconcile`),
-  getMyRegistration: () =>
-    wsClient.request<MyRegistration | null>("GET", "/users/me/registration").catch(() => null),
-  getMyRegistrations: () =>
-    wsClient.request<MyRegistration[]>("GET", "/users/me/registrations").catch(() => [] as MyRegistration[]),
+   reconcileSlots: (slug: string) =>
+     wsClient.request<SlotInfo>("POST", `/classes/${encodeURIComponent(slug)}/reconcile`),
+   getMyRegistration: () =>
+     wsClient.request<MyRegistration | null>("GET", "/users/me/registration").catch(() => null),
+   getMyRegistrations: () =>
+     wsClient.request<MyRegistration[]>("GET", "/users/me/registrations").catch(() => [] as MyRegistration[]),
 };
+
+export function setSiteEnded(v: boolean): void {
+  _siteEnded = v;
+}
+
+export function isSiteEnded(): boolean {
+  return _siteEnded;
+}

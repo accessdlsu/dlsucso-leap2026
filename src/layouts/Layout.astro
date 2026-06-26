@@ -152,11 +152,21 @@ const {
         to   { opacity: 0; transform: translateY(-8px); }
       }
     </style>
+    <script is:inline>
+      // Check _site_ended cookie synchronously before any deferred scripts run
+      // This ensures data is available during HTML parse and React hydration
+      (function() {
+        if (document.cookie.indexOf('_site_ended=1') !== -1) {
+          document.documentElement.dataset.siteEnded = 'true';
+          window.__SITE_ENDED__ = true;
+        }
+      })();
+    </script>
     <script>
       let lastGateState: string | null = null;
 
       function initConfigListener() {
-        if (window.__configSocketInitialized) return;
+        if (window.__configSocketInitialized || window.__SITE_ENDED__) return;
         window.__configSocketInitialized = true;
 
         const wsUrl = new URL("/api", window.location.origin);
@@ -370,10 +380,12 @@ const {
         } catch {}
       }
 
-      document.addEventListener("astro:page-load", () => {
-        signalWidget();
-        initSession();
-      });
+       document.addEventListener("astro:page-load", () => {
+         // Skip auth when site is in archive mode (won't have session anyway)
+         if (window.__SITE_ENDED__) return;
+         signalWidget();
+         initSession();
+       });
     </script>
   )}
 </html>

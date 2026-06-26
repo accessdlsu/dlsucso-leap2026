@@ -30,15 +30,15 @@ import { SUPPORTED_LOCALES, setStoredLocale, type LocaleCode } from "../../lib/l
 import { useLocale } from "../../hooks/useLocale";
 
 const NAV_LINK_DEFS = [
-  { href: "/",           key: "nav_home"   as const, icon: House },
-  { href: "/about",      key: "nav_about"  as const, icon: BookOpen },
-  { href: "/main-events",key: "nav_events" as const, icon: Star },
-  { href: "/classes",    key: "nav_classes"as const, icon: GraduationCap },
-  { href: "/faq",        key: "nav_faq"    as const, icon: MessageCircleQuestion },
+  { href: "/",            key: "nav_home"   as const, icon: House },
+  { href: "/about/",      key: "nav_about"  as const, icon: BookOpen },
+  { href: "/main-events/",key: "nav_events" as const, icon: Star },
+  { href: "/classes/",    key: "nav_classes"as const, icon: GraduationCap },
+  { href: "/faq/",        key: "nav_faq"    as const, icon: MessageCircleQuestion },
 ];
 
 const cubicBezier = "cubic-bezier(0.22, 1, 0.36, 1)";
-const LOGO_HIDDEN_PATHS = new Set(["/", "/about"]);
+const LOGO_HIDDEN_PATHS = new Set(["/", "/about/"]);
 
 function pillIndicatorStyle(index: number): CSSProperties {
   // index 0→left:calc(0%+4px), 1→calc(20%+4px), 2→calc(40%+4px), 3→calc(60%+4px), 4→calc(80%+4px)
@@ -633,7 +633,7 @@ export default function Navbar({ hideSearch = false }: { hideSearch?: boolean })
             </div>
           )}
           <a
-            href="/access"
+            href="/access/"
             onClick={toggleProfile}
             style={menuItemStyle}
             onMouseEnter={(e) => {
@@ -728,26 +728,30 @@ export default function Navbar({ hideSearch = false }: { hideSearch?: boolean })
             </div>
           </div>
 
-          <div style={{
-            height: "1px",
-            background: "rgba(255, 255, 255, 0.06)",
-            margin: "0 4px",
-          }} />
-          <button
-            style={signOutStyle}
-            onClick={() => { signOutUser(); toggleProfile(); }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(200,40,40,0.32)";
-              e.currentTarget.style.borderColor = "rgba(220,60,60,0.5)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(180,40,40,0.18)";
-              e.currentTarget.style.borderColor = "rgba(220,60,60,0.3)";
-            }}
-          >
-            <LogOut size={18} strokeWidth={1.75} />
-            {t('profile_signout')}
-          </button>
+          {user && (
+            <>
+              <div style={{
+                height: "1px",
+                background: "rgba(255, 255, 255, 0.06)",
+                margin: "0 4px",
+              }} />
+              <button
+                style={signOutStyle}
+                onClick={() => { signOutUser(); toggleProfile(); }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(200,40,40,0.32)";
+                  e.currentTarget.style.borderColor = "rgba(220,60,60,0.5)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "rgba(180,40,40,0.18)";
+                  e.currentTarget.style.borderColor = "rgba(220,60,60,0.3)";
+                }}
+              >
+                <LogOut size={18} strokeWidth={1.75} />
+                {t('profile_signout')}
+              </button>
+            </>
+          )}
         </div>,
         document.body
       )}

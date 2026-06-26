@@ -5,6 +5,7 @@ import { leapifyApi } from '../services/leapify';
 import type { Announcement } from '../services/leapify';
 import { SUPPORTED_LOCALES, setStoredLocale } from '../lib/locale';
 import { useLocale } from '../hooks/useLocale';
+import { useSiteEnded } from '../hooks/useSiteEnded';
 
 const RTL_LOCALES = new Set(['ar', 'he', 'fa', 'ur']);
 
@@ -58,6 +59,7 @@ function formatDate(unix: number): string {
 }
 
 export default function AnnouncementModal() {
+  const siteEnded = useSiteEnded();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [allAnnouncements, setAllAnnouncements] = useState<Announcement[]>([]);
   const [idx, setIdx] = useState(0);
@@ -66,6 +68,8 @@ export default function AnnouncementModal() {
 
   useEffect(() => {
     setMounted(true);
+    // Don't fetch announcements when site is in archive mode
+    if (siteEnded) return;
     leapifyApi.getAnnouncements()
       .then(list => {
         const active = list.filter(a => a.isActive);
@@ -75,7 +79,7 @@ export default function AnnouncementModal() {
         setAnnouncements(pending);
       })
       .catch(() => {});
-  }, []);
+  }, [siteEnded]);
 
   useEffect(() => {
     const handler = () => {

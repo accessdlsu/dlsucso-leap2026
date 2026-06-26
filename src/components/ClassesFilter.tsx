@@ -7,6 +7,7 @@ import { leapifyApi } from '../services/leapify';
 import type { LeapEvent, SlotInfo, MyRegistration } from '../services/leapify';
 import { useAllSlots } from '../hooks/useAllSlots';
 import { useAllEvents } from '../hooks/useAllEvents';
+import { useSiteEnded } from '../hooks/useSiteEnded';
 import ClassCard, { computeSlotStatus } from './ClassCard';
 import { SkeletonGrid } from './skeletons';
 import { formatTime } from '../services/utils';
@@ -205,6 +206,7 @@ function FilterDropdown<T extends string>({
 
 export default function ClassesFilter() {
   const { t } = useLocale();
+  const siteEnded = useSiteEnded();
   const classes = useAllEvents();
   const loading = classes.length === 0;
   const slotsMap = useAllSlots();
@@ -449,7 +451,7 @@ export default function ClassesFilter() {
 
   const hasFilters = !!(selectedTheme || selectedDate || selectedOrg || selectedAvailability || search || showOnlyBookmarked);
 
-  const [showEndedSection, setShowEndedSection] = useState(false);
+  const [showEndedSection, setShowEndedSection] = useState(siteEnded);
 
   // Filter ended classes by same criteria (except availability)
   const filteredEnded = useMemo(() => {
@@ -508,7 +510,7 @@ export default function ClassesFilter() {
 
 
   // Drawer footer with complex registration logic
-  const drawerFooter = drawerClass && (
+  const drawerFooter = drawerClass && !siteEnded && (
     <div style={{ display: 'flex', gap: 8, alignItems: 'stretch' }}>
       {isLoggedIn && (
         <button
@@ -734,7 +736,7 @@ export default function ClassesFilter() {
                 <p className="results-count">
                   {filtered.length === 1 ? t('results_count', { n: filtered.length }) : t('results_count_plural', { n: filtered.length })}
                 </p>
-                <p className="results-note">{t('more_coming')}</p>
+                <p className="results-note">{siteEnded ? 'All classes have concluded.' : t('more_coming')}</p>
                 <div className="classes-grid">
                   {filtered.slice(0, visibleCount).map((c, idx) => (
                     <div key={c.id} style={{ position: 'relative' }}>
@@ -788,28 +790,38 @@ export default function ClassesFilter() {
                 {showEndedSection && (
                   <div className="classes-grid ended-grid">
                     {filteredEnded.map((c) => (
-                      <div key={c.id} style={{ position: 'relative', opacity: 0.5, pointerEvents: 'none' }}>
+                      <div
+                        key={c.id}
+                        onClick={() => siteEnded && handleOpenDrawer(c)}
+                        style={{
+                          position: 'relative',
+                          opacity: siteEnded ? 1 : 0.5,
+                          pointerEvents: siteEnded ? 'auto' : 'none',
+                          cursor: siteEnded ? 'pointer' : 'default',
+                        }}>
                         <ClassCard
                           event={c}
                           slotInfo={slotsMap.get(c.slug)}
                           dayNumber={dayMap.get(c.date)}
                           imageLoading="lazy"
                         />
-                        <div style={{
-                          position: 'absolute', inset: 0, zIndex: 5,
-                          display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-                          paddingTop: 12,
-                        }}>
-                          <span style={{
-                            background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(var(--blur-sm, 0px))',
-                            border: '1px solid rgba(255,255,255,0.15)', borderRadius: 9999,
-                            padding: '3px 12px', fontFamily: "'Poppins', sans-serif",
-                            fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)',
-                            letterSpacing: '0.08em', whiteSpace: 'nowrap',
+                        {!siteEnded && (
+                          <div style={{
+                            position: 'absolute', inset: 0, zIndex: 5,
+                            display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+                            paddingTop: 12,
                           }}>
-                            {t('event_ended_badge')}
-                          </span>
-                        </div>
+                            <span style={{
+                              background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(var(--blur-sm, 0px))',
+                              border: '1px solid rgba(255,255,255,0.15)', borderRadius: 9999,
+                              padding: '3px 12px', fontFamily: "'Poppins', sans-serif",
+                              fontSize: '0.6rem', fontWeight: 700, color: 'rgba(255,255,255,0.6)',
+                              letterSpacing: '0.08em', whiteSpace: 'nowrap',
+                            }}>
+                              {t('event_ended_badge')}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

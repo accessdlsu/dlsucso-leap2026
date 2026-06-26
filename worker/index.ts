@@ -150,6 +150,61 @@ async function backendFetch(env: Env, path: string, init?: RequestInit, baseOrig
   throw new Error("Backend not configured: set LEAPIFY_API_URL in .dev.vars or bind BACKEND service");
 }
 
+// ── Archive Cache (Site-Ended Mode) ────────────────────────────────────────
+
+/**
+ * Fetch all static data needed for archive mode.
+ * Stores in archiveCache.data with ready=true on success.
+ */
+async function ensureArchiveCache(env: Env, baseOrigin: string): Promise<void> {
+  if (archiveCache.ready) return;
+  if (archiveCache.loading) return; // Already fetching
+  
+  archiveCache.loading = true;
+  try {
+    const [configRes, classesRes, slotsRes, themesRes, orgsRes, faqsRes, announcementsRes] = await Promise.all([
+      backendFetch(env, "/api/config", { signal: AbortSignal.timeout(10_000) }, baseOrigin),
+      backendFetch(env, "/api/classes", { signal: AbortSignal.timeout(10_000) }, baseOrigin),
+      backendFetch(env, "/api/classes/slots", { signal: AbortSignal.timeout(10_000) }, baseOrigin),
+      backendFetch(env, "/api/themes", { signal: AbortSignal.timeout(10_000) }, baseOrigin),
+      backendFetch(env, "/api/organizations", { signal: AbortSignal.timeout(10_000) }, baseOrigin),
+      backendFetch(env, "/api/faqs", { signal: AbortSignal.timeout(10_000) }, baseOrigin),
+      backendFetch(env, "/api/announcements", { signal: AbortSignal.timeout(10_000) }, baseOrigin),
+    ]);
+
+    const [configJson, classesJson, slotsJson, themesJson, orgsJson, faqsJson, announcementsJson] = await Promise.all([
+      configRes.json() as Promise<{ data?: Record<string, unknown> }>,
+      classesRes.json() as Promise<{ data?: unknown[] }>,
+      slotsRes.json() as Promise<{ data?: Record<string, unknown> }>,
+      themesRes.json() as Promise<{ data?: unknown[] }>,
+      orgsRes.json() as Promise<{ data?: unknown[] }>,
+      faqsRes.json() as Promise<{ data?: unknown[] }>,
+      announcementsRes.json() as Promise<{ data?: unknown[] }>,
+    ]);
+
+    const config = configJson.data ? { ...configJson.data } : null;
+    if (config) {
+      delete config.allowedOrigins; // Strip sensitive field
+    }
+
+     archiveCache.data = {
+       config,
+       classes: (rewriteUploadUrlsInData(classesJson.data ?? []) as unknown[]),
+       slots: (rewriteUploadUrlsInData(slotsJson.data ?? {}) as Record<string, { total: number; registered: number }>),
+       themes: (rewriteUploadUrlsInData(themesJson.data ?? []) as unknown[]),
+       organizations: (rewriteUploadUrlsInData(orgsJson.data ?? []) as unknown[]),
+       faqs: (rewriteUploadUrlsInData(faqsJson.data ?? []) as unknown[]),
+       announcements: (rewriteUploadUrlsInData(announcementsJson.data ?? []) as unknown[]),
+     };
+     archiveCache.ready = true;
+    console.log("[worker] Archive cache ready");
+  } catch (err) {
+    console.warn("[worker] Archive cache fetch failed:", err);
+    archiveCache.loading = false;
+    // Retries will happen on next request
+  }
+}
+
 // ── WebSocket Protocol Types ──────────────────────────────────────────────────
 
 interface WsApiRequest {
@@ -306,6 +361,25 @@ async function handleWsMessage(
   }
 }
 
+// ── Archive Mode (Site-Ended) Cache ────────────────────────────────────────
+
+interface ArchiveCache {
+  loading: boolean;
+  ready: boolean;
+  data: {
+    config: Record<string, unknown> | null;
+    classes: unknown[];
+    slots: Record<string, { total: number; registered: number }>;
+    themes: unknown[];
+    organizations: unknown[];
+    faqs: unknown[];
+    announcements: unknown[];
+  } | null;
+}
+
+let archiveCache: ArchiveCache = { loading: false, ready: false, data: null };
+let _siteEnded = false;
+
 // ── WebSocket Active Sockets ───────────────────────────────────────────────────
 
 const activeSockets = new Set<WebSocket>();
@@ -325,6 +399,11 @@ async function handleWebSocketUpgrade(
   env: Env,
   ctx: ExecutionContext,
 ): Promise<Response> {
+  // Reject all WebSocket upgrades when site has ended (archive mode)
+  if (_siteEnded) {
+    return new Response(null, { status: 503 });
+  }
+
   const url = new URL(request.url);
   const isConfigOnly = url.searchParams.get("type") === "config";
 
@@ -469,31 +548,52 @@ async function handleApiRequest(
     return response;
   }
 
-  // GET /api/config — public config (used by countdown before WS is ready)
-  // Sensitive internal fields (allowedOrigins) are stripped before sending to the browser.
-  if (pathname === "/api/config" && request.method === "GET") {
-    if (!env.BACKEND && !env.LEAPIFY_API_URL) return jsonResponse({ error: "Backend not configured" }, 500);
-    let upstream: Response;
-    try {
-      upstream = await backendFetch(env, "/api/config", { signal: AbortSignal.timeout(5_000) }, baseOrigin);
-    } catch {
-      return jsonResponse({ error: "Backend not configured" }, 500);
-    }
-    const json = await upstream.json() as { data?: Record<string, unknown> };
-    // Strip fields that expose internal infrastructure
-    if (json?.data) {
-      delete json.data.allowedOrigins;
-    }
-    return new Response(JSON.stringify(json), {
-      status: upstream.status,
-      headers: {
-        "Content-Type": "application/json;charset=UTF-8",
-        "Cache-Control": "no-store, no-cache, must-revalidate",
-      },
-    });
-  }
+   // ── Archive mode: return cached static data ───────────────────────────
+   if (_siteEnded && archiveCache.ready && request.method === "GET") {
+     // /api/config → cached config
+     if (pathname === "/api/config") {
+       const cfg = { ...archiveCache.data!.config };
+       return jsonResponse({ data: cfg });
+     }
+     // Static data paths → cached data
+     const staticPaths: Record<string, keyof typeof archiveCache.data> = {
+       "/api/classes": "classes",
+       "/api/classes/slots": "slots",
+       "/api/themes": "themes",
+       "/api/organizations": "organizations",
+       "/api/faqs": "faqs",
+       "/api/announcements": "announcements",
+     };
+     if (staticPaths[pathname]) {
+       return jsonResponse({ data: archiveCache.data![staticPaths[pathname]] });
+     }
+   }
 
-  return null;
+   // GET /api/config — public config (used by countdown before WS is ready)
+   // Sensitive internal fields (allowedOrigins) are stripped before sending to the browser.
+   if (pathname === "/api/config" && request.method === "GET") {
+     if (!env.BACKEND && !env.LEAPIFY_API_URL) return jsonResponse({ error: "Backend not configured" }, 500);
+     let upstream: Response;
+     try {
+       upstream = await backendFetch(env, "/api/config", { signal: AbortSignal.timeout(5_000) }, baseOrigin);
+     } catch {
+       return jsonResponse({ error: "Backend not configured" }, 500);
+     }
+     const json = await upstream.json() as { data?: Record<string, unknown> };
+     // Strip fields that expose internal infrastructure
+     if (json?.data) {
+       delete json.data.allowedOrigins;
+     }
+     return new Response(JSON.stringify(json), {
+       status: upstream.status,
+       headers: {
+         "Content-Type": "application/json;charset=UTF-8",
+         "Cache-Control": "no-store, no-cache, must-revalidate",
+       },
+     });
+   }
+
+   return null;
 }
 
 // ── Session & Admin Helpers ─────────────────────────────────────────────
@@ -539,6 +639,38 @@ async function isAdminUser(env: Env, cookie: string, baseOrigin?: string): Promi
   }
 }
 
+// ── Data Injection for Archive Mode ───────────────────────────────────────
+
+/**
+ * Rewrite upload URLs in archive data: /api/uploads/* → /data/*
+ * Ensures images work both on live domain and on archive.org
+ */
+function rewriteUploadUrlsInData(value: unknown): unknown {
+  if (typeof value === "string" && value.startsWith("/api/uploads/")) {
+    return "/data/" + value.slice("/api/uploads/".length);
+  }
+  if (Array.isArray(value)) return value.map(rewriteUploadUrlsInData);
+  if (value !== null && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) {
+      out[k] = rewriteUploadUrlsInData(v);
+    }
+    return out;
+  }
+  return value;
+}
+
+/**
+ * Inject archive data into HTML document as a script tag.
+ * Called before </head> so data is available to React before hydration.
+ */
+function injectArchiveDataIntoHtml(html: string): string {
+  const data = archiveCache.data;
+  if (!data) return html;
+  const script = `<script>window.__LEAP_ARCHIVE_DATA__=${JSON.stringify(data)}</script>`;
+  return html.replace('</head>', script + '</head>');
+}
+
 // ── Index Routing (maintenance / countdown / home) ────────────────────────
 
 interface SiteConfig {
@@ -546,6 +678,7 @@ interface SiteConfig {
   comingSoonUntil: number | null;
   enhancementsMode: boolean;
   enhancementsUntil: number | null;
+  siteEndsAt: number | null;
   now: number;
 }
 
@@ -557,6 +690,7 @@ interface SiteConfig {
 async function routeIndex(
   request: Request,
   env: Env,
+  ctx: ExecutionContext,
 ): Promise<Response | null> {
   const dev = isLocalDev(request, env);
   const cookie = request.headers.get("Cookie") ?? "";
@@ -612,6 +746,18 @@ async function routeIndex(
 
   const now = config.now * 1000;
   const hasSession = !!getSessionToken(cookie);
+
+  // ── Site-ended gate (archive mode) ─────────────────────────────────────
+  // When now >= siteEndsAt, the site becomes a read-only archive.
+  // No gates, no auth checks — just serve the SPA with archived data injected.
+  const siteEnded = config.siteEndsAt && now >= config.siteEndsAt * 1000;
+  if (siteEnded) {
+    _siteEnded = true;
+    if (!archiveCache.ready && !archiveCache.loading) {
+      ctx.waitUntil(ensureArchiveCache(env, baseOrigin));
+    }
+    return null; // Fall through to ASSETS — no gates, no login redirect
+  }
 
   // ── Admin / role gate ─────────────────────────────────────────────────
   // When maintenance or coming-soon is active (and not local dev), verify
@@ -712,6 +858,29 @@ export default {
     const url = new URL(request.url);
     const { pathname } = url;
 
+    // Check if site has ended (for HTML pages, detect early)
+    // This ensures archive cache fetch is triggered for all pages
+    if (!_siteEnded && (pathname === "/" || pathname.match(/\/[a-z-]+\/?$/i))) {
+      try {
+        const configRes = await backendFetch(env, "/api/config", { signal: AbortSignal.timeout(3_000) }, url.origin);
+        if (configRes.ok) {
+          const json = (await configRes.json()) as { data?: SiteConfig };
+          const config = json.data;
+          if (config) {
+            const now = config.now * 1000;
+            if (config.siteEndsAt && now >= config.siteEndsAt * 1000) {
+              _siteEnded = true;
+              if (!archiveCache.ready && !archiveCache.loading) {
+                ctx.waitUntil(ensureArchiveCache(env, url.origin));
+              }
+            }
+          }
+        }
+      } catch (err) {
+        // Silently fail - not critical for archive detection
+      }
+    }
+
     if (pathname.startsWith("/api") || pathname.startsWith("/data")) {
       const apiResponse = await handleApiRequest(request, env, pathname, ctx);
       if (apiResponse) return apiResponse;
@@ -780,27 +949,47 @@ export default {
       !isLoginPage &&
       !isStaticAsset
     ) {
-      const routed = await routeIndex(request, env);
+      const routed = await routeIndex(request, env, ctx);
       if (routed) return routed;
     }
 
     if (!env.ASSETS) return jsonResponse({ error: "Not found" }, 404);
     const assetRes = await env.ASSETS.fetch(request);
 
-    // Stamp _dev=1 cookie on HTML pages when running in local dev.
-    // Client-side bypass bar reads this cookie to decide whether to show.
+    // ── Cookie stamps and data injection ───────────────────────────────────
+    const ct = assetRes.headers.get("content-type") ?? "";
+    const isHtml = ct.includes("text/html");
+
+    // Stamp _dev=1 on HTML pages in local dev
     const devActive = isLocalDev(request, env);
-    if (devActive) {
-      const ct = assetRes.headers.get("content-type") ?? "";
-      if (ct.includes("text/html")) {
-        const headers = new Headers(assetRes.headers);
-        headers.append("Set-Cookie", "_dev=1; Path=/; SameSite=Lax; Max-Age=86400");
-        return new Response(assetRes.body, {
-          status: assetRes.status,
-          statusText: assetRes.statusText,
-          headers,
-        });
+    if (devActive && isHtml) {
+      const headers = new Headers(assetRes.headers);
+      headers.append("Set-Cookie", "_dev=1; Path=/; SameSite=Lax; Max-Age=86400");
+      return new Response(assetRes.body, {
+        status: assetRes.status,
+        statusText: assetRes.statusText,
+        headers,
+      });
+    }
+
+    // Stamp _site_ended=1 on HTML pages and inject archive data if site is ended
+    if (_siteEnded && isHtml) {
+      // Ensure archive cache is being fetched
+      if (!archiveCache.ready && !archiveCache.loading) {
+        ctx.waitUntil(ensureArchiveCache(env, new URL(request.url).origin));
       }
+      const html = await assetRes.text();
+      const headers = new Headers(assetRes.headers);
+      headers.append("Set-Cookie", "_site_ended=1; Path=/; SameSite=Lax; Max-Age=3600");
+      let finalHtml = html;
+      if (archiveCache.ready) {
+        finalHtml = injectArchiveDataIntoHtml(html);
+      }
+      return new Response(finalHtml, {
+        status: assetRes.status,
+        statusText: assetRes.statusText,
+        headers,
+      });
     }
 
     return assetRes;
